@@ -154,7 +154,7 @@ export async function transition(t: TxCtx, o: Order, event: OrderEvent, actor: O
 const NOTIFY_ON: Partial<Record<OrderStatus, string>> = { AWAITING_PAYMENT: 'order_created', PAID: 'order_paid', COMPLETED: 'order_completed', CANCELLED: 'order_cancelled', DISPUTED: 'order_disputed' };
 const ctxHasJobs = (c: Ctx) => !!c.jobs;
 
-async function lockOrder(t: TxCtx, id: string): Promise<Order> {
+export async function lockOrder(t: TxCtx, id: string): Promise<Order> {
   const [o] = await t.tx.select().from(orders).where(eq(orders.id, id)).for('update');
   if (!o) throw new DomainError('NOT_FOUND', 'order not found');
   return o;

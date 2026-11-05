@@ -24,3 +24,5 @@ export * from './notifications';
 export * from './chat';
 export * from './reputation';
 export * from './wallet';
+export * from './disputes';
+export * from './insurance';

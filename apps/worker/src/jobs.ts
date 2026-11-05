@@ -27,3 +27,6 @@ SCHEDULES.push({ name: 'reputation.nightly', everyMs: 24 * 3600_000 });
 JOBS['withdrawal.submit'] = (ctx, d) => core.submitWithdrawal(ctx, d.withdrawalId);
 JOBS['withdrawals.process'] = (ctx) => core.processWithdrawals(ctx);
 SCHEDULES.push({ name: 'withdrawals.process', everyMs: 30_000 });
+JOBS['dispute.triage'] = (ctx, d) => core.runTriage(ctx, d.disputeId);
+JOBS['disputes.escalate'] = (ctx) => core.escalateOverdueDisputes(ctx);
+SCHEDULES.push({ name: 'disputes.escalate', everyMs: 60_000 });

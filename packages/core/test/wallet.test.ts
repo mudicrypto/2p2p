@@ -128,7 +128,7 @@ describe('M5 wallet & custody', () => {
     const r = await deposit(u, 'USDT', 'TRON', toMinor('100', 6), 100, uniq('tx'), 'Tbeefmixerxxxxxxxxxxxxxxxxxxxxxxxx');
     expect(r.res.outcome).toBe('held');
     expect(await balanceOf(ctx.db, userAcct(u.id, 'USDT'))).toBe(0n);
-    await reviewHeldDeposit(ctx, (await ctx.db.insert(adminUsers).values({ email: `${uniq()}@admin.io`, passwordHash: 'x', roles: ['compliance'] }).returning())[0].id, r.res.depositId!, 'credit', 'source verified');
+    await reviewHeldDeposit(ctx, (await ctx.db.insert(adminUsers).values({ email: `${uniq()}@admin.io`, passwordHash: 'x', roles: ['compliance'] }).returning())[0].id, (r.res as { depositId: string }).depositId, 'credit', 'source verified');
     expect(await balanceOf(ctx.db, userAcct(u.id, 'USDT'))).toBe(toMinor('100', 6));
     const b = await with2fa(u);
     const v = await mkUser(ctx);
