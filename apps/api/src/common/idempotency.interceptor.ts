@@ -19,7 +19,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
     if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next.handle();
     if (this.reflector.getAllAndOverride<boolean>(NO_IDEMPOTENCY, [c.getHandler(), c.getClass()])) return next.handle();
     const key = req.headers['idempotency-key'] as string;
-    const scope = req.user?.id ?? `ip:${req.ip}`;
+    const scope = req.admin ? `admin:${req.admin.id}` : req.user?.id ?? `ip:${req.ip}`;
     return from((async () => {
       const r = unwrapReplay(await withIdempotency(this.ctx.db, scope, key, { m: req.method, p: req.path, b: req.body }, async () => {
         const body = await lastValueFrom(next.handle(), { defaultValue: null });

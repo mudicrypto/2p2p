@@ -247,7 +247,8 @@ export async function passkeyRegistrationOptions(ctx: Ctx, subject: { kind: 'use
 }
 export async function passkeyRegister(ctx: Ctx, subject: { kind: 'user' | 'admin'; id: string }, response: any) {
   const expectedChallenge = await takeChallenge(ctx, `${subject.kind}:${subject.id}:reg`);
-  const v = await verifyRegistrationResponse({ response, expectedChallenge, expectedOrigin: rp().origin, expectedRPID: rp().rpID, requireUserVerification: true });
+  const v = await verifyRegistrationResponse({ response, expectedChallenge, expectedOrigin: rp().origin, expectedRPID: rp().rpID, requireUserVerification: true })
+    .catch((e: Error) => { throw new DomainError('UNAUTHORIZED', `passkey registration failed: ${e.message}`); });
   if (!v.verified || !v.registrationInfo) throw new DomainError('UNAUTHORIZED', 'passkey registration failed');
   const { credential } = v.registrationInfo;
   await runTx(ctx, async (t) => {
@@ -267,12 +268,13 @@ export async function passkeyAuthOptions(ctx: Ctx, subjectKey: string) {
 /** Verifies a passkey assertion and returns the owner. */
 export async function passkeyVerify(ctx: Ctx, subjectKey: string, response: any) {
   const expectedChallenge = await takeChallenge(ctx, `auth:${subjectKey}`);
+  if (!response || typeof response.id !== 'string') throw new DomainError('UNAUTHORIZED', 'invalid passkey response');
   const [cred] = await ctx.db.select().from(webauthnCredentials).where(eq(webauthnCredentials.id, response.id));
   if (!cred) throw new DomainError('UNAUTHORIZED', 'unknown passkey');
   const v = await verifyAuthenticationResponse({
     response, expectedChallenge, expectedOrigin: rp().origin, expectedRPID: rp().rpID, requireUserVerification: true,
     credential: { id: cred.id, publicKey: Buffer.from(cred.publicKey, 'base64url'), counter: cred.counter, transports: (cred.transports ?? []) as any },
-  });
+  }).catch((e: Error) => { throw new DomainError('UNAUTHORIZED', `passkey verification failed: ${e.message}`); });
   if (!v.verified) throw new DomainError('UNAUTHORIZED', 'passkey verification failed');
   await ctx.db.update(webauthnCredentials).set({ counter: v.authenticationInfo.newCounter }).where(eq(webauthnCredentials.id, cred.id));
   return { userId: cred.userId, adminId: cred.adminId };

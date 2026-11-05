@@ -8,7 +8,7 @@ process.env.RATE_LIMIT_DISABLED = '1';
 export type TestApp = Awaited<ReturnType<typeof createApp>> & { http: ReturnType<typeof request> };
 
 export async function startApp(): Promise<TestApp> {
-  const a = await createApp({ databaseUrl: process.env.TEST_DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/p2p_test', redisUrl: null, logger: false });
+  const a = await createApp({ databaseUrl: process.env.TEST_DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/p2p_test', redisUrl: null, logger: process.env.TEST_LOG === '1' ? undefined : false });
   await a.app.init();
   return Object.assign(a, { http: request(a.app.getHttpServer()) });
 }
