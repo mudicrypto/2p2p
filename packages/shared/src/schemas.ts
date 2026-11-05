@@ -43,6 +43,7 @@ export const CreateAdSchema = z
     paymentWindowMin: z.number().int().min(5).max(180).default(15),
     terms: z.string().max(2000).default(''),
     minCounterpartyTier: z.number().int().min(0).max(3).default(0),
+    acceptReversible: z.boolean().default(false),
   })
   .refine((a) => (a.priceType === 'fixed' ? !!a.price : a.marginBps !== undefined), {
     message: 'fixed ads need price; floating ads need marginBps',

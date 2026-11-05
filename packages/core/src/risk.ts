@@ -20,3 +20,18 @@ export async function evaluateDeviceRisk(ctx: Ctx, userId: string, fingerprint: 
     for (const o of others) await flag(ctx.db, 'user', o.u, 'MULTI_ACCOUNT_DEVICE', 'high', { fingerprint, accounts: c });
   }
 }
+
+export interface RiskFlagSpec { code: string; severity: 'low' | 'medium' | 'high'; details?: unknown }
+export interface OrderRiskInput {
+  buyer: { id: string; kycTier: number; createdAt: Date };
+  seller: { id: string; kycTier: number; createdAt: Date };
+  usdCents: bigint; paymentRisk: string; reversible: boolean;
+}
+/**
+ * Order risk score 0-100 from account age, tier, device, amount vs history and counterparty freeze reports.
+ * High scores force the manual-confirmation path (no auto-release). Extended in M8.
+ */
+export async function scoreOrder(ctx: Ctx, db: DbOrTx, i: OrderRiskInput): Promise<{ score: number; manual: boolean; flags: RiskFlagSpec[] }> {
+  const { scoreOrderFull } = await import('./fraud');
+  return scoreOrderFull(ctx, db, i);
+}
