@@ -22,6 +22,8 @@ import { require2fa, type User } from './auth';
 import { scoreOrder, flag } from './risk';
 import { assertTierAllowed } from './kyc';
 import { decryptJson } from './crypto';
+import { notify } from './notifications';
+import { recomputeReputation } from './reputation';
 
 export type Order = typeof orders.$inferSelect;
 const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -113,7 +115,7 @@ export async function createOrder(ctx: Ctx, takerIn: User, input: CreateOrderInp
     ] });
     const o = await transition(t, created, 'ESCROW_LOCKED', 'system', null);
     for (const f of risk.flags) await flag(t.tx, 'order', o.id, f.code, f.severity, f.details);
-    t.afterCommit(() => ctx.jobs?.enqueue('order.expire', { orderId: o.id }, { delayMs: ad.paymentWindowMin * 60_000 + 1000, jobId: `expire:${o.id}` }));
+    t.afterCommit(() => ctx.jobs?.enqueue('order.expire', { orderId: o.id }, { delayMs: ad.paymentWindowMin * 60_000 + 1000, jobId: `expire-${o.id}` }));
     t.emit({ type: 'order.created', orderId: o.id, userIds: [maker.id], payload: { orderId: o.id, status: o.status } });
     t.emit({ type: 'book.updated', room: `ads:${asset}:${ad.fiat}`, payload: { adId: ad.id } });
     return o;
@@ -134,9 +136,23 @@ export async function transition(t: TxCtx, o: Order, event: OrderEvent, actor: O
     .where(and(eq(orders.id, o.id), eq(orders.status, o.status))).returning();
   if (!u) throw new DomainError('ILLEGAL_TRANSITION', 'order state changed concurrently');
   await logEvent(t, o.id, o.status as OrderStatus, to, event, actor, actorId, reason);
-  t.emit({ type: 'order.status', orderId: o.id, userIds: [o.buyerId, o.sellerId], payload: { orderId: o.id, status: to, event } });
+  t.emit({ type: 'order.status', orderId: o.id, payload: { orderId: o.id, status: to, event } });
+  const kind = NOTIFY_ON[to];
+  if (kind) {
+    const targets = to === 'AWAITING_PAYMENT' ? [o.makerId] : to === 'PAID' ? [o.sellerId] : [o.buyerId, o.sellerId];
+    for (const uid of targets) await notify(t, t.tx, uid, kind, { orderId: o.id, status: to, amount: o.cryptoAmount.toString(), asset: o.asset });
+  }
+  if (to === 'COMPLETED' || to === 'CANCELLED' || to === 'DISPUTED') {
+    t.afterCommit(async () => {
+      if (ctxHasJobs(t)) await t.jobs!.enqueue('reputation.recompute', { userIds: [o.buyerId, o.sellerId] });
+      else for (const uid of [o.buyerId, o.sellerId]) await recomputeReputation(t, uid);
+    });
+  }
   return u;
 }
+
+const NOTIFY_ON: Partial<Record<OrderStatus, string>> = { AWAITING_PAYMENT: 'order_created', PAID: 'order_paid', COMPLETED: 'order_completed', CANCELLED: 'order_cancelled', DISPUTED: 'order_disputed' };
+const ctxHasJobs = (c: Ctx) => !!c.jobs;
 
 async function lockOrder(t: TxCtx, id: string): Promise<Order> {
   const [o] = await t.tx.select().from(orders).where(eq(orders.id, id)).for('update');
@@ -210,7 +226,6 @@ export async function releaseOrder(ctx: Ctx, user: User, orderId: string, totp: 
     if (o.sellerId !== user.id) throw new DomainError('FORBIDDEN', 'only the seller can release');
     const u = await transition(t, o, 'RELEASE', 'seller', user.id, undefined, { releasedAt: ctx.now() });
     await applyEscrow(ctx, t, o, 'release');
-    t.afterCommit(() => ctx.jobs?.enqueue('reputation.recompute', { userIds: [o.buyerId, o.sellerId] }));
     return u;
   });
 }

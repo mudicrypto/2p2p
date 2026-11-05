@@ -19,3 +19,7 @@ export * from './fraud';
 export * from './dev';
 export * from './seed';
 export * from './kyc';
+export * from './chat-filter';
+export * from './notifications';
+export * from './chat';
+export * from './reputation';

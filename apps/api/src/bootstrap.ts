@@ -44,6 +44,7 @@ export async function createApp(opts: AppOptions = {}) {
   const app = await NestFactory.create<NestExpressApplication>(AppModule.register(ctx, redis), { logger: opts.logger === false ? false : ['error', 'warn', 'log'], rawBody: true });
   app.set('trust proxy', process.env.TRUST_PROXY ?? 'loopback');
   app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } } }));
+  app.useBodyParser('json', { limit: '15mb' });
   app.use(cookieParser());
   app.enableCors({ origin: (process.env.WEB_ORIGIN ?? 'http://localhost:3000').split(','), credentials: true });
   if (redis) app.useWebSocketAdapter(new RedisIoAdapter(app, redis));

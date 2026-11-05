@@ -8,9 +8,9 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 |---|---|
 | M1 Foundation | ✅ done |
 | M2 Trading core | ✅ done |
-| M3 Web app & realtime | ⏳ in progress |
-| M4 KYC & limits | ⏳ in progress (parallel) |
-| M5 Wallet & custody | ☐ |
+| M3 Web app & realtime | ✅ done |
+| M4 KYC & limits | ✅ done (parallel stream) |
+| M5 Wallet & custody | ⏳ next |
 | M6 Admin & compliance | ☐ |
 | M7 Disputes & insurance | ☐ |
 | M8 Anti-fraud | ☐ |
@@ -82,3 +82,30 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 **Decisions**
 - Global lock order: ad → limit_usage (sorted by user id; day then month) → accounts (sorted by id). Found by the fuzz test (a real deadlock); now passes with retries disabled. `runTx` also retries deadlock/serialization failures as a backstop.
 - Prices are stored as fiat minor units per whole crypto unit ×10^8, so cheap fiats and expensive assets keep precision.
+
+## M3 — Web app and realtime ✅
+
+**Built**
+- `packages/i18n`: 26 locale codes, RTL for ar/fa/ur, `translate` with fallback, locale formatting of decimals/money/dates/percent **without converting amounts to floats** (string-based grouping + locale digits). `en` is complete; the other languages land in M9 (CI's `i18n:check` fails on any missing key).
+- `packages/ui`: shadcn/ui-style primitives (Button, Input, Select, Card, Badge, Tabs, Alert…) using logical properties so layouts flip in RTL; shared with the Telegram Mini App (M12).
+- `apps/web` (Next.js 15 App Router, Tailwind v4): locale routing middleware, `/v1` proxied to the API (same-origin cookies, CSRF double-submit, automatic Idempotency-Key), strict CSP + security headers.
+  Pages: market/order book with filters + live updates (`ads:{asset}:{fiat}` room), trade dialog, signup/verify/login (2FA prompt), post ad (fixed/floating), my orders, order page (countdown, reference code, payee details, mark paid / cancel / release with 2FA, dispute timer, feedback, realtime status), chat with attachments + typing indicator, wallet (balances, limits, faucet in mock mode, payment methods driven by the catalog's field schema, 2FA setup, KYC level-up), public profile with reputation, notifications. Responsive (stacked cards on mobile, bottom-sheet trade dialog).
+- Backend: order chat (participant-only, magic-byte type sniffing, 10MB cap, virus scan, private storage keys, `nosniff` download), off-platform chat filter (phones, Telegram/WhatsApp handles/links, emails, "pay outside" in en/ru/es/pt; obfuscation-normalized) → message hidden + `OFF_PLATFORM_CHAT` flag; notifications (in-app rows + `user:{id}` socket + Telegram/email via Notifier after commit) on every order transition and chat message; reputation (trades 30d, completion, avg release, dispute rate, disputes lost, freeze reports, feedback, volume) recomputed on terminal transitions and nightly; feedback once per party per completed order; public profile endpoint.
+
+**Acceptance**
+- ✅ Playwright (`apps/web/e2e/trade.spec.ts`): two browser users — UI signup/verify/login, 2FA setup, faucet, payment method, post ad, browse book, place order, chat (incl. blocked off-platform message), mark paid, seller sees PAID in realtime, wrong then right 2FA release, buyer sees COMPLETED in realtime, feedback, balances. Arabic renders `dir=rtl` (desktop + Pixel 7).
+
+## M4 — KYC & limits ✅ (built as a parallel stream, merged)
+
+**Built**
+- `packages/core/src/kyc.ts`: `startKyc` (next level only; level 1 needs verified email + phone + 2FA), `handleKycWebhook` (signature over raw body, dedupe on provider event id in the same tx, approved → encrypted verified name/DOB, person sanctions screen, raise tier — never lowered by stale approvals, `user.tier_changed` audit + event; rejected → reason), `kycStatus`, `getKycName` (for payer-name matching), `assertTierAllowed` (country `tier0Allowed` + `tierOverrides.minTierToTrade`, enforced for both parties in order creation), `setLimits` (validated, audited `limits.changed`, live without deploy).
+- Sanctions screening on every tier change: hit → user frozen, `SANCTIONS_HIT` flag, audit, upgrade blocked (`manual_review`).
+- API: `POST /v1/kyc/start`, `GET /v1/kyc/status`, `POST /v1/webhooks/kyc`, mock-only `POST /v1/dev/kyc/approve`.
+
+**Acceptance**
+- ✅ Tier upgrade via mock KYC webhook raises limits ($500 → $10,000 daily), core + API e2e.
+- ✅ Over-limit order rejected with `LIMIT_EXCEEDED` inside the transaction (no order row, no escrow, ad remaining unchanged); succeeds after upgrade. Six concurrent $150 tier-0 orders → exactly 3 succeed.
+- ✅ Sanctions hit on upgrade freezes and blocks; webhook replay is a no-op; bad signature → 401; blocked / tier-0-disallowed / min-tier countries cannot trade.
+
+**Decisions**
+- The sanctions screen (external call) runs before the DB transaction; its result is applied inside it. Tier 3 currently requires level-3 approval; M13 adds the merchant security deposit.
