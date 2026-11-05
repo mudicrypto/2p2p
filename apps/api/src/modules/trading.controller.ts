@@ -5,7 +5,7 @@ import {
   createOrder, markPaid, cancelOrder, releaseOrder, getOrderFor, presentOrder, listMyOrders, userBalances, getLimits, limitUsageFor, type User,
 } from '@p2p/core';
 import { CreateAdSchema, OrderBookQuerySchema, CreateOrderSchema, fromMinor, assetDecimals, type Asset } from '@p2p/shared';
-import { paymentMethodTypes, eq } from '@p2p/db';
+import { paymentMethodTypes, fiatCurrencies, countryRules, eq } from '@p2p/db';
 import { CTX, type Ctx } from '../common/ctx';
 import { CurrentUser, Public } from '../common/auth.guard';
 import { Zod } from '../common/zod';
@@ -31,6 +31,18 @@ export class TradingController {
     const used = await limitUsageFor(this.ctx.db, u.id, this.ctx.now());
     const usd = (v: bigint) => fromMinor(v, 2);
     return { tier: u.kycTier, cooldown: l.cooldown, daily: usd(l.daily), monthly: usd(l.monthly), perOrder: usd(l.perOrder), withdrawDaily: usd(l.withdrawDaily), usedToday: usd(used.tradeDay), usedMonth: usd(used.tradeMonth), withdrawnToday: usd(used.withdrawDay) };
+  }
+
+  // ---- global reference data
+  @Public() @Get('fiats')
+  async fiats() {
+    const rows = await this.ctx.read.select({ code: fiatCurrencies.code, name: fiatCurrencies.name, minorUnits: fiatCurrencies.minorUnits }).from(fiatCurrencies).where(eq(fiatCurrencies.enabled, true));
+    return rows.sort((a, b) => a.code.localeCompare(b.code));
+  }
+  @Public() @Get('countries/:code')
+  async country(@Param('code') code: string) {
+    const [r] = await this.ctx.read.select().from(countryRules).where(eq(countryRules.country, code.toUpperCase()));
+    return { country: code.toUpperCase(), allowed: !r || (r.status === 'allowed' && r.launchEnabled), tier0Allowed: r?.tier0Allowed ?? true, allowedPaymentMethods: r?.allowedPaymentMethods ?? null, requiredDisclosures: r?.requiredDisclosures ?? [] };
   }
 
   // ---- payment methods

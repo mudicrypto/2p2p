@@ -13,6 +13,9 @@ const loaders: Record<string, () => Promise<{ default: Messages }>> = {};
 /** Register lazily-loaded locale bundles (filled by locales/index.ts). */
 export function registerLocale(l: string, loader: () => Promise<{ default: Messages }>) { loaders[l] = loader; }
 registerLocale('en', async () => ({ default: en }));
+// Lazy bundles per locale (each is a separate chunk).
+const L = (l: string) => () => import(`../locales/${l}.json`) as Promise<{ default: Messages }>;
+for (const l of LOCALES) if (l !== 'en') registerLocale(l, L(l));
 
 export async function loadMessages(l: string): Promise<Messages> {
   const loader = loaders[l] ?? loaders.en;
@@ -32,20 +35,20 @@ export function translate(messages: Messages, key: string, params?: Record<strin
 /** Intl locale tag for formatting (fil -> fil-PH etc. handled by Intl). */
 const intlTag = (l: string) => (l === 'zh-Hant' ? 'zh-Hant-TW' : l);
 
-/** Format a canonical decimal string by locale without converting to float (keeps all digits). */
+/**
+ * Format a canonical decimal string by locale without converting to float: the integer part is
+ * formatted as a BigInt (locale grouping incl. lakh/crore, locale digits), the fraction is digit-mapped.
+ */
 export function formatDecimal(l: string, value: string, opts: { maxFraction?: number; minFraction?: number } = {}) {
   const neg = value.startsWith('-');
   const [int, frac = ''] = (neg ? value.slice(1) : value).split('.');
-  const parts = new Intl.NumberFormat(intlTag(l)).formatToParts(12345.6);
-  const group = parts.find((p) => p.type === 'group')?.value ?? ',';
-  const decimal = parts.find((p) => p.type === 'decimal')?.value ?? '.';
-  // Locale digits (e.g. Arabic-Indic) via formatting single digits.
+  const nf = new Intl.NumberFormat(intlTag(l));
+  const decimal = nf.formatToParts(1.5).find((p) => p.type === 'decimal')?.value ?? '.';
   const digitFmt = new Intl.NumberFormat(intlTag(l), { useGrouping: false });
   const loc = (s: string) => s.replace(/\d/g, (d) => digitFmt.format(Number(d)));
-  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, '\u0000');
   let f = frac.slice(0, opts.maxFraction ?? frac.length);
   if (opts.minFraction && f.length < opts.minFraction) f = f.padEnd(opts.minFraction, '0');
-  return (neg ? '-' : '') + loc(grouped).replace(/\u0000/g, group) + (f ? decimal + loc(f) : '');
+  return (neg ? '-' : '') + nf.format(BigInt(int || '0')) + (f ? decimal + loc(f) : '');
 }
 export function formatMoney(l: string, value: string, currency: string, minorUnits = 2) {
   const n = formatDecimal(l, value, { minFraction: minorUnits, maxFraction: minorUnits });

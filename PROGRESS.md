@@ -14,8 +14,8 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M6 Admin & compliance | ✅ done |
 | M7 Disputes & insurance | ✅ done (parallel stream) |
 | M8 Anti-fraud | ✅ done |
-| M9 Global layer | ⏳ next |
-| M10 Payment auto-confirm | ☐ |
+| M9 Global layer | ✅ done |
+| M10 Payment auto-confirm | ⏳ next |
 | M11 Corridors | ☐ |
 | M12 Telegram Mini App & mobile | ☐ |
 | M13 Merchant program | ☐ |
@@ -165,3 +165,20 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 
 **Acceptance**
 - ✅ Simulated fraud suite (`packages/core/test/fraud.test.ts`): third-party payment → flags + automatic dispute + no release; full match auto-releases while wrong amount / missing reference do not; multiple accounts on one device flagged; shared-device counterparties forced to manual confirmation; order velocity, signup-IP velocity and login brute-force all trigger; cooldown limits and off-platform chat flags.
+
+## M9 — Global layer ✅
+
+**Built**
+- All 155 active ISO 4217 currencies seeded (`packages/core/src/data/currencies.ts`, generated from CLDR with ISO minor-unit overrides: KWD/BHD/JOD/OMR/TND/IQD/LYD = 3, JPY/KRW/VND/CLP/XOF/XAF… = 0). Each has `enabled`, `min_order`, `max_order`, `rate_source` (admin-editable); 64 fiats enabled by default.
+- Full payment-method catalog from §2b — 73 methods across Europe, North America, LatAm, Asia, CIS, Middle East, Africa, Oceania, Global — each with countries, currencies, zod-validated field schema (stored as JSON), `reversible`, `risk_level`, `verifier_available`, hold hours. Card/PayPal/Cash App/Venmo are reversible + opt-in + hold; cash in person is opt-in/high risk; gift cards are disabled.
+- Rates: ≥3 sources, median, reject >2% outliers (real: Binance, Kraken, Coinbase + FX cross for fiats with no direct market; mock: three jittered sources).
+- 26 languages: en, es, pt, ru, uk, tr, ar, fa, ur, hi, bn, id, ms, vi, th, fil, zh-Hant, ko, ja, fr, de, it, pl, sw, ha, yo — complete translations, lazily loaded per locale; RTL for ar/fa/ur; locale formatting of amounts via `Intl` on **BigInt** integer parts (lakh grouping for hi/bn, Persian digits, etc.) with no float conversion.
+- Country rules applied app-wide: signup, trading (both parties), ad creation, payment-method allow-lists, tier-0 rules, limit multipliers, launch flag; public `GET /v1/countries/:code` (allowed, disclosures, allowed methods) and `GET /v1/fiats` (market selector).
+
+**Acceptance**
+- ✅ Playwright renders every locale (home/login/signup) on desktop and Pixel 7: correct `lang`/`dir`, no untranslated keys, no horizontal overflow (55/55 passing). Unit tests check key completeness, placeholder parity and that ≥75% of strings differ from English in every locale.
+- ✅ Ads in any fiat × method combination work: every enabled catalog method × each of its currencies (>100 combos) goes ad → order → paid → release; reversible rails land in hold.
+- ✅ A blocked country (or one with `launchEnabled=false`) can't sign up, create ads or trade.
+
+**Decisions**
+- Translations were authored for this milestone and should be reviewed by native speakers before launch (especially sw/ha/yo/fil); CI enforces completeness.

@@ -9,7 +9,7 @@ import { useL } from '@/components/nav';
 import { TradeDialog } from '@/components/trade-dialog';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
-const FIATS = ['EUR', 'USD', 'GBP', 'BRL', 'RUB', 'INR', 'NGN', 'TRY', 'ARS', 'MXN', 'KES', 'PHP', 'IDR', 'VND', 'UAH', 'KZT', 'JPY', 'KRW', 'THB'];
+const DEFAULT_FIATS = ['EUR', 'USD'];
 
 export default function Market() {
   const { t, num, money, pct } = useI18n();
@@ -21,6 +21,8 @@ export default function Market() {
   const [paymentType, setPaymentType] = useState('');
   const [merchantOnly, setMerchantOnly] = useState(false);
   const [types, setTypes] = useState<Array<{ code: string; name: string }>>([]);
+  const [fiats, setFiats] = useState<string[]>(DEFAULT_FIATS);
+  useEffect(() => { api<Array<{ code: string }>>('/fiats').then((r) => r.length && setFiats(r.map((x) => x.code))).catch(() => {}); }, []);
   const [items, setItems] = useState<any[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [selected, setSelected] = useState<any | null>(null);
@@ -55,7 +57,7 @@ export default function Market() {
         <label className="space-y-1"><span className="text-xs text-muted-foreground">{t('market.asset')}</span>
           <Select data-testid="asset" value={asset} onChange={(e) => setAsset(e.target.value)} className="w-28">{ASSETS.map((a) => <option key={a}>{a}</option>)}</Select></label>
         <label className="space-y-1"><span className="text-xs text-muted-foreground">{t('market.fiat')}</span>
-          <Select data-testid="fiat" value={fiat} onChange={(e) => setFiat(e.target.value)} className="w-28">{FIATS.map((f) => <option key={f}>{f}</option>)}</Select></label>
+          <Select data-testid="fiat" value={fiat} onChange={(e) => setFiat(e.target.value)} className="w-28">{fiats.map((f) => <option key={f}>{f}</option>)}</Select></label>
         <label className="space-y-1"><span className="text-xs text-muted-foreground">{t('market.amount')}</span>
           <Input inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ''))} className="w-32" placeholder={fiat} /></label>
         <label className="space-y-1"><span className="text-xs text-muted-foreground">{t('market.paymentMethod')}</span>

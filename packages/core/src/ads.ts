@@ -34,7 +34,7 @@ export async function createAd(ctx: Ctx, user: User, input: CreateAdInput) {
   const rule = await getCountryRule(ctx.db, user.country);
   for (const t of types) {
     if (!t.enabled) throw new DomainError('VALIDATION', `${t.code} disabled`);
-    if (!t.currencies.includes(input.fiat)) throw new DomainError('VALIDATION', `${t.code} does not support ${input.fiat}`);
+    if (!t.currencies.includes(input.fiat) && !t.currencies.includes('*')) throw new DomainError('VALIDATION', `${t.code} does not support ${input.fiat}`);
     if (rule.allowedPaymentMethods && !rule.allowedPaymentMethods.includes(t.code)) throw new DomainError('FORBIDDEN', `${t.code} not allowed in ${user.country}`);
     // Reversible rails (chargeback risk): only tier 2+ sellers who explicitly opt in (spec 2b).
     if (t.reversible && (input.side !== 'sell' || user.kycTier < 2 || !input.acceptReversible)) throw new DomainError('TIER_REQUIRED', 'reversible methods need a tier 2+ seller who opts in');
