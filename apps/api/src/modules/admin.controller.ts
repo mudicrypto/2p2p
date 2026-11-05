@@ -153,6 +153,16 @@ export class AdminController {
     return core.fundInsurance(this.ctx, a.id, asset as Asset, toMinor(b.amount, assetDecimals(asset as Asset)), String(req.headers['idempotency-key']));
   }
 
+  // ---------------------------------------------------------- merchants
+  @Perm('users.read') @Get('merchants')
+  merchants() { return core.listMerchants(this.ctx); }
+  @Perm('kyc.review') @Post('merchants/:userId/review') @HttpCode(200)
+  reviewMerchant(@CurrentAdmin() a: Admin, @Param('userId', uuid) userId: string, @Body(new Zod(z.object({ approve: z.boolean(), note: z.string().min(1).max(2000) }))) b: { approve: boolean; note: string }) {
+    return core.reviewMerchant(this.ctx, a.id, userId, b);
+  }
+  @Perm('withdrawals.approve') @Post('merchants/:userId/deposit/release') @HttpCode(200)
+  releaseDeposit(@CurrentAdmin() a: Admin, @Param('userId', uuid) userId: string) { return core.releaseSecurityDeposit(this.ctx, a.id, userId); }
+
   // ---------------------------------------------------------- admins
   @Perm('admins.manage') @Get('admins')
   admins() { return this.ctx.db.select({ id: adminUsers.id, email: adminUsers.email, roles: adminUsers.roles, active: adminUsers.active, createdAt: adminUsers.createdAt }).from(adminUsers); }

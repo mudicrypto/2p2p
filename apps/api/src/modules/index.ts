@@ -9,4 +9,5 @@ import { AdminController } from './admin.controller';
 import { DisputesController } from './disputes.controller';
 import { PaymentsController } from './payments.controller';
 import { CorridorsController } from './corridors.controller';
-export const CONTROLLERS = [AuthController, SystemController, TradingController, KycController, SocialController, WalletController, DisputesController, PaymentsController, CorridorsController, AdminController, ...(process.env.NODE_ENV === 'production' ? [] : [DevController])];
+import { MerchantApiController, MerchantProgramController } from './merchant.controller';
+export const CONTROLLERS = [AuthController, SystemController, TradingController, KycController, SocialController, WalletController, DisputesController, PaymentsController, CorridorsController, AdminController, MerchantApiController, MerchantProgramController,...(process.env.NODE_ENV === 'production' ? [] : [DevController])];

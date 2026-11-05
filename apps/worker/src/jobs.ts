@@ -33,3 +33,6 @@ SCHEDULES.push({ name: 'disputes.escalate', everyMs: 60_000 });
 JOBS['payment.verify'] = (ctx, d) => core.verifyOrderPayment(ctx, d.orderId);
 JOBS['corridors.sweep'] = (ctx) => core.sweepCorridors(ctx);
 SCHEDULES.push({ name: 'corridors.sweep', everyMs: 60_000 });
+JOBS['merchants.levels'] = (ctx) => core.recomputeMerchantLevels(ctx);
+JOBS['merchants.prune_signatures'] = (ctx) => core.pruneMerchantSignatures(ctx);
+SCHEDULES.push({ name: 'merchants.levels', everyMs: 3600_000 }, { name: 'merchants.prune_signatures', everyMs: 600_000 });
