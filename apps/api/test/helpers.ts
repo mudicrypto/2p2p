@@ -23,11 +23,12 @@ export async function makeUser(t: TestApp, country = 'DE'): Promise<TestUser> {
   const password = 'correct horse battery';
   const s = await t.http.post('/v1/auth/signup').set(idem()).send({ email, password, country }).expect(201);
   await t.http.post('/v1/auth/verify-email').set(idem()).send({ token: s.body.devEmailToken }).expect(200);
-  let l = await t.http.post('/v1/auth/login').send({ email, password }).expect(200);
+  const deviceFingerprint = uniq('fp');
+  let l = await t.http.post('/v1/auth/login').send({ email, password, deviceFingerprint }).expect(200);
   const auth = { Authorization: `Bearer ${l.body.token}` };
   const setup = await t.http.post('/v1/auth/2fa/setup').set(auth).set(idem()).expect(201);
   await t.http.post('/v1/auth/2fa/confirm').set(auth).set(idem()).send({ code: authenticator.generate(setup.body.secret) }).expect(200);
-  l = await t.http.post('/v1/auth/login').send({ email, password, totp: authenticator.generate(setup.body.secret) }).expect(200);
+  l = await t.http.post('/v1/auth/login').send({ email, password, deviceFingerprint, totp: authenticator.generate(setup.body.secret) }).expect(200);
   return { id: l.body.user.id, token: l.body.token, email, totpSecret: setup.body.secret, auth: { Authorization: `Bearer ${l.body.token}` } };
 }
 export const totp = (u: TestUser) => authenticator.generate(u.totpSecret);

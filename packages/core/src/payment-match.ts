@@ -5,7 +5,7 @@
  */
 import { orders, paymentConfirmations, paymentMethods, eq } from '@p2p/db';
 import { DomainError } from '@p2p/shared';
-import type { IncomingPayment } from '@p2p/providers';
+import { REF_RE, type IncomingPayment } from '@p2p/providers';
 import type { Ctx } from './context';
 import { runTx } from './context';
 import { transition, autoRelease, type Order } from './orders';
@@ -75,4 +75,17 @@ export async function verifyOrderPayment(ctx: Ctx, orderId: string) {
   const found = await v.findPayment({ orderId, rail: o.paymentType, fiat: o.fiat, amount: o.fiatAmount, referenceCode: o.referenceCode, expectedPayerName: kyc ?? '', payeeDetails: pm ? decryptJson(pm.detailsEnc) : {} });
   if (!found) return null;
   return handleIncomingPayment(ctx, orderId, found);
+}
+
+/** Rail webhook (PSP/open-banking push): verify signature, parse, locate the order by its reference code. */
+export async function handlePaymentWebhook(ctx: Ctx, rail: string, rawBody: string, headers: Record<string, string | undefined>) {
+  const v = ctx.providers.verifiers.get(rail);
+  if (!v?.verifyWebhook || !v.parseWebhook) throw new DomainError('NOT_FOUND', 'unknown rail');
+  if (!v.verifyWebhook(rawBody, headers)) throw new DomainError('UNAUTHORIZED', 'bad webhook signature');
+  const p = v.parseWebhook(rawBody);
+  const ref = REF_RE.exec(p.reference.toUpperCase().replace(/[^A-Z0-9]/g, ''))?.[0];
+  if (!ref) return { outcome: 'no_reference' as const };
+  const [o] = await ctx.db.select().from(orders).where(eq(orders.referenceCode, ref));
+  if (!o || o.paymentType !== rail) return { outcome: 'unknown_order' as const };
+  return handleIncomingPayment(ctx, o.id, p);
 }

@@ -15,8 +15,8 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M7 Disputes & insurance | ✅ done (parallel stream) |
 | M8 Anti-fraud | ✅ done |
 | M9 Global layer | ✅ done |
-| M10 Payment auto-confirm | ⏳ next |
-| M11 Corridors | ☐ |
+| M10 Payment auto-confirm | ✅ done on mocks + provider-format payloads — live sandboxes need keys |
+| M11 Corridors | ⏳ next |
 | M12 Telegram Mini App & mobile | ☐ |
 | M13 Merchant program | ☐ |
 | M14 Scale & observability | ☐ |
@@ -182,3 +182,13 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 
 **Decisions**
 - Translations were authored for this milestone and should be reviewed by native speakers before launch (especially sw/ha/yo/fil); CI enforces completeness.
+
+## M10 — Payment auto-confirmation ✅ (mock + provider payload formats) · ⛔ live sandboxes pending keys
+
+**Built**
+- `packages/providers/src/verifiers/`: real adapters for **PIX** (PSP webhook `pix[]` + `/v2/pix` polling), **UPI** (Razorpay-style webhook), **SEPA Instant** and **Faster Payments** (open-banking transaction push + `/accounts/{id}/transactions` polling), **SPEI** (STP abono), **SBP** (bank incoming-payment webhook), **M-Pesa** (Daraja C2B confirmation) and **PromptPay** (bank payment-confirmation callback). Each verifies an HMAC signature over the raw body, maps the provider's payload to amount / reference / payer name without float math, and is selected only when its secret exists (`<RAIL>_WEBHOOK_SECRET`); otherwise the mock verifier is used.
+- `POST /v1/webhooks/payments/:rail` → signature check → reference code extracted from the payment comment → order lookup (must be on that rail) → `handleIncomingPayment` (M8): auto-release only when amount, reference **and** payer name (vs KYC name) all match; mismatched name → third-party flag + automatic dispute + no release. Dedupe on (rail, provider ref). Worker `payment.verify` polls rails that support it after the buyer marks paid. Mock-only `POST /v1/dev/payments/simulate`.
+
+**Acceptance**
+- ✅ For each of the 8 rails: a payload in the provider's own format with a valid signature auto-releases; a bad signature is rejected; a mismatched payer name blocks the release (order goes to DISPUTED, buyer gets nothing). The mock polling path auto-releases on every rail. API e2e covers the SPEI webhook end to end.
+- ⛔ **Live sandbox runs blocked:** need sandbox credentials per rail (PIX PSP + mTLS cert, Razorpay/Cashfree, an open-banking aggregator for SEPA Instant/FPS, STP, a Russian bank API for SBP, Safaricom Daraja, a Thai bank for PromptPay). Field names are marked `TODO(provider)` for verification against each sandbox.
