@@ -199,5 +199,20 @@
   "SELF_TRADE": "自分の広告とは取引できません",
   "VALIDATION": "入力内容をご確認ください",
   "ILLEGAL_TRANSITION": "この操作は実行できなくなりました"
+ },
+ "corridor": {
+  "title": "海外送金",
+  "from": "送金元",
+  "to": "送金先",
+  "amount": "送金額",
+  "receiveVia": "受取先",
+  "quote": "見積もり",
+  "via": "{amount} USDT 経由",
+  "effective": "あなたのレート",
+  "market": "市場レート",
+  "spread": "市場比 {pct}%",
+  "start": "送金を開始",
+  "leg1": "ステップ1：支払ってUSDTを受け取る",
+  "leg2": "ステップ2：USDTを売却して受け取る"
  }
 }

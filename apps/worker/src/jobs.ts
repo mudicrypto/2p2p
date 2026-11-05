@@ -31,3 +31,5 @@ JOBS['dispute.triage'] = (ctx, d) => core.runTriage(ctx, d.disputeId);
 JOBS['disputes.escalate'] = (ctx) => core.escalateOverdueDisputes(ctx);
 SCHEDULES.push({ name: 'disputes.escalate', everyMs: 60_000 });
 JOBS['payment.verify'] = (ctx, d) => core.verifyOrderPayment(ctx, d.orderId);
+JOBS['corridors.sweep'] = (ctx) => core.sweepCorridors(ctx);
+SCHEDULES.push({ name: 'corridors.sweep', everyMs: 60_000 });

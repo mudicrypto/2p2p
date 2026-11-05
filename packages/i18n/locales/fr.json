@@ -199,5 +199,20 @@
   "SELF_TRADE": "Vous ne pouvez pas échanger avec votre propre annonce",
   "VALIDATION": "Veuillez vérifier le formulaire",
   "ILLEGAL_TRANSITION": "Cette action n'est plus possible"
+ },
+ "corridor": {
+  "title": "Envoi transfrontalier",
+  "from": "De",
+  "to": "Vers",
+  "amount": "Montant envoyé",
+  "receiveVia": "Recevoir sur",
+  "quote": "Obtenir un devis",
+  "via": "Via {amount} USDT",
+  "effective": "Votre taux",
+  "market": "Taux du marché",
+  "spread": "{pct} % par rapport au marché",
+  "start": "Lancer l'envoi",
+  "leg1": "Étape 1 : payez et recevez des USDT",
+  "leg2": "Étape 2 : les USDT sont vendus et vous êtes payé"
  }
 }

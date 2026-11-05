@@ -199,5 +199,20 @@
   "SELF_TRADE": "Ba za ka iya ciniki da tallanka ba",
   "VALIDATION": "Da fatan duba fom ɗin",
   "ILLEGAL_TRANSITION": "Wannan aikin ba zai yiwu ba yanzu"
+ },
+ "corridor": {
+  "title": "Aika zuwa wata ƙasa",
+  "from": "Daga",
+  "to": "Zuwa",
+  "amount": "Adadin da za a aika",
+  "receiveVia": "Karɓa ta",
+  "quote": "Samu farashi",
+  "via": "Ta hanyar USDT {amount}",
+  "effective": "Farashinka",
+  "market": "Farashin kasuwa",
+  "spread": "{pct}% idan aka kwatanta da kasuwa",
+  "start": "Fara aikawa",
+  "leg1": "Mataki 1: biya ka karɓi USDT",
+  "leg2": "Mataki 2: ana sayar da USDT kuma ka karɓi kuɗi"
  }
 }

@@ -199,5 +199,20 @@
   "SELF_TRADE": "不能與自己的廣告交易",
   "VALIDATION": "請檢查表單",
   "ILLEGAL_TRANSITION": "此操作已無法執行"
+ },
+ "corridor": {
+  "title": "跨境匯款",
+  "from": "從",
+  "to": "至",
+  "amount": "匯出金額",
+  "receiveVia": "收款至",
+  "quote": "取得報價",
+  "via": "經由 {amount} USDT",
+  "effective": "您的匯率",
+  "market": "市場匯率",
+  "spread": "較市場 {pct}%",
+  "start": "開始匯款",
+  "leg1": "步驟 1：付款並取得 USDT",
+  "leg2": "步驟 2：售出 USDT 並收款"
  }
 }

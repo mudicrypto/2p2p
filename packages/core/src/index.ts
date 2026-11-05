@@ -29,3 +29,4 @@ export * from './disputes';
 export * from './insurance';
 export * from './name-match';
 export * from './payment-match';
+export * from './corridors';

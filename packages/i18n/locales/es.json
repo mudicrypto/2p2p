@@ -199,5 +199,20 @@
   "SELF_TRADE": "No puedes operar con tu propio anuncio",
   "VALIDATION": "Revisa el formulario",
   "ILLEGAL_TRANSITION": "Esta acción ya no es posible"
+ },
+ "corridor": {
+  "title": "Envío entre países",
+  "from": "De",
+  "to": "A",
+  "amount": "Importe a enviar",
+  "receiveVia": "Recibir en",
+  "quote": "Cotizar",
+  "via": "Vía {amount} USDT",
+  "effective": "Tu tipo",
+  "market": "Tipo de mercado",
+  "spread": "{pct}% frente al mercado",
+  "start": "Iniciar envío",
+  "leg1": "Paso 1: paga y recibe USDT",
+  "leg2": "Paso 2: se venden los USDT y recibes el pago"
  }
 }

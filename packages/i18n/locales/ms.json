@@ -199,5 +199,20 @@
   "SELF_TRADE": "Anda tidak boleh berdagang dengan iklan sendiri",
   "VALIDATION": "Sila semak borang",
   "ILLEGAL_TRANSITION": "Tindakan ini tidak lagi boleh dilakukan"
+ },
+ "corridor": {
+  "title": "Hantar merentas negara",
+  "from": "Dari",
+  "to": "Ke",
+  "amount": "Jumlah dihantar",
+  "receiveVia": "Terima ke",
+  "quote": "Dapatkan sebut harga",
+  "via": "Melalui {amount} USDT",
+  "effective": "Kadar anda",
+  "market": "Kadar pasaran",
+  "spread": "{pct}% berbanding pasaran",
+  "start": "Mula hantar",
+  "leg1": "Langkah 1: bayar dan terima USDT",
+  "leg2": "Langkah 2: USDT dijual dan anda menerima bayaran"
  }
 }

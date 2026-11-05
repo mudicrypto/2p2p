@@ -199,5 +199,20 @@
   "SELF_TRADE": "Huwezi kufanya biashara na tangazo lako mwenyewe",
   "VALIDATION": "Tafadhali kagua fomu",
   "ILLEGAL_TRANSITION": "Kitendo hiki hakiwezekani tena"
+ },
+ "corridor": {
+  "title": "Tuma nje ya nchi",
+  "from": "Kutoka",
+  "to": "Kwenda",
+  "amount": "Kiasi cha kutuma",
+  "receiveVia": "Pokea kupitia",
+  "quote": "Pata bei",
+  "via": "Kupitia USDT {amount}",
+  "effective": "Kiwango chako",
+  "market": "Kiwango cha soko",
+  "spread": "{pct}% dhidi ya soko",
+  "start": "Anza kutuma",
+  "leg1": "Hatua 1: lipa upokee USDT",
+  "leg2": "Hatua 2: USDT inauzwa na unapokea malipo"
  }
 }

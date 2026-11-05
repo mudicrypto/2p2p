@@ -41,6 +41,7 @@ export function Nav() {
         {me && <>
           <Link href={L('/orders')} className="text-sm hover:underline" data-testid="nav-orders">{t('nav.orders')}</Link>
           <Link href={L('/ads/new')} className="text-sm hover:underline">{t('nav.postAd')}</Link>
+          <Link href={L('/corridor')} className="text-sm hover:underline">{t('corridor.title')}</Link>
           <Link href={L('/wallet')} className="text-sm hover:underline" data-testid="nav-wallet">{t('nav.wallet')}</Link>
           <Link href={L('/notifications')} className="text-sm hover:underline" aria-label={t('nav.notifications')}>
             🔔{unread > 0 && <Badge variant="danger" className="ms-1" data-testid="unread">{unread}</Badge>}

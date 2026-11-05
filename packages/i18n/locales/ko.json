@@ -199,5 +199,20 @@
   "SELF_TRADE": "본인 광고와는 거래할 수 없습니다",
   "VALIDATION": "입력 내용을 확인하세요",
   "ILLEGAL_TRANSITION": "더 이상 수행할 수 없는 작업입니다"
+ },
+ "corridor": {
+  "title": "해외 송금",
+  "from": "보내는 통화",
+  "to": "받는 통화",
+  "amount": "보낼 금액",
+  "receiveVia": "받을 계좌",
+  "quote": "견적 받기",
+  "via": "{amount} USDT 경유",
+  "effective": "적용 환율",
+  "market": "시장 환율",
+  "spread": "시장 대비 {pct}%",
+  "start": "송금 시작",
+  "leg1": "1단계: 결제 후 USDT 받기",
+  "leg2": "2단계: USDT 판매 후 대금 수령"
  }
 }

@@ -8,4 +8,5 @@ import { WalletController } from './wallet.controller';
 import { AdminController } from './admin.controller';
 import { DisputesController } from './disputes.controller';
 import { PaymentsController } from './payments.controller';
-export const CONTROLLERS = [AuthController, SystemController, TradingController, KycController, SocialController, WalletController, DisputesController, PaymentsController, AdminController, ...(process.env.NODE_ENV === 'production' ? [] : [DevController])];
+import { CorridorsController } from './corridors.controller';
+export const CONTROLLERS = [AuthController, SystemController, TradingController, KycController, SocialController, WalletController, DisputesController, PaymentsController, CorridorsController, AdminController, ...(process.env.NODE_ENV === 'production' ? [] : [DevController])];

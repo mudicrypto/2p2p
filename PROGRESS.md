@@ -16,8 +16,8 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M8 Anti-fraud | ✅ done |
 | M9 Global layer | ✅ done |
 | M10 Payment auto-confirm | ✅ done on mocks + provider-format payloads — live sandboxes need keys |
-| M11 Corridors | ⏳ next |
-| M12 Telegram Mini App & mobile | ☐ |
+| M11 Corridors | ✅ done |
+| M12 Telegram Mini App & mobile | ⏳ next |
 | M13 Merchant program | ☐ |
 | M14 Scale & observability | ☐ |
 | M15 Security hardening & audit package | ☐ |
@@ -192,3 +192,17 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 **Acceptance**
 - ✅ For each of the 8 rails: a payload in the provider's own format with a valid signature auto-releases; a bad signature is rejected; a mismatched payer name blocks the release (order goes to DISPUTED, buyer gets nothing). The mock polling path auto-releases on every rail. API e2e covers the SPEI webhook end to end.
 - ⛔ **Live sandbox runs blocked:** need sandbox credentials per rail (PIX PSP + mTLS cert, Razorpay/Cashfree, an open-banking aggregator for SEPA Instant/FPS, STP, a Russian bank API for SBP, Safaricom Daraja, a Thai bank for PromptPay). Field names are marked `TODO(provider)` for verification against each sandbox.
+
+## M11 — Cross-border corridors ✅
+
+**Built** (`packages/core/src/corridors.ts`, `/v1/corridors`, web `/{locale}/corridor`)
+- Quote: best SELL ad in fiat A (non-reversible rails only) and best BUY ad in fiat B that accepts the user's receiving method and fits the size; shows you pay / you receive / USDT routed, **effective rate vs market rate** (reference prices) and the spread.
+- Create: corridor row + both orders in **one transaction** with a shared deadline. Leg 1 (user buys USDT with fiat A) is escrowed normally; leg 2 (user sells the USDT for fiat B) is created in `CREATED` with the ad capacity and limits reserved. `createOrder` was refactored into a composable `createOrderInTx`.
+- Linked settlement inside each leg's ledger transaction: leg 1 release → leg 2 escrow funded from the USDT just received and moved to AWAITING_PAYMENT atomically; leg 1 cancel/timeout/split → leg 2 cancelled via `LINKED_LEG_FAILED` (ad capacity and limits restored, no ledger movement since it was never escrowed); leg 2 failure → its escrow refunds to the user. Corridor status: active → completed | rolled_back. Worker `corridors.sweep` as a safety net.
+
+**Acceptance**
+- ✅ EUR → BRL corridor completes (core + API e2e): exact balances, fees, effective/market rates.
+- ✅ Leg 1 cancel and leg 1 timeout → both legs CANCELLED, ad remaining and limit usage restored, no escrow left, invariants OK. Leg 2 timeout after leg 1 → user's USDT refunded from escrow, nothing stranded.
+
+**Decisions**
+- Once leg 1 has settled, the fiat-A payment cannot be reversed; a leg-2 failure therefore returns the intermediate USDT to the user's balance (they can withdraw or retry). Everything before leg 1 settlement rolls back completely.

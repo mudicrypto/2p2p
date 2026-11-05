@@ -199,5 +199,20 @@
   "SELF_TRADE": "Bạn không thể giao dịch với quảng cáo của chính mình",
   "VALIDATION": "Vui lòng kiểm tra biểu mẫu",
   "ILLEGAL_TRANSITION": "Không thể thực hiện thao tác này nữa"
+ },
+ "corridor": {
+  "title": "Chuyển tiền xuyên biên giới",
+  "from": "Từ",
+  "to": "Đến",
+  "amount": "Số tiền gửi",
+  "receiveVia": "Nhận vào",
+  "quote": "Báo giá",
+  "via": "Qua {amount} USDT",
+  "effective": "Tỷ giá của bạn",
+  "market": "Tỷ giá thị trường",
+  "spread": "{pct}% so với thị trường",
+  "start": "Bắt đầu chuyển",
+  "leg1": "Bước 1: thanh toán và nhận USDT",
+  "leg2": "Bước 2: USDT được bán và bạn nhận tiền"
  }
 }

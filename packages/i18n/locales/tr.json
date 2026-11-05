@@ -199,5 +199,20 @@
   "SELF_TRADE": "Kendi ilanınızla işlem yapamazsınız",
   "VALIDATION": "Lütfen formu kontrol edin",
   "ILLEGAL_TRANSITION": "Bu işlem artık mümkün değil"
+ },
+ "corridor": {
+  "title": "Ülkeler arası gönderim",
+  "from": "Kaynak",
+  "to": "Hedef",
+  "amount": "Gönderilecek tutar",
+  "receiveVia": "Alınacak hesap",
+  "quote": "Teklif al",
+  "via": "{amount} USDT üzerinden",
+  "effective": "Sizin kurunuz",
+  "market": "Piyasa kuru",
+  "spread": "Piyasaya göre %{pct}",
+  "start": "Gönderimi başlat",
+  "leg1": "Adım 1: ödeyin ve USDT alın",
+  "leg2": "Adım 2: USDT satılır ve ödemeyi alırsınız"
  }
 }

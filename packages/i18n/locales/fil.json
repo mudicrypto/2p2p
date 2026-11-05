@@ -199,5 +199,20 @@
   "SELF_TRADE": "Hindi ka puwedeng mag-trade sa sarili mong ad",
   "VALIDATION": "Pakisuri ang form",
   "ILLEGAL_TRANSITION": "Hindi na posible ang aksyong ito"
+ },
+ "corridor": {
+  "title": "Magpadala sa ibang bansa",
+  "from": "Mula",
+  "to": "Papunta",
+  "amount": "Halagang ipapadala",
+  "receiveVia": "Tanggapin sa",
+  "quote": "Kumuha ng quote",
+  "via": "Sa pamamagitan ng {amount} USDT",
+  "effective": "Iyong rate",
+  "market": "Rate sa merkado",
+  "spread": "{pct}% kumpara sa merkado",
+  "start": "Simulan ang padala",
+  "leg1": "Hakbang 1: magbayad at tumanggap ng USDT",
+  "leg2": "Hakbang 2: ibebenta ang USDT at matatanggap mo ang bayad"
  }
 }

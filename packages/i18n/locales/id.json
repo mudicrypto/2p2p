@@ -199,5 +199,20 @@
   "SELF_TRADE": "Anda tidak bisa bertransaksi dengan iklan sendiri",
   "VALIDATION": "Periksa kembali formulir",
   "ILLEGAL_TRANSITION": "Tindakan ini sudah tidak dapat dilakukan"
+ },
+ "corridor": {
+  "title": "Kirim lintas negara",
+  "from": "Dari",
+  "to": "Ke",
+  "amount": "Jumlah dikirim",
+  "receiveVia": "Terima ke",
+  "quote": "Lihat kurs",
+  "via": "Melalui {amount} USDT",
+  "effective": "Kurs Anda",
+  "market": "Kurs pasar",
+  "spread": "{pct}% vs pasar",
+  "start": "Mulai kirim",
+  "leg1": "Langkah 1: bayar dan terima USDT",
+  "leg2": "Langkah 2: USDT dijual dan Anda menerima dana"
  }
 }

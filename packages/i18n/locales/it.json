@@ -199,5 +199,20 @@
   "SELF_TRADE": "Non puoi scambiare con il tuo annuncio",
   "VALIDATION": "Controlla il modulo",
   "ILLEGAL_TRANSITION": "Questa azione non è più possibile"
+ },
+ "corridor": {
+  "title": "Invio internazionale",
+  "from": "Da",
+  "to": "A",
+  "amount": "Importo da inviare",
+  "receiveVia": "Ricevi su",
+  "quote": "Ottieni preventivo",
+  "via": "Tramite {amount} USDT",
+  "effective": "Il tuo tasso",
+  "market": "Tasso di mercato",
+  "spread": "{pct}% rispetto al mercato",
+  "start": "Avvia invio",
+  "leg1": "Passo 1: paga e ricevi USDT",
+  "leg2": "Passo 2: gli USDT vengono venduti e ricevi il pagamento"
  }
 }

@@ -199,5 +199,20 @@
   "SELF_TRADE": "Nie możesz handlować z własnym ogłoszeniem",
   "VALIDATION": "Sprawdź formularz",
   "ILLEGAL_TRANSITION": "Ta czynność nie jest już możliwa"
+ },
+ "corridor": {
+  "title": "Przelew między krajami",
+  "from": "Z",
+  "to": "Na",
+  "amount": "Kwota przelewu",
+  "receiveVia": "Odbierz na",
+  "quote": "Pobierz wycenę",
+  "via": "Przez {amount} USDT",
+  "effective": "Twój kurs",
+  "market": "Kurs rynkowy",
+  "spread": "{pct}% względem rynku",
+  "start": "Rozpocznij przelew",
+  "leg1": "Krok 1: zapłać i otrzymaj USDT",
+  "leg2": "Krok 2: USDT są sprzedawane, otrzymujesz wypłatę"
  }
 }

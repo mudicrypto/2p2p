@@ -199,5 +199,20 @@
   "SELF_TRADE": "Du kannst nicht mit deiner eigenen Anzeige handeln",
   "VALIDATION": "Bitte prüfe das Formular",
   "ILLEGAL_TRANSITION": "Diese Aktion ist nicht mehr möglich"
+ },
+ "corridor": {
+  "title": "Grenzüberschreitend senden",
+  "from": "Von",
+  "to": "Nach",
+  "amount": "Sendebetrag",
+  "receiveVia": "Empfangen auf",
+  "quote": "Angebot holen",
+  "via": "Über {amount} USDT",
+  "effective": "Ihr Kurs",
+  "market": "Marktkurs",
+  "spread": "{pct} % zum Markt",
+  "start": "Senden starten",
+  "leg1": "Schritt 1: zahlen und USDT erhalten",
+  "leg2": "Schritt 2: USDT werden verkauft, Sie erhalten die Auszahlung"
  }
 }

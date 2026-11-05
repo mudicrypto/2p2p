@@ -199,5 +199,20 @@
   "SELF_TRADE": "O kò lè ṣòwò pẹ̀lú ìpolówó tirẹ",
   "VALIDATION": "Jọ̀wọ́ ṣàyẹ̀wò fọ́ọ̀mù náà",
   "ILLEGAL_TRANSITION": "Ìgbésẹ̀ yìí kò ṣeé ṣe mọ́"
+ },
+ "corridor": {
+  "title": "Fi ránṣẹ́ sí orílẹ̀-èdè mìíràn",
+  "from": "Láti",
+  "to": "Sí",
+  "amount": "Iye tí a ó fi ránṣẹ́",
+  "receiveVia": "Gbà sí",
+  "quote": "Gba ìdíyelé",
+  "via": "Nípasẹ̀ USDT {amount}",
+  "effective": "Ìwọ̀n rẹ",
+  "market": "Ìwọ̀n ọjà",
+  "spread": "{pct}% sí ọjà",
+  "start": "Bẹ̀rẹ̀ ìfiránṣẹ́",
+  "leg1": "Ìgbésẹ̀ 1: san owó kí o gba USDT",
+  "leg2": "Ìgbésẹ̀ 2: a ta USDT, o sì gba owó"
  }
 }

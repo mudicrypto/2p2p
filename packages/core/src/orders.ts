@@ -24,6 +24,7 @@ import { assertTierAllowed } from './kyc';
 import { decryptJson } from './crypto';
 import { notify } from './notifications';
 import { recomputeReputation } from './reputation';
+import { onCorridorLegSettled } from './corridors';
 
 export type Order = typeof orders.$inferSelect;
 const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -33,10 +34,15 @@ export const newReferenceCode = () => 'P2P' + Array.from(randomBytes(8), (b) => 
 export const escrowAmount = (o: Pick<Order, 'cryptoAmount' | 'feeAmount' | 'feePayer'>) => o.cryptoAmount + (o.feePayer === 'seller' ? o.feeAmount : 0n);
 
 export interface CreateOrderInput { adId: string; fiatAmount?: string; cryptoAmount?: string; paymentMethodId?: string; corridorId?: string }
+export interface CreateOrderOpts { /** Corridor leg 2: reserve the ad + limits now, lock escrow when leg 1 settles. */ deferEscrow?: boolean; expiresAt?: Date }
 
 export async function createOrder(ctx: Ctx, takerIn: User, input: CreateOrderInput): Promise<Order> {
   await assertCountryAllowed(ctx.db, takerIn.country);
-  return runTx(ctx, async (t) => {
+  return runTx(ctx, (t) => createOrderInTx(ctx, t, takerIn, input));
+}
+
+export async function createOrderInTx(ctx: Ctx, t: TxCtx, takerIn: User, input: CreateOrderInput, opts: CreateOrderOpts = {}): Promise<Order> {
+  {
     const taker = await reloadUser(t.tx, takerIn.id);
     const [ad] = await t.tx.select().from(ads).where(eq(ads.id, input.adId)).for('update');
     if (!ad || ad.status !== 'active') throw new DomainError('AD_UNAVAILABLE', 'ad not available');
@@ -105,8 +111,12 @@ export async function createOrder(ctx: Ctx, takerIn: User, input: CreateOrderInp
       adId: ad.id, makerId: maker.id, takerId: taker.id, buyerId: buyer.id, sellerId: seller.id, asset, fiat: ad.fiat,
       cryptoAmount, fiatAmount, price, feeAmount: fee, feePayer, usdValueCents: usd, paymentMethodId: pmId, paymentType: pm.pm.type,
       referenceCode: newReferenceCode(), status: 'CREATED', riskScore: risk.score, manualConfirmRequired: risk.manual,
-      expiresAt: new Date(now.getTime() + ad.paymentWindowMin * 60_000), corridorId: input.corridorId ?? null,
+      expiresAt: opts.expiresAt ?? new Date(now.getTime() + ad.paymentWindowMin * 60_000), corridorId: input.corridorId ?? null,
     }).returning();
+    if (opts.deferEscrow) {
+      await logEvent(t, created.id, null, 'CREATED', 'CREATE', sellerIsMaker ? 'buyer' : 'seller', taker.id, 'corridor_leg_pending');
+      return created;
+    }
     await logEvent(t, created.id, null, 'CREATED', 'CREATE', sellerIsMaker ? 'buyer' : 'seller', taker.id);
     // Lock escrow atomically with creation (CREATED -> AWAITING_PAYMENT).
     const lock = escrowAmount(created);
@@ -119,7 +129,7 @@ export async function createOrder(ctx: Ctx, takerIn: User, input: CreateOrderInp
     t.emit({ type: 'order.created', orderId: o.id, userIds: [maker.id], payload: { orderId: o.id, status: o.status } });
     t.emit({ type: 'book.updated', room: `ads:${asset}:${ad.fiat}`, payload: { adId: ad.id } });
     return o;
-  });
+  }
 }
 
 async function logEvent(t: TxCtx, orderId: string, from: OrderStatus | null, to: OrderStatus, event: string, actor: string, actorId: string | null, reason?: string) {
@@ -171,6 +181,7 @@ export async function applyEscrow(ctx: Ctx, t: TxCtx, o: Order, effect: 'release
     await t.tx.update(ads).set({ remainingAmount: sql`${ads.remainingAmount} + ${o.cryptoAmount.toString()}::numeric` }).where(and(eq(ads.id, o.adId), sql`${ads.status} <> 'closed'`));
     for (const uid of [o.buyerId, o.sellerId].sort()) await releaseTradeLimit(t.tx, uid, o.usdValueCents, o.createdAt);
     await postTx(t.tx, { type: 'escrow_refund', refType: 'order', refId: o.id, idempotencyKey: key, postings: [{ account: escrow, amount: -lock }, { account: userAcct(o.sellerId, asset), amount: lock }] });
+    if (o.corridorId) await onCorridorLegSettled(ctx, t, o, 'failed');
     return;
   }
   if (effect === 'split') {
@@ -181,6 +192,7 @@ export async function applyEscrow(ctx: Ctx, t: TxCtx, o: Order, effect: 'release
     if (toBuyer > 0n) p.push({ account: userAcct(o.buyerId, asset), amount: toBuyer });
     if (toSeller > 0n) p.push({ account: userAcct(o.sellerId, asset), amount: toSeller });
     await postTx(t.tx, { type: 'escrow_split', refType: 'order', refId: o.id, idempotencyKey: key, postings: p });
+    if (o.corridorId) await onCorridorLegSettled(ctx, t, o, 'failed'); // partial leg 1 cannot fund leg 2
     return;
   }
   const fees = await getConfig(t.tx, 'fees');
@@ -193,6 +205,7 @@ export async function applyEscrow(ctx: Ctx, t: TxCtx, o: Order, effect: 'release
   if (platform > 0n) p.push({ account: systemAcct(asset, 'fee'), amount: platform });
   if (insurance > 0n) p.push({ account: systemAcct(asset, 'insurance'), amount: insurance });
   await postTx(t.tx, { type: 'escrow_release', refType: 'order', refId: o.id, idempotencyKey: key, postings: p });
+  if (o.corridorId) await onCorridorLegSettled(ctx, t, o, 'completed');
 }
 
 // ---------------------------------------------------------------- actions
