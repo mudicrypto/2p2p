@@ -24,3 +24,6 @@ export const SCHEDULES: Array<{ name: string; everyMs: number }> = [
 JOBS['reputation.recompute'] = async (ctx, d) => { for (const id of d.userIds as string[]) await core.recomputeReputation(ctx, id); };
 JOBS['reputation.nightly'] = (ctx) => core.recomputeAllReputation(ctx);
 SCHEDULES.push({ name: 'reputation.nightly', everyMs: 24 * 3600_000 });
+JOBS['withdrawal.submit'] = (ctx, d) => core.submitWithdrawal(ctx, d.withdrawalId);
+JOBS['withdrawals.process'] = (ctx) => core.processWithdrawals(ctx);
+SCHEDULES.push({ name: 'withdrawals.process', everyMs: 30_000 });

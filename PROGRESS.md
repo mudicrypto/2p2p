@@ -10,8 +10,8 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M2 Trading core | ✅ done |
 | M3 Web app & realtime | ✅ done |
 | M4 KYC & limits | ✅ done (parallel stream) |
-| M5 Wallet & custody | ⏳ next |
-| M6 Admin & compliance | ☐ |
+| M5 Wallet & custody | ✅ done on mock custody — real testnet run blocked on custody sandbox keys |
+| M6 Admin & compliance | ⏳ next |
 | M7 Disputes & insurance | ☐ |
 | M8 Anti-fraud | ☐ |
 | M9 Global layer | ☐ |
@@ -109,3 +109,18 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 
 **Decisions**
 - The sanctions screen (external call) runs before the DB transaction; its result is applied inside it. Tier 3 currently requires level-3 approval; M13 adds the merchant security deposit.
+
+## M5 — Wallet and custody ✅ (mock custody) · ⛔ real testnet pending credentials
+
+**Built** (`packages/core/src/wallet.ts`, `apps/api/src/modules/wallet.controller.ts`)
+- Deposit addresses per user/asset/network via `CustodyProvider` (TON uses memos).
+- Custody webhook: signature over raw body, dedupe on provider event id, source-address chain-risk screen, credit only after the network's configured confirmations (`confirmations` config: TRON 20, TON 10, BSC 15, ETH 12, POLYGON 128, BTC 2). High-risk or sanctioned sources are **held** (sanctioned also freezes the user and flags); compliance can credit or reject held deposits.
+- Withdrawals: global pause switch (set by the invariant job), active account, 2FA re-prompt, 24h cooldown after password/2FA change, per-network address format validation, allowlist with 24h activation delay (risk-screened at add), destination risk screen (sanctioned/high risk blocked + flagged), tier daily withdrawal limit (tier-0 $500/day), network fee to the fee account, `withdraw_pending` ledger account until custody settles. Large (≥ $10k, configurable) or risky withdrawals need **two distinct admins** (`withdrawal_approvals` PK prevents double approval). Custody failures reverse the ledger and refund the fee; the custody call is idempotent on withdrawal id.
+- Internal transfers: free, instant, ledger-only, 2FA.
+- Worker: `withdrawal.submit` on approval + `withdrawals.process` every 30s (submit approved, poll submitted).
+- Mock-only `POST /v1/dev/custody/deposit` simulates on-chain deposits.
+
+**Acceptance**
+- ✅ Deposit → trade → withdrawal end-to-end for **every** supported asset/network (USDT on TRON, TON, BSC, ETHEREUM, POLYGON; BTC; ETH) against the mock custody, with confirmation gating, webhook replay, ledger invariant incl. custody balance.
+- ✅ Withdrawal rule tests (2FA, allowlist delay, security cooldown, sanctions, tier-0 limit, pause), two-admin approval, failed-submission reversal, held high-risk deposit review, internal transfers.
+- ⛔ **Real testnet run blocked:** needs a Fireblocks/BitGo/Cobo sandbox workspace + API key/secret (`TODO(provider)` in `packages/providers/src/real/stubs.ts`). Everything else runs on the mock until then.

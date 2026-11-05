@@ -23,3 +23,4 @@ export * from './chat-filter';
 export * from './notifications';
 export * from './chat';
 export * from './reputation';
+export * from './wallet';
