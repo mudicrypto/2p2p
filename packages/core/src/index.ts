@@ -18,3 +18,4 @@ export * from './orders';
 export * from './fraud';
 export * from './dev';
 export * from './seed';
+export * from './kyc';

@@ -20,6 +20,7 @@ import { consumeTradeLimit, releaseTradeLimit, usdCents, reloadUser } from './li
 import { assertCountryAllowed } from './compliance';
 import { require2fa, type User } from './auth';
 import { scoreOrder, flag } from './risk';
+import { assertTierAllowed } from './kyc';
 import { decryptJson } from './crypto';
 
 export type Order = typeof orders.$inferSelect;
@@ -63,6 +64,8 @@ export async function createOrder(ctx: Ctx, takerIn: User, input: CreateOrderInp
     if (fiatAmount < ad.minAmount || fiatAmount > ad.maxAmount) throw new DomainError('VALIDATION', `amount must be between ${fromMinor(ad.minAmount, fd)} and ${fromMinor(ad.maxAmount, fd)} ${ad.fiat}`);
     if (cryptoAmount > ad.remainingAmount) throw new DomainError('AD_UNAVAILABLE', 'not enough remaining on this ad');
 
+    await assertTierAllowed(t.tx, taker);
+    await assertTierAllowed(t.tx, maker);
     const sellerIsMaker = ad.side === 'sell';
     const buyer = sellerIsMaker ? taker : maker;
     const seller = sellerIsMaker ? maker : taker;
