@@ -9,6 +9,8 @@ afterAll(() => ctx.close());
 
 /** EUR seller (SEPA) and BRL buyer (PIX) liquidity. */
 async function market() {
+  // Isolation: other suites share this DB; make sure the corridor only sees this test's EUR/BRL liquidity.
+  await ctx.db.execute("update ads set status = 'closed' where fiat in ('EUR','BRL') and status = 'active'" as never);
   const eurSeller = await mkUser(ctx, { tier: 2 });
   await fund(ctx, eurSeller, 'USDT', '10000');
   const sepa = await addPaymentMethod(ctx, eurSeller, { type: 'SEPA', holderName: 'Eur Seller', details: { iban: 'DE89370400440532013000' } });

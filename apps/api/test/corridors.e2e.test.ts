@@ -9,6 +9,8 @@ const post = (u: TestUser, p: string, b: unknown = {}) => t.http.post(p).set(u.a
 
 describe('M11 corridor E2E (API)', () => {
   it('EUR -> BRL one-tap corridor completes end to end', async () => {
+    // Isolation: other suites share this DB; the corridor must only see this test's EUR/BRL liquidity.
+    await t.ctx.db.execute("update ads set status = 'closed' where fiat in ('EUR','BRL') and status = 'active'" as never);
     const eur = await makeUser(t); const brl = await makeUser(t); const me = await makeUser(t);
     for (const u of [eur, brl, me]) await post(u, '/v1/dev/tier', { tier: 2 }); // new accounts get 25% limits for 48h
     await post(eur, '/v1/dev/faucet', { asset: 'USDT', amount: '1000' });

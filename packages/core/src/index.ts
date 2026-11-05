@@ -30,3 +30,5 @@ export * from './insurance';
 export * from './name-match';
 export * from './payment-match';
 export * from './corridors';
+export * from './merchants';
+export * from './merchant-api';

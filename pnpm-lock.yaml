@@ -115,6 +115,9 @@ importers:
         specifier: ^3.24.1
         version: 3.25.2(zod@3.25.76)
     devDependencies:
+      '@p2p/merchant-sdk':
+        specifier: workspace:*
+        version: link:../../packages/merchant-sdk
       '@swc/core':
         specifier: ^1.10.0
         version: 1.16.22
@@ -264,6 +267,8 @@ importers:
         version: 0.31.11
 
   packages/i18n: {}
+
+  packages/merchant-sdk: {}
 
   packages/providers:
     dependencies:
