@@ -17,7 +17,7 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M9 Global layer | ✅ done |
 | M10 Payment auto-confirm | ✅ done on mocks + provider-format payloads — live sandboxes need keys |
 | M11 Corridors | ✅ done |
-| M12 Telegram Mini App & mobile | ⏳ next |
+| M12 Telegram Mini App & mobile | ✅ Mini App done; mobile apps built + flow-tested — device/store builds need Apple/Google/EAS accounts |
 | M13 Merchant program | ☐ |
 | M14 Scale & observability | ☐ |
 | M15 Security hardening & audit package | ☐ |
@@ -206,3 +206,14 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 
 **Decisions**
 - Once leg 1 has settled, the fiat-A payment cannot be reversed; a leg-2 failure therefore returns the intermediate USDT to the user's balance (they can withdraw or retry). Everything before leg 1 settlement rolls back completely.
+
+## M12 — Telegram Mini App and native mobile apps ✅ (Mini App) · ⚠️ native store builds pending accounts
+
+**Built**
+- `apps/tg` (Telegram Mini App, Next.js): every page re-exports the web screen (`@p2p/web/app/[locale]/...`), so the UI, i18n/RTL and realtime are shared; `TelegramGate` authenticates with `Telegram.WebApp.initData` (HMAC-validated server-side with the bot token; first launch asks for country), applies Telegram theme colours to the design tokens, drives the native BackButton; bottom tab bar for the Telegram viewport; CSP allows framing only by Telegram web clients. The web app's `@/` imports were made relative so its modules are importable from other apps.
+- `apps/mobile` (Expo SDK 58 / React Native 0.88, iOS + Android): expo-router screens (market, order with mark-paid/cancel/release, login, wallet); **biometric unlock** (expo-local-authentication, lock on cold start and after 60 s in background, biometric re-prompt before release on top of server 2FA); **push notifications** (expo-notifications → `POST /v1/push-tokens`; backend `ExpoPushNotifier` sends every order notification to registered devices; tapping opens the order); **deep links** `p2p://orders/{id}`, universal/app links `https://app.example.com/{locale}/orders/{id}` (iOS associated domains, Android verified intent filters); session token in SecureStore (this-device-only).
+
+**Acceptance**
+- ✅ Full trade flow in the Mini App (Playwright, Pixel 7 viewport, signed initData): first-launch country, browse book, place order, mark paid, realtime COMPLETED after the seller's 2FA release, wallet balance.
+- ✅ Both mobile builds compile: `expo export --platform ios` and `--platform android` produce Hermes bundles. The full trade flow runs through the mobile app's own API client against a live API (incl. wrong-2FA rejection and push delivery to the registered Expo token). Deep-link parsing and the biometric lock policy are unit-tested.
+- ⛔ **Blocked:** installing and running on real devices / simulators and store builds need an Expo (EAS) account + project id, an Apple Developer account (bundle id, APNs key, associated domain) and a Google Play account (FCM credentials, assetlinks for the app domain). `TODO(provider)` in `apps/mobile/src/native.ts`.

@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "P2P Exchange",
+    "slug": "p2p-exchange",
+    "scheme": "p2p",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.example.p2pexchange",
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:app.example.com"],
+      "infoPlist": { "NSFaceIDUsageDescription": "Unlock the app and confirm sensitive actions with Face ID." }
+    },
+    "android": {
+      "package": "com.example.p2pexchange",
+      "permissions": ["USE_BIOMETRIC", "USE_FINGERPRINT", "POST_NOTIFICATIONS"],
+      "intentFilters": [{ "action": "VIEW", "autoVerify": true, "data": [{ "scheme": "https", "host": "app.example.com", "pathPrefix": "/orders" }], "category": ["BROWSABLE", "DEFAULT"] }]
+    },
+    "plugins": ["expo-router", "expo-secure-store", "expo-notifications", ["expo-local-authentication", { "faceIDPermission": "Unlock the app with Face ID." }]],
+    "extra": { "apiUrl": "https://api.example.com" }
+  }
+}
