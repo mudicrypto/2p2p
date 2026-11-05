@@ -16,6 +16,7 @@ import { audit } from './audit';
 import { encrypt, decrypt, randomToken, sha256, randomDigits, safeEqual } from './crypto';
 import { assertCountryAllowed } from './compliance';
 import { evaluateDeviceRisk } from './risk';
+import { checkSignupVelocity, assertLoginVelocity } from './fraud';
 
 authenticator.options = { window: 1 };
 
@@ -41,6 +42,7 @@ async function screenAndCreate(ctx: Ctx, values: typeof users.$inferInsert, meta
     const [u] = await t.tx.insert(users).values({ ...values, sanctionsHit: screen.hit, status: screen.hit ? 'frozen' : 'active' }).returning();
     await audit(t.tx, { actorType: 'user', actorId: u.id, action, subjectType: 'user', subjectId: u.id, after: { country: u.country, sanctionsHit: screen.hit }, ip: meta.ip });
     if (screen.hit) await audit(t.tx, { actorType: 'system', action: 'user.sanctions_hit', subjectType: 'user', subjectId: u.id, after: { lists: screen.lists } });
+    await checkSignupVelocity(t.tx, u.id, meta.ip, ctx.now());
     return u;
   });
 }
@@ -135,6 +137,7 @@ export async function logout(ctx: Ctx, token: string) {
 }
 
 export async function login(ctx: Ctx, input: { email: string; password: string; totp?: string }, meta: ReqMeta = {}) {
+  await assertLoginVelocity(ctx.db, meta.ip, ctx.now());
   const [u] = await ctx.db.select().from(users).where(sql`lower(${users.email}) = ${input.email.trim().toLowerCase()}`);
   const ok = u?.passwordHash ? await argon2.verify(u.passwordHash, input.password) : (await argon2.hash('timing-pad', ARGON), false);
   if (!u || !ok) {

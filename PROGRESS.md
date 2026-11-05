@@ -13,8 +13,8 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M5 Wallet & custody | ✅ done on mock custody — real testnet run blocked on custody sandbox keys |
 | M6 Admin & compliance | ✅ done |
 | M7 Disputes & insurance | ✅ done (parallel stream) |
-| M8 Anti-fraud | ⏳ next |
-| M9 Global layer | ☐ |
+| M8 Anti-fraud | ✅ done |
+| M9 Global layer | ⏳ next |
 | M10 Payment auto-confirm | ☐ |
 | M11 Corridors | ☐ |
 | M12 Telegram Mini App & mobile | ☐ |
@@ -151,3 +151,17 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 - ✅ Dispute E2E (core + API) for release, refund and split with exact balances (split 60%/70%: buyer share of crypto, seller gets the rest of the escrow incl. fee, no fee charged).
 - ✅ Appeal wait, wrong-state and evidence rules; triage stored but arbiter still required; SLA escalation; repeat-offender freeze.
 - ✅ Insurance payout balances the ledger (`checkInvariants` ok); payouts capped; double payout impossible.
+
+## M8 — Anti-fraud engine ✅
+
+**Built**
+- Payer-name matching (`name-match.ts`): normalizes case, order, diacritics, honorifics, particles (da/van/bin…), initials, Cyrillic transliteration; needs ≥2 full-token matches for multi-part names.
+- Payment matching (`payment-match.ts`): amount + unique reference code + payer name vs the buyer's KYC name, stored in `payment_confirmations` (payer name encrypted, idempotent per provider ref). Full match → verifier marks PAID and auto-releases unless the order is on the manual path. **Third-party payer** → `THIRD_PARTY_PAYMENT` flags on order and buyer, manual path, order moved to PAID and an automatic system dispute opened. Partial matches are audited, never released.
+- Order risk score (age, tier, payment-rail risk, reversibility, amount vs history, velocity, counterparty freeze reports, open high flags, shared device). Any high-severity flag forces manual confirmation.
+- Velocity: orders/hour (`VELOCITY`), signups per IP per hour (`SIGNUP_IP_VELOCITY` on all accounts), failed logins per IP per 15 min (`RATE_LIMITED`).
+- Multi-account detection: device fingerprint shared by >2 accounts flags all of them; buyer/seller sharing a device flags the order (`SHARED_DEVICE_COUNTERPARTIES`).
+- New-account cooldown (48h lower limits) and 24h withdrawal lock after password/2FA changes (from M4/M5); off-platform chat filter + flag (M3).
+- `userRiskScore` (flags, disputes lost, freeze reports, shared devices, age, tier, sanctions) shown in the admin user view; worker `payment.verify` job polls the rail verifier.
+
+**Acceptance**
+- ✅ Simulated fraud suite (`packages/core/test/fraud.test.ts`): third-party payment → flags + automatic dispute + no release; full match auto-releases while wrong amount / missing reference do not; multiple accounts on one device flagged; shared-device counterparties forced to manual confirmation; order velocity, signup-IP velocity and login brute-force all trigger; cooldown limits and off-platform chat flags.

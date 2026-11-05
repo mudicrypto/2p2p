@@ -27,3 +27,5 @@ export * from './wallet';
 export * from './admin';
 export * from './disputes';
 export * from './insurance';
+export * from './name-match';
+export * from './payment-match';

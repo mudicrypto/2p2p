@@ -15,6 +15,7 @@ import { randomToken, sha256, decrypt } from './crypto';
 import { passkeyAuthOptions, passkeyVerify, passkeyRegistrationOptions, passkeyRegister, hashPassword } from './auth';
 import { setConfig, getConfig, type ConfigKey } from './config';
 import { userBalances } from './ledger';
+import { userRiskScore } from './fraud';
 
 export const ADMIN_ROLES = ['support', 'arbiter', 'compliance', 'finance', 'superadmin'] as const;
 export type AdminRole = (typeof ADMIN_ROLES)[number];
@@ -163,7 +164,7 @@ export async function userDetail(ctx: Ctx, admin: Admin, userId: string) {
   return {
     user: presentUserForAdmin(admin, u), balances: await userBalances(ctx.db, userId), recentOrders,
     kyc: kyc.map((k) => ({ id: k.id, level: k.level, status: k.status, provider: k.provider, createdAt: k.createdAt, verifiedFullName: pii && k.verifiedFullNameEnc ? decrypt(k.verifiedFullNameEnc) : undefined, rejectReason: k.rejectReason })),
-    flags, devices: devs,
+    flags, devices: devs, risk: can(admin.roles, 'risk.read') ? await userRiskScore(ctx, userId) : undefined,
   };
 }
 export async function setUserStatus(ctx: Ctx, admin: Admin, userId: string, status: 'active' | 'frozen' | 'banned', reason: string) {
