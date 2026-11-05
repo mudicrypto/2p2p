@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { dir, isLocale, loadMessages } from '@p2p/i18n';
-import { Providers } from '@/components/providers';
-import { Nav } from '@/components/nav';
+import { Providers } from '../../components/providers';
+import { Nav } from '../../components/nav';
 
 export default async function LocaleLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;

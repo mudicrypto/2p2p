@@ -2,11 +2,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card, Input, Select, Tabs, Badge } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { socket } from '@/lib/socket';
-import { useL } from '@/components/nav';
-import { TradeDialog } from '@/components/trade-dialog';
+import { useI18n } from '../../lib/i18n';
+import { api } from '../../lib/api';
+import { socket } from '../../lib/socket';
+import { useL } from '../../components/nav';
+import { TradeDialog } from '../../components/trade-dialog';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
 const DEFAULT_FIATS = ['EUR', 'USD'];

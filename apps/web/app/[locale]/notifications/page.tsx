@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button, Card } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { useL } from '@/components/nav';
+import { useI18n } from '../../../lib/i18n';
+import { api } from '../../../lib/api';
+import { useL } from '../../../components/nav';
 export default function Notifications() {
   const { t, date } = useI18n();
   const L = useL();

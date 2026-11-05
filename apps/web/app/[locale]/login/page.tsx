@@ -3,11 +3,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
-import { api, ApiError } from '@/lib/api';
-import { useL } from '@/components/nav';
-import { ErrorText } from '@/components/errors';
+import { useI18n } from '../../../lib/i18n';
+import { useSession } from '../../../lib/session';
+import { api, ApiError } from '../../../lib/api';
+import { useL } from '../../../components/nav';
+import { ErrorText } from '../../../components/errors';
 
 export default function Login() {
   const { t } = useI18n();

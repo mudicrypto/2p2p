@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Select } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
-import { api } from '@/lib/api';
+import { useI18n } from '../lib/i18n';
+import { useSession } from '../lib/session';
+import { api } from '../lib/api';
 import { useL } from './nav';
 import { ErrorText } from './errors';
 

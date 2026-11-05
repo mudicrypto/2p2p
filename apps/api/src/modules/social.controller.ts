@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Post, Query, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { z } from 'zod';
-import { sendChatMessage, listChat, uploadAttachment, readAttachment, listNotifications, markNotificationsRead, leaveFeedback, publicProfile, type User } from '@p2p/core';
+import { registerPushToken, sendChatMessage, listChat, uploadAttachment, readAttachment, listNotifications, markNotificationsRead, leaveFeedback, publicProfile, type User } from '@p2p/core';
 import { ChatMessageSchema } from '@p2p/shared';
 import { CTX, type Ctx } from '../common/ctx';
 import { CurrentUser, Public } from '../common/auth.guard';
@@ -48,6 +48,11 @@ export class SocialController {
   }
   @Post('notifications/read') @HttpCode(200)
   async read(@CurrentUser() u: User) { await markNotificationsRead(this.ctx.db, u.id); return { ok: true }; }
+
+  @Post('push-tokens') @HttpCode(200)
+  async push(@CurrentUser() u: User, @Body(new Zod(z.object({ token: z.string().max(200), platform: z.enum(['ios', 'android']) }), 'PushToken')) b: { token: string; platform: 'ios' | 'android' }) {
+    await registerPushToken(this.ctx.db, u.id, b.token, b.platform); return { ok: true };
+  }
 
   @Public() @Get('users/:id/profile')
   profile(@Param('id', uuid) id: string) { return publicProfile(this.ctx, id); }

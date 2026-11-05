@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Badge, Card } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { useL } from '@/components/nav';
+import { useI18n } from '../../../lib/i18n';
+import { api } from '../../../lib/api';
+import { useL } from '../../../components/nav';
 export default function Orders() {
   const { t, num, money, date } = useI18n();
   const L = useL();

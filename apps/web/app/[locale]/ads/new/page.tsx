@@ -2,10 +2,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Select, Tabs, Textarea } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { useL } from '@/components/nav';
-import { ErrorText } from '@/components/errors';
+import { useI18n } from '../../../../lib/i18n';
+import { api } from '../../../../lib/api';
+import { useL } from '../../../../components/nav';
+import { ErrorText } from '../../../../components/errors';
 
 export default function NewAd() {
   const { t } = useI18n();

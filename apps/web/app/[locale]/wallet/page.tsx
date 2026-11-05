@@ -1,10 +1,10 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Select } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
-import { api } from '@/lib/api';
-import { ErrorText } from '@/components/errors';
+import { useI18n } from '../../../lib/i18n';
+import { useSession } from '../../../lib/session';
+import { api } from '../../../lib/api';
+import { ErrorText } from '../../../components/errors';
 
 export default function Wallet() {
   const { t, num, money } = useI18n();

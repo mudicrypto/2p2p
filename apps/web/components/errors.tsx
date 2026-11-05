@@ -1,7 +1,7 @@
 'use client';
 import { Alert } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { ApiError } from '@/lib/api';
+import { useI18n } from '../lib/i18n';
+import { ApiError } from '../lib/api';
 export function ErrorText({ error }: { error: unknown }) {
   const { t } = useI18n();
   if (!error) return null;

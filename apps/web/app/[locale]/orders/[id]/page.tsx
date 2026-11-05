@@ -2,12 +2,12 @@
 import { use, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Alert, Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { socket } from '@/lib/socket';
-import { Chat } from '@/components/chat';
-import { ErrorText } from '@/components/errors';
-import { useL } from '@/components/nav';
+import { useI18n } from '../../../../lib/i18n';
+import { api } from '../../../../lib/api';
+import { socket } from '../../../../lib/socket';
+import { Chat } from '../../../../components/chat';
+import { ErrorText } from '../../../../components/errors';
+import { useL } from '../../../../components/nav';
 
 function useCountdown(to?: string | null) {
   const [now, setNow] = useState(Date.now());

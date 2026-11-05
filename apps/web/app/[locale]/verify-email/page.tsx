@@ -3,10 +3,10 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Alert, Card } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { useL } from '@/components/nav';
-import { ErrorText } from '@/components/errors';
+import { useI18n } from '../../../lib/i18n';
+import { api } from '../../../lib/api';
+import { useL } from '../../../components/nav';
+import { ErrorText } from '../../../components/errors';
 import { Suspense } from 'react';
 
 function Verify() {

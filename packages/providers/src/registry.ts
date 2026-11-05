@@ -1,6 +1,6 @@
 import type { AiTriageProvider, ChainRiskProvider, CustodyProvider, KycProvider, Notifier, PaymentVerifier, RateSource, StorageProvider, VirusScanner } from './interfaces';
 import { HeuristicTriage, MemoryStorage, MockChainRisk, MockCustody, MockKyc, MockNotifier, MockPaymentInbox, MockPaymentVerifier, MockRateSource, MockVirusScanner } from './mock';
-import { ChannelNotifier, PostmarkNotifier, TelegramNotifier, TwilioNotifier } from './real/notifiers';
+import { ChannelNotifier, PostmarkNotifier, TelegramNotifier, TwilioNotifier, ExpoPushNotifier } from './real/notifiers';
 import { SumsubKyc } from './real/sumsub';
 import { ClaudeTriage } from './real/triage';
 import { BinanceRateSource, CoinbaseRateSource, FxCrossRateSource, KrakenRateSource } from './real/rates';
@@ -45,6 +45,7 @@ export function createProviders(mode: 'mock' | 'real' = (process.env.PROVIDER_MO
         telegram: has('TELEGRAM_BOT_TOKEN') ? new TelegramNotifier() : undefined,
         email: has('POSTMARK_TOKEN') ? new PostmarkNotifier() : undefined,
         sms: has('TWILIO_SID', 'TWILIO_TOKEN', 'TWILIO_FROM') ? new TwilioNotifier() : undefined,
+        push: process.env.PUSH_MODE === 'expo' ? new ExpoPushNotifier() : undefined,
       }, notifierM)
     : notifierM;
 

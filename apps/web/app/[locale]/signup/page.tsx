@@ -1,10 +1,10 @@
 'use client';
 import { useState } from 'react';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Alert } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
-import { useL } from '@/components/nav';
-import { ErrorText } from '@/components/errors';
+import { useI18n } from '../../../lib/i18n';
+import { api } from '../../../lib/api';
+import { useL } from '../../../components/nav';
+import { ErrorText } from '../../../components/errors';
 import Link from 'next/link';
 
 export default function Signup() {

@@ -1,8 +1,8 @@
 'use client';
 import { use, useEffect, useState } from 'react';
 import { Badge, Card, CardContent, CardHeader, CardTitle } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { api } from '@/lib/api';
+import { useI18n } from '../../../../lib/i18n';
+import { api } from '../../../../lib/api';
 export default function Profile({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { t, pct, date } = useI18n();

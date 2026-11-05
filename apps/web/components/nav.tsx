@@ -4,10 +4,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LOCALES } from '@p2p/i18n';
 import { Button, Select, Badge } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
-import { api } from '@/lib/api';
-import { socket } from '@/lib/socket';
+import { useI18n } from '../lib/i18n';
+import { useSession } from '../lib/session';
+import { api } from '../lib/api';
+import { socket } from '../lib/socket';
 
 export function useL() {
   const { locale } = useI18n();

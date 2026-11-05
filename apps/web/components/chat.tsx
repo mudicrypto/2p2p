@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '@p2p/ui';
-import { useI18n } from '@/lib/i18n';
-import { useSession } from '@/lib/session';
-import { api, ApiError } from '@/lib/api';
-import { socket } from '@/lib/socket';
+import { useI18n } from '../lib/i18n';
+import { useSession } from '../lib/session';
+import { api, ApiError } from '../lib/api';
+import { socket } from '../lib/socket';
 
 export function Chat({ orderId }: { orderId: string }) {
   const { t, date } = useI18n();

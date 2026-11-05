@@ -43,3 +43,15 @@ export class ChannelNotifier implements Notifier {
     return (this.byChannel[msg.channel] ?? this.fallback).send(msg);
   }
 }
+
+/** Expo push service (iOS APNs + Android FCM via Expo). `to` = ExponentPushToken[...]. Optional EXPO_ACCESS_TOKEN. */
+export class ExpoPushNotifier implements Notifier {
+  async send(msg: NotifyMessage) {
+    const headers: Record<string, string> = { 'content-type': 'application/json', accept: 'application/json' };
+    if (process.env.EXPO_ACCESS_TOKEN) headers.authorization = `Bearer ${process.env.EXPO_ACCESS_TOKEN}`;
+    const r = await httpJson<{ data: { id?: string; status: string } }>('https://exp.host/--/api/v2/push/send', {
+      method: 'POST', headers, body: JSON.stringify({ to: msg.to, title: 'P2P Exchange', body: renderTemplate(msg), data: msg.params, sound: 'default' }),
+    });
+    return { id: r.data.id ?? r.data.status };
+  }
+}

@@ -1,5 +1,5 @@
 /** In-app notifications + external channels (Telegram, email). */
-import { notifications, users, and, eq, isNull, desc, lt, type DbOrTx } from '@p2p/db';
+import { notifications, users, pushTokens, and, eq, isNull, desc, lt, type DbOrTx } from '@p2p/db';
 import type { Ctx, TxCtx } from './context';
 
 export async function notify(t: TxCtx | Ctx, db: DbOrTx, userId: string, type: string, payload: Record<string, unknown>) {
@@ -11,6 +11,8 @@ export async function notify(t: TxCtx | Ctx, db: DbOrTx, userId: string, type: s
     const msg = { template: type, params: payload, locale: u.locale };
     // External channels are best-effort; failures never affect the trade.
     if (u.tgId) await t.providers.notifier.send({ channel: 'telegram', to: u.tgId, ...msg }).catch(() => null);
+    const tokens = await t.db.select({ token: pushTokens.token }).from(pushTokens).where(eq(pushTokens.userId, userId));
+    for (const tk of tokens) await t.providers.notifier.send({ channel: 'push', to: tk.token, ...msg }).catch(() => null);
     if (u.email && u.emailOk && EMAIL_TYPES.has(type)) await t.providers.notifier.send({ channel: 'email', to: u.email, ...msg }).catch(() => null);
   };
   if ('afterCommit' in t) t.afterCommit(deliver); else await deliver();
@@ -24,4 +26,9 @@ export async function listNotifications(db: DbOrTx, userId: string, before?: big
 }
 export async function markNotificationsRead(db: DbOrTx, userId: string) {
   await db.update(notifications).set({ readAt: new Date() }).where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
+}
+
+export async function registerPushToken(db: DbOrTx, userId: string, token: string, platform: 'ios' | 'android') {
+  if (!/^(ExponentPushToken|ExpoPushToken)\[[A-Za-z0-9_-]+\]$/.test(token)) throw new Error('invalid push token');
+  await db.insert(pushTokens).values({ token, userId, platform }).onConflictDoUpdate({ target: pushTokens.token, set: { userId, platform } });
 }
