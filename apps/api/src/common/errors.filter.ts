@@ -18,7 +18,8 @@ export class ErrorsFilter implements ExceptionFilter {
     if (!res?.status) return; // ws context
     if (e instanceof DomainError) return res.status(STATUS[e.code] ?? 400).json({ error: e.code, message: e.message, details: e.details });
     if (e instanceof TransitionError) return res.status(409).json({ error: 'ILLEGAL_TRANSITION', message: e.message });
-    if (e instanceof ZodError) return res.status(400).json({ error: 'VALIDATION', message: 'invalid request', details: e.flatten() });
+    // Duck-typed: schemas from @p2p/shared may come from a different zod instance than this package's.
+    if (e instanceof ZodError || (e as { name?: string })?.name === 'ZodError') return res.status(400).json({ error: 'VALIDATION', message: 'invalid request', details: (e as ZodError).flatten() });
     if (e instanceof HttpException) return res.status(e.getStatus()).json({ error: e.getStatus() === 404 ? 'NOT_FOUND' : 'HTTP_ERROR', message: e.message });
     this.log.error(redactPii(String((e as Error)?.stack ?? e)));
     return res.status(500).json({ error: 'INTERNAL', message: 'internal error' });

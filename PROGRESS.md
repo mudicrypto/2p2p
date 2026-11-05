@@ -11,9 +11,9 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M3 Web app & realtime | ✅ done |
 | M4 KYC & limits | ✅ done (parallel stream) |
 | M5 Wallet & custody | ✅ done on mock custody — real testnet run blocked on custody sandbox keys |
-| M6 Admin & compliance | ⏳ next |
-| M7 Disputes & insurance | ☐ |
-| M8 Anti-fraud | ☐ |
+| M6 Admin & compliance | ✅ done |
+| M7 Disputes & insurance | ✅ done (parallel stream) |
+| M8 Anti-fraud | ⏳ next |
 | M9 Global layer | ☐ |
 | M10 Payment auto-confirm | ☐ |
 | M11 Corridors | ☐ |
@@ -124,3 +124,30 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 - ✅ Deposit → trade → withdrawal end-to-end for **every** supported asset/network (USDT on TRON, TON, BSC, ETHEREUM, POLYGON; BTC; ETH) against the mock custody, with confirmation gating, webhook replay, ledger invariant incl. custody balance.
 - ✅ Withdrawal rule tests (2FA, allowlist delay, security cooldown, sanctions, tier-0 limit, pause), two-admin approval, failed-submission reversal, held high-risk deposit review, internal transfers.
 - ⛔ **Real testnet run blocked:** needs a Fireblocks/BitGo/Cobo sandbox workspace + API key/secret (`TODO(provider)` in `packages/providers/src/real/stubs.ts`). Everything else runs on the mock until then.
+
+## M6 — Admin and compliance panel ✅
+
+**Built**
+- Admin auth (`packages/core/src/admin.ts`): separate `admin_users`/`admin_sessions`; step 1 password + IP allowlist (`ADMIN_IP_ALLOWLIST`), step 2 **WebAuthn hardware key** bound to that session (first-login key enrolment); sessions are unusable until WebAuthn completes and are pinned to allowlisted IPs. Separate cookies (`asid`/`acsrf`) with CSRF double-submit.
+- Roles support, arbiter, compliance, finance, superadmin with a least-privilege permission matrix (`PERMISSIONS`); `AdminGuard` fails closed when a route declares no permission. PII is masked for roles without `users.read_pii`; viewing a user is itself audited.
+- Every admin action is audited twice: the domain function writes its own before/after entry, and `AdminAuditInterceptor` writes a catch-all `admin.request` row for every mutating admin request (success or failure, secrets redacted). Denied permissions are audited too.
+- Admin API (`/v1/admin/*`): user search/detail/freeze/ban, KYC manual review, withdrawal approvals (two distinct admins), held-deposit review, editors for limits, country rules, payment-method types, fiat currencies, fees, withdrawal switches, generic config (superadmin), audit-log viewer with filters, risk flags, SAR/STR creation + JSON/CSV export, admin management, plus the arbiter queue/decisions, freeze-report review and insurance fund (wired after M7 merged).
+- `apps/admin` (Next.js, separate origin, edge IP allowlist, no-index, strict CSP/HSTS, no framing): password + security-key login via `@simplewebauthn/browser`, role-aware menu, generic table + action/editor pages for every section.
+- `packages/core/src/testing/soft-authenticator.ts`: an ES256 software authenticator so tests exercise the real WebAuthn verification path.
+
+**Acceptance**
+- ✅ Every admin action appears in the audit log (API e2e checks domain entries + catch-all rows + denied-permission entries).
+- ✅ Role matrix test: support, arbiter, compliance, finance and superadmin each hit every admin endpoint; only permitted ones succeed (superadmin all).
+
+## M7 — Disputes and insurance ✅ (parallel stream, merged)
+
+**Built**
+- `packages/core/src/disputes.ts`: `openDispute` (buyer/seller, PAID only, after the appeal wait, reason + note + ≥1 evidence key uploaded to the order; DISPUTED via optimistic transition; SLA due = now + 30 min; system chat message; notifications; triage queued), `openDisputeSystem` (automatic flags, no appeal wait), `addEvidence`, `runTriage` (order + chat incl. flagged + evidence + payment-verifier records → `AiTriageProvider`; stores summary, recommendation, confidence; **never decides**), `assignDispute`, `decideDispute` (release/refund/split; ledger + loser + `dispute.decided` audit + both parties notified with the reason + reputation; repeat losers auto-frozen with `REPEAT_DISPUTE_LOSER`), `escalateOverdueDisputes` (worker every 60s, pages on-call), `arbiterQueue` (SLA-ordered with time remaining), `getDisputeDetail`, participant view without AI fields.
+- `packages/core/src/insurance.ts`: fund fed by the fee slice; idempotent admin top-up; `submitFreezeReport` (seller of a completed order, once, bank letter attached, claim ≤ order amount, flags buyer); `reviewFreezeReport` (payout from the insurance account, idempotency key `freeze:{id}:payout`, capped by `maxPayoutUsdCents` and fund balance; feeds buyer reputation/risk).
+- API: `POST/GET /v1/orders/:id/dispute`, `POST /v1/disputes/:id/evidence`, `POST/GET /v1/freeze-reports`; admin endpoints listed under M6.
+- Fixed: validation errors from `@p2p/shared` schemas (separate zod instance) were 500s — the error filter now matches by name.
+
+**Acceptance**
+- ✅ Dispute E2E (core + API) for release, refund and split with exact balances (split 60%/70%: buyer share of crypto, seller gets the rest of the escrow incl. fee, no fee charged).
+- ✅ Appeal wait, wrong-state and evidence rules; triage stored but arbiter still required; SLA escalation; repeat-offender freeze.
+- ✅ Insurance payout balances the ledger (`checkInvariants` ok); payouts capped; double payout impossible.

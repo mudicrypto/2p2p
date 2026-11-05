@@ -127,6 +127,32 @@ export class AdminController {
     res.json(r);
   }
 
+  // ---------------------------------------------------------- disputes (arbiter) & insurance
+  @Perm('disputes.read') @Get('disputes')
+  disputes(@Query('status') status?: string) { return core.arbiterQueue(this.ctx, status ? { status: status.split(',') } : undefined); }
+  @Perm('disputes.read') @Get('disputes/:id')
+  dispute(@Param('id', uuid) id: string) { return core.getDisputeDetail(this.ctx, id); }
+  @Perm('disputes.decide') @Post('disputes/:id/assign') @HttpCode(200)
+  assign(@CurrentAdmin() a: Admin, @Param('id', uuid) id: string) { return core.assignDispute(this.ctx, a.id, id); }
+  @Perm('disputes.decide') @Post('disputes/:id/triage') @HttpCode(200)
+  triage(@Param('id', uuid) id: string) { return core.runTriage(this.ctx, id); }
+  @Perm('disputes.decide') @Post('disputes/:id/decide') @HttpCode(200)
+  decide(@CurrentAdmin() a: Admin, @Param('id', uuid) id: string, @Body(new Zod(z.object({ decision: z.enum(['release', 'refund', 'split']), splitBuyerBps: z.number().int().min(1).max(9999).optional(), note: z.string().min(1).max(4000) }), 'ArbiterDecision')) b: any) {
+    return core.decideDispute(this.ctx, a.id, id, b);
+  }
+  @Perm('freeze_reports.review') @Get('freeze-reports')
+  freezeReports(@Query('status') status?: string) { return core.listFreezeReports(this.ctx, { status: status ?? 'pending' }); }
+  @Perm('freeze_reports.review') @Post('freeze-reports/:id/review') @HttpCode(200)
+  reviewFreeze(@CurrentAdmin() a: Admin, @Param('id', uuid) id: string, @Body(new Zod(z.object({ approve: z.boolean(), payoutAsset: z.enum(['USDT', 'BTC', 'ETH']).optional(), payoutAmount: z.string().optional(), note: z.string().min(1) }))) b: any) {
+    return core.reviewFreezeReport(this.ctx, a.id, id, { approve: b.approve, note: b.note, payoutAsset: b.payoutAsset, payoutAmount: b.payoutAsset && b.payoutAmount ? toMinor(b.payoutAmount, assetDecimals(b.payoutAsset)) : undefined });
+  }
+  @Perm('insurance.fund') @Get('insurance/:asset')
+  async insurance(@Param('asset') asset: string) { return { asset, balance: fromMinor(await core.insuranceBalance(this.ctx, asset), assetDecimals(asset as Asset)) }; }
+  @Perm('insurance.fund') @Post('insurance/:asset/fund') @HttpCode(200)
+  fund(@CurrentAdmin() a: Admin, @Param('asset') asset: string, @Body(new Zod(z.object({ amount: z.string() }))) b: { amount: string }, @Req() req: any) {
+    return core.fundInsurance(this.ctx, a.id, asset as Asset, toMinor(b.amount, assetDecimals(asset as Asset)), String(req.headers['idempotency-key']));
+  }
+
   // ---------------------------------------------------------- admins
   @Perm('admins.manage') @Get('admins')
   admins() { return this.ctx.db.select({ id: adminUsers.id, email: adminUsers.email, roles: adminUsers.roles, active: adminUsers.active, createdAt: adminUsers.createdAt }).from(adminUsers); }
