@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { dir, isLocale, loadMessages } from '@p2p/i18n';
 import { Providers } from '../../components/providers';
 import { Nav } from '../../components/nav';
+import { Footer } from '../../components/footer';
 
 export default async function LocaleLayout({ children, params }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -13,6 +14,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
         <Providers locale={locale} messages={messages}>
           <Nav />
           <main className="mx-auto w-full max-w-6xl px-4 py-6">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>

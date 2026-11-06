@@ -295,3 +295,13 @@ export function reportToCsv(payload: any): string {
   for (const w of payload.withdrawals) lines.push(['withdrawal', w.id, w.network, w.status, w.asset, w.amount, w.address, ''].map(esc).join(','));
   return lines.join('\n');
 }
+
+/** Auditor sign-off lifts the launch gate on withdrawals (superadmin only; recorded with the audit reference). */
+export async function recordAuditorSignoff(ctx: Ctx, admin: Admin, input: { auditor: string; reportRef: string; liftWithdrawalGate: boolean }) {
+  if (!admin.roles.includes('superadmin')) throw new DomainError('FORBIDDEN', 'superadmin only');
+  if (!input.auditor?.trim() || !input.reportRef?.trim()) throw new DomainError('VALIDATION', 'auditor and report reference required');
+  const before = await getConfig(ctx.db, 'withdrawals');
+  const after = await setConfig(ctx.db, 'withdrawals', { auditGate: !input.liftWithdrawalGate });
+  await audit(ctx.db, { actorType: 'admin', actorId: admin.id, action: 'launch.auditor_signoff', subjectType: 'config', subjectId: 'withdrawals', before: { auditGate: before.auditGate }, after: { auditGate: after.auditGate, auditor: input.auditor, reportRef: input.reportRef } });
+  return { auditGate: after.auditGate };
+}

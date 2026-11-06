@@ -214,5 +214,21 @@
   "start": "Simulan ang padala",
   "leg1": "Hakbang 1: magbayad at tumanggap ng USDT",
   "leg2": "Hakbang 2: ibebenta ang USDT at matatanggap mo ang bayad"
+ },
+ "launch": {
+  "statusTitle": "Status ng system",
+  "operational": "Gumagana",
+  "degraded": "May aberya",
+  "outage": "Down",
+  "paused": "Naka-pause",
+  "trading": "Trading",
+  "deposits": "Mga deposito",
+  "withdrawals": "Mga withdrawal",
+  "realtime": "Live updates",
+  "api": "API",
+  "terms": "Mga tuntunin ng serbisyo",
+  "privacy": "Patakaran sa privacy",
+  "risk": "Pagsisiwalat ng panganib",
+  "legalNote": "Ang bersyong Ingles ang may bisa."
  }
 }

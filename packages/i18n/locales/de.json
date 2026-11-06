@@ -214,5 +214,21 @@
   "start": "Senden starten",
   "leg1": "Schritt 1: zahlen und USDT erhalten",
   "leg2": "Schritt 2: USDT werden verkauft, Sie erhalten die Auszahlung"
+ },
+ "launch": {
+  "statusTitle": "Systemstatus",
+  "operational": "In Betrieb",
+  "degraded": "Beeinträchtigt",
+  "outage": "Ausfall",
+  "paused": "Pausiert",
+  "trading": "Handel",
+  "deposits": "Einzahlungen",
+  "withdrawals": "Auszahlungen",
+  "realtime": "Live-Updates",
+  "api": "API",
+  "terms": "Nutzungsbedingungen",
+  "privacy": "Datenschutzerklärung",
+  "risk": "Risikohinweis",
+  "legalNote": "Maßgeblich ist die englische Fassung."
  }
 }

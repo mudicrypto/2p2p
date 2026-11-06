@@ -163,6 +163,10 @@ export class AdminController {
   @Perm('withdrawals.approve') @Post('merchants/:userId/deposit/release') @HttpCode(200)
   releaseDeposit(@CurrentAdmin() a: Admin, @Param('userId', uuid) userId: string) { return core.releaseSecurityDeposit(this.ctx, a.id, userId); }
 
+  // ---------------------------------------------------------- launch
+  @Perm('admins.manage') @Post('launch/auditor-signoff') @HttpCode(200)
+  signoff(@CurrentAdmin() a: Admin, @Body(new Zod(z.object({ auditor: z.string().min(2), reportRef: z.string().min(2), liftWithdrawalGate: z.boolean() }))) b: any) { return core.recordAuditorSignoff(this.ctx, a, b); }
+
   // ---------------------------------------------------------- admins
   @Perm('admins.manage') @Get('admins')
   admins() { return this.ctx.db.select({ id: adminUsers.id, email: adminUsers.email, roles: adminUsers.roles, active: adminUsers.active, createdAt: adminUsers.createdAt }).from(adminUsers); }

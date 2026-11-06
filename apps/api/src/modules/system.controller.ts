@@ -28,5 +28,23 @@ export class SystemController {
     res.setHeader('content-type', registry.contentType);
     res.send(await registry.metrics());
   }
+  /** Public status page data: component health without internal details. */
+  @Public() @Get('v1/status')
+  async status() {
+    const t0 = Date.now();
+    const db = await this.ctx.db.execute(sql`select 1`).then(() => 'operational', () => 'outage');
+    const redis = this.redis ? await this.redis.ping().then(() => 'operational', () => 'degraded') : 'operational';
+    const w = await getConfig(this.ctx.db, 'withdrawals').catch(() => ({ paused: true }));
+    const last = this.redis ? await this.redis.get('invariants:last').catch(() => null) : null;
+    const inv = last ? JSON.parse(last) : null;
+    const components = {
+      trading: db === 'operational' ? 'operational' : 'outage',
+      deposits: db === 'operational' ? 'operational' : 'outage',
+      withdrawals: (w as { paused: boolean }).paused ? 'paused' : db === 'operational' ? 'operational' : 'outage',
+      realtime: redis, api: 'operational',
+    };
+    const overall = Object.values(components).includes('outage') ? 'outage' : Object.values(components).some((c) => c !== 'operational') ? 'degraded' : 'operational';
+    return { overall, components, ledgerCheckedAt: inv?.at ? new Date(inv.at).toISOString() : null, responseMs: Date.now() - t0, updatedAt: new Date().toISOString() };
+  }
   @Public() @Get('v1/openapi.json') openapi() { return buildOpenApi(ROUTES()); }
 }

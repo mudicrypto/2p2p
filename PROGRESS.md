@@ -21,7 +21,7 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M13 Merchant program | ✅ done (parallel stream) |
 | M14 Scale & observability | ✅ done (k6 binary run in CI; Node-equivalent run here) |
 | M15 Security hardening & audit package | ✅ done |
-| M16 Launch readiness | ⏳ next |
+| M16 Launch readiness | ✅ done (IaC written; `terraform plan/apply` needs cloud credentials) |
 
 ## Running locally
 
@@ -255,3 +255,39 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 **Acceptance**
 - ✅ Zero high or critical findings open (`docs/audit/security-findings.md`); audit package complete.
 - Note: the `/security-review` skill needs a base branch (`origin/HEAD`) and this branch has none, so the equivalent review was done manually; it can be re-run on the first PR against `main`.
+
+## M16 — Launch readiness ✅ · ⛔ cloud apply pending credentials
+
+**Built**
+- **Infrastructure as code**: `infra/terraform` (module `platform`: VPC + flow logs, EKS 1.31 with KMS-encrypted secrets, RDS Postgres 16 primary Multi-AZ + regional read replicas, 35-day PITR, Redis 7 with TLS/at-rest encryption, KMS keys for app KEK and storage, private evidence bucket, object-locked backup bucket, WAF with managed rules + rate limiting, admin CIDR set). Envs: `staging` (single region, small) and `production` (eu-central-1 home + sa-east-1 + ap-southeast-1 app regions with cross-region replicas). `infra/k8s` Kustomize base + overlays: api/worker/web/tg/admin Deployments (non-root, read-only FS, zone spread), Services, HPA, PDB, default-deny NetworkPolicy, public ingress behind WAF, separate admin ingress restricted to allowlisted CIDRs, External Secrets (no secrets in repo), migration PreSync job, backup and restore-test CronJobs.
+- **Staging environment**: staging overlay runs `PROVIDER_MODE=mock` with `ALLOW_MOCK_PROVIDERS=1` (production refuses mocks).
+- **Feature flags per country**: `country_rules.launchEnabled` / `status`, edited in the admin panel, effective within seconds without deploy (signup, orders, ads → HTTP 451).
+- **Withdrawal launch gate**: `withdrawals.auditGate` defaults to **on** → every withdrawal requires two-admin approval regardless of size until a superadmin records the external auditors' sign-off (`POST /v1/admin/launch/auditor-signoff`, audited with auditor + report reference).
+- **Backups with tested restore**: `infra/backup/backup.sh` (pg_dump custom format + checksum, S3 with KMS + object lock) and `restore-test.sh` (checksum, restore into scratch DB, verifies append-only/balance triggers, row counts and per-asset ledger sums vs source, ledger invariants). Daily backup + weekly restore-test CronJobs; CI job `restore-test`.
+- **Runbooks**: `docs/runbooks/` — severity/on-call/roles, invariant failure, API errors, database failover/PITR, custody outage, payment-rail outage, security incident, country shutdown, dispute backlog, postmortem template.
+- **Status page**: public `GET /v1/status` (overall + trading, deposits, withdrawals incl. paused, realtime, API; last ledger check) and `/{locale}/status` (polling, localized).
+- **Legal pages**: Terms of Service, Privacy Policy, Risk Disclosure at `/{locale}/legal/{terms|privacy|risk}` (English master, localized titles + "English version binding" note, footer links). **Drafts with [PLACEHOLDERS] — counsel must review per jurisdiction.**
+
+**Acceptance**
+- ✅ Backup restore tested: 17 MB dump of the load-test DB (25,200 users, 24,137 orders, 50,674 ledger entries, 51,874 audit rows) restored with identical counts and ledger sums; triggers present; invariants OK.
+- ✅ Each country can be switched on/off by flag (API e2e via admin: off → orders and signups 451, on → orders succeed).
+- ✅ Withdrawals stay gated behind manual approval until the auditors sign off (core test: a 5 USDT withdrawal is `pending_approval` with 2 required approvals while the gate is on; sign-off endpoint superadmin-only and audited).
+- ✅ Status and legal pages render in the browser (Playwright, 56/56 web tests).
+- ⛔ `terraform validate/plan/apply` and `kubectl apply` were not run here (no terraform binary / cloud account in this sandbox); CI job `infra` validates both. Needs: AWS account + state bucket/lock table, domains + TLS certs, container registry.
+
+---
+
+# Summary of blockers (everything else is built and tested on mocks)
+
+| Needed from you | Unblocks |
+|---|---|
+| Custody provider sandbox + prod keys (Fireblocks / BitGo / Cobo) | Real deposits/withdrawals; M5 testnet run on every network |
+| Sumsub app token + secret (+ webhook secret) | Real KYC (adapter written) |
+| TRM/Chainalysis key + a person-sanctions screening vendor | Real chain-risk & sanctions screening |
+| Per-rail payment API sandboxes (PIX PSP, Razorpay/Cashfree, open-banking aggregator for SEPA Instant/FPS, STP, SBP bank, Safaricom Daraja, Thai bank) | Live auto-confirmation (adapters written) |
+| Telegram bot token; Postmark; Twilio; Expo/EAS project, Apple Developer + Google Play accounts | Notifications, Mini App in Telegram, device/store builds |
+| AWS account (or chosen cloud), domains, KMS, S3, Sentry DSN, Anthropic API key (dispute triage) | Staging/production deploy |
+| Legal counsel review of terms/privacy/risk per jurisdiction; native-speaker review of translations | Launch |
+| External auditors' sign-off | Lift the withdrawal launch gate |
+
+**Real-money decisions for you:** fee levels (default maker 0.1%, insurance 10% of fees), tier limits, merchant deposit minimum ($5,000), large-withdrawal threshold ($10,000), launch countries.

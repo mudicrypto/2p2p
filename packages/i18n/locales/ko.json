@@ -214,5 +214,21 @@
   "start": "송금 시작",
   "leg1": "1단계: 결제 후 USDT 받기",
   "leg2": "2단계: USDT 판매 후 대금 수령"
+ },
+ "launch": {
+  "statusTitle": "시스템 상태",
+  "operational": "정상",
+  "degraded": "일부 장애",
+  "outage": "중단",
+  "paused": "일시 중지",
+  "trading": "거래",
+  "deposits": "입금",
+  "withdrawals": "출금",
+  "realtime": "실시간 업데이트",
+  "api": "API",
+  "terms": "서비스 약관",
+  "privacy": "개인정보 처리방침",
+  "risk": "위험 고지",
+  "legalNote": "영문본이 구속력을 가집니다."
  }
 }

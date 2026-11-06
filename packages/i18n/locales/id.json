@@ -214,5 +214,21 @@
   "start": "Mulai kirim",
   "leg1": "Langkah 1: bayar dan terima USDT",
   "leg2": "Langkah 2: USDT dijual dan Anda menerima dana"
+ },
+ "launch": {
+  "statusTitle": "Status sistem",
+  "operational": "Beroperasi",
+  "degraded": "Terganggu",
+  "outage": "Gangguan",
+  "paused": "Dijeda",
+  "trading": "Perdagangan",
+  "deposits": "Deposit",
+  "withdrawals": "Penarikan",
+  "realtime": "Pembaruan langsung",
+  "api": "API",
+  "terms": "Ketentuan layanan",
+  "privacy": "Kebijakan privasi",
+  "risk": "Pengungkapan risiko",
+  "legalNote": "Versi bahasa Inggris yang mengikat."
  }
 }

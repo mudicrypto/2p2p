@@ -214,5 +214,21 @@
   "start": "Bẹ̀rẹ̀ ìfiránṣẹ́",
   "leg1": "Ìgbésẹ̀ 1: san owó kí o gba USDT",
   "leg2": "Ìgbésẹ̀ 2: a ta USDT, o sì gba owó"
+ },
+ "launch": {
+  "statusTitle": "Ipò ẹ̀rọ",
+  "operational": "Ń ṣiṣẹ́",
+  "degraded": "Ó ní ìṣòro",
+  "outage": "Kò ṣiṣẹ́",
+  "paused": "Ti dádúró",
+  "trading": "Òwò",
+  "deposits": "Ìfipamọ́",
+  "withdrawals": "Yíyọ owó",
+  "realtime": "Ìmúdójúìwọ̀n lójúkan",
+  "api": "API",
+  "terms": "Àwọn òfin iṣẹ́",
+  "privacy": "Ìlànà àṣírí",
+  "risk": "Ìfihàn ewu",
+  "legalNote": "Ẹ̀dà Gẹ̀ẹ́sì ni ó ní agbára òfin."
  }
 }

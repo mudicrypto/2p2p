@@ -214,5 +214,21 @@
   "start": "Fara aikawa",
   "leg1": "Mataki 1: biya ka karɓi USDT",
   "leg2": "Mataki 2: ana sayar da USDT kuma ka karɓi kuɗi"
+ },
+ "launch": {
+  "statusTitle": "Matsayin tsarin",
+  "operational": "Yana aiki",
+  "degraded": "Akwai matsala",
+  "outage": "An katse",
+  "paused": "An dakatar",
+  "trading": "Ciniki",
+  "deposits": "Ajiya",
+  "withdrawals": "Cirewa",
+  "realtime": "Sabuntawa kai tsaye",
+  "api": "API",
+  "terms": "Sharuɗɗan sabis",
+  "privacy": "Manufar sirri",
+  "risk": "Bayyana haɗari",
+  "legalNote": "Sigar Turanci ce ke da iko."
  }
 }

@@ -214,5 +214,21 @@
   "start": "送金を開始",
   "leg1": "ステップ1：支払ってUSDTを受け取る",
   "leg2": "ステップ2：USDTを売却して受け取る"
+ },
+ "launch": {
+  "statusTitle": "システムの状態",
+  "operational": "正常",
+  "degraded": "一部障害",
+  "outage": "停止中",
+  "paused": "一時停止",
+  "trading": "取引",
+  "deposits": "入金",
+  "withdrawals": "出金",
+  "realtime": "リアルタイム更新",
+  "api": "API",
+  "terms": "利用規約",
+  "privacy": "プライバシーポリシー",
+  "risk": "リスク開示",
+  "legalNote": "英語版が正本です。"
  }
 }

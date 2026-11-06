@@ -11,7 +11,7 @@ import {
 const ctx = makeCtx();
 const custody = ctx.providers.mocks!.custody;
 beforeAll(async () => {
-  await ensureSeed(ctx); await setConfig(ctx.db, 'withdrawals', { paused: false });
+  await ensureSeed(ctx); await setConfig(ctx.db, 'withdrawals', { paused: false, auditGate: false });
   // Other suites share this DB: start the mock custody at the current liabilities so the invariant is meaningful.
   for (const p of (await checkInvariants(ctx.db)).perAsset) custody.setBalance(p.asset as Asset, p.liabilities);
 });
@@ -38,6 +38,19 @@ async function allowlistNow(u: { user: User; code: () => string }, asset: Asset,
   await expect(requestWithdrawal(ctx, u.user, { asset, network, address: DEST[network], amount: '0.0001', totp: u.code() })).rejects.toMatchObject({ code: 'COOLDOWN' });
   await ctx.db.update(addressAllowlist).set({ activeAt: new Date(Date.now() - 1000) }).where(eq(addressAllowlist.id, row.id));
 }
+
+describe('M16 launch gate', () => {
+  it('while the auditor gate is on, even small withdrawals need two-admin approval', async () => {
+    await setConfig(ctx.db, 'withdrawals', { auditGate: true });
+    const u = await mkUser(ctx, { tier: 2 });
+    await deposit(u, 'USDT', 'TRON', toMinor('50', 6), 100);
+    const b = await with2fa(u);
+    await allowlistNow(b, 'USDT', 'TRON');
+    const w = await requestWithdrawal(ctx, b.user, { asset: 'USDT', network: 'TRON', address: DEST.TRON, amount: '5', totp: b.code() });
+    expect(w).toMatchObject({ status: 'pending_approval', requiredApprovals: 2 });
+    await setConfig(ctx.db, 'withdrawals', { auditGate: false });
+  });
+});
 
 describe('M5 wallet & custody', () => {
   const pairs = Object.entries(ASSETS).flatMap(([asset, a]) => a.networks.map((n) => [asset as Asset, n as Network] as const));

@@ -214,5 +214,21 @@
   "start": "Iniciar envio",
   "leg1": "Etapa 1: pague e receba USDT",
   "leg2": "Etapa 2: os USDT são vendidos e você recebe"
+ },
+ "launch": {
+  "statusTitle": "Status do sistema",
+  "operational": "Operacional",
+  "degraded": "Degradado",
+  "outage": "Fora do ar",
+  "paused": "Pausado",
+  "trading": "Negociação",
+  "deposits": "Depósitos",
+  "withdrawals": "Saques",
+  "realtime": "Atualizações ao vivo",
+  "api": "API",
+  "terms": "Termos de serviço",
+  "privacy": "Política de privacidade",
+  "risk": "Divulgação de riscos",
+  "legalNote": "A versão em inglês é a vinculante."
  }
 }

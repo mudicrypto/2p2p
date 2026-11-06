@@ -214,5 +214,21 @@
   "start": "Rozpocznij przelew",
   "leg1": "Krok 1: zapłać i otrzymaj USDT",
   "leg2": "Krok 2: USDT są sprzedawane, otrzymujesz wypłatę"
+ },
+ "launch": {
+  "statusTitle": "Stan systemu",
+  "operational": "Działa",
+  "degraded": "Zakłócenia",
+  "outage": "Awaria",
+  "paused": "Wstrzymane",
+  "trading": "Handel",
+  "deposits": "Wpłaty",
+  "withdrawals": "Wypłaty",
+  "realtime": "Aktualizacje na żywo",
+  "api": "API",
+  "terms": "Regulamin",
+  "privacy": "Polityka prywatności",
+  "risk": "Ujawnienie ryzyka",
+  "legalNote": "Wiążąca jest wersja angielska."
  }
 }

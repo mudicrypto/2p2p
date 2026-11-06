@@ -146,7 +146,8 @@ export async function requestWithdrawal(ctx: Ctx, userIn: User, input: { asset: 
   if (amount <= 0n) throw new DomainError('VALIDATION', 'amount must be positive');
   const fee = toMinor(wcfg.networkFee[input.asset] ?? '0', dec);
   const usd = await usdCents(ctx, ctx.db, input.asset, amount);
-  const manual = usd >= BigInt(wcfg.manualApprovalUsdCents) || risk.score >= riskCfg.manualConfirmScore;
+  // Launch gate (M16): until the external auditors sign off, every withdrawal needs manual two-admin approval.
+  const manual = wcfg.auditGate || usd >= BigInt(wcfg.manualApprovalUsdCents) || risk.score >= riskCfg.manualConfirmScore;
   const w = await runTx(ctx, async (t) => {
     await consumeWithdrawLimit(ctx, t.tx, user, usd);
     const [w] = await t.tx.insert(withdrawals).values({

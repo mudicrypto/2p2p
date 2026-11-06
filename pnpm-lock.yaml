@@ -329,6 +329,15 @@ importers:
         specifier: ^5.4.2
         version: 5.11.1
 
+  infra/backup:
+    dependencies:
+      '@p2p/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@p2p/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+
   loadtest:
     dependencies:
       '@p2p/core':

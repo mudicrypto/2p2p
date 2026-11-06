@@ -214,5 +214,21 @@
   "start": "Anza kutuma",
   "leg1": "Hatua 1: lipa upokee USDT",
   "leg2": "Hatua 2: USDT inauzwa na unapokea malipo"
+ },
+ "launch": {
+  "statusTitle": "Hali ya mfumo",
+  "operational": "Inafanya kazi",
+  "degraded": "Imeathirika",
+  "outage": "Hitilafu",
+  "paused": "Imesitishwa",
+  "trading": "Biashara",
+  "deposits": "Amana",
+  "withdrawals": "Uondoaji",
+  "realtime": "Taarifa za papo hapo",
+  "api": "API",
+  "terms": "Masharti ya huduma",
+  "privacy": "Sera ya faragha",
+  "risk": "Ufichuzi wa hatari",
+  "legalNote": "Toleo la Kiingereza ndilo linalofunga."
  }
 }

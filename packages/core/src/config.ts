@@ -5,7 +5,7 @@ export const CONFIG_DEFAULTS = {
   fees: { makerBps: 10, takerBps: 0, insuranceShareBps: 1000, merchantLevelMakerBps: { 1: 8, 2: 6, 3: 4 } as Record<string, number> },
   trading: { appealWaitMin: 10, defaultPaymentWindowMin: 15, maxOpenOrdersPerUser: 10, reversibleHoldHours: 72 },
   confirmations: { TRON: 20, TON: 10, BSC: 15, ETHEREUM: 12, POLYGON: 128, BITCOIN: 2 } as Record<string, number>,
-  withdrawals: { paused: false, manualApprovalUsdCents: 1_000_000, newAddressDelayHours: 24, requiredApprovals: 2, networkFee: { USDT: '1', BTC: '0.0001', ETH: '0.001' } as Record<string, string> },
+  withdrawals: { paused: false, auditGate: true, manualApprovalUsdCents: 1_000_000, newAddressDelayHours: 24, requiredApprovals: 2, networkFee: { USDT: '1', BTC: '0.0001', ETH: '0.001' } as Record<string, string> },
   cooldowns: { newAccountHours: 48, newAccountLimitBps: 2500, securityChangeWithdrawHours: 24 },
   risk: { manualConfirmScore: 70, depositHoldScore: 70, withdrawBlockScore: 90, velocityOrdersPerHour: 10, maxAccountsPerDevice: 2 },
   disputes: { slaMin: 30, escalateAfterMin: 30, autoFreezeLostDisputes: 3 },

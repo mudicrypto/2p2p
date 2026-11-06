@@ -214,5 +214,21 @@
   "start": "Bắt đầu chuyển",
   "leg1": "Bước 1: thanh toán và nhận USDT",
   "leg2": "Bước 2: USDT được bán và bạn nhận tiền"
+ },
+ "launch": {
+  "statusTitle": "Trạng thái hệ thống",
+  "operational": "Hoạt động",
+  "degraded": "Suy giảm",
+  "outage": "Ngừng hoạt động",
+  "paused": "Tạm dừng",
+  "trading": "Giao dịch",
+  "deposits": "Nạp tiền",
+  "withdrawals": "Rút tiền",
+  "realtime": "Cập nhật trực tiếp",
+  "api": "API",
+  "terms": "Điều khoản dịch vụ",
+  "privacy": "Chính sách quyền riêng tư",
+  "risk": "Công bố rủi ro",
+  "legalNote": "Bản tiếng Anh là bản có giá trị ràng buộc."
  }
 }

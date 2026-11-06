@@ -214,5 +214,21 @@
   "start": "Start transfer",
   "leg1": "Step 1: pay and receive USDT",
   "leg2": "Step 2: USDT is sold and you receive the payout"
+ },
+ "launch": {
+  "statusTitle": "System status",
+  "operational": "Operational",
+  "degraded": "Degraded",
+  "outage": "Outage",
+  "paused": "Paused",
+  "trading": "Trading",
+  "deposits": "Deposits",
+  "withdrawals": "Withdrawals",
+  "realtime": "Live updates",
+  "api": "API",
+  "terms": "Terms of service",
+  "privacy": "Privacy policy",
+  "risk": "Risk disclosure",
+  "legalNote": "The English version is the binding version."
  }
 }

@@ -214,5 +214,21 @@
   "start": "開始匯款",
   "leg1": "步驟 1：付款並取得 USDT",
   "leg2": "步驟 2：售出 USDT 並收款"
+ },
+ "launch": {
+  "statusTitle": "系統狀態",
+  "operational": "正常運作",
+  "degraded": "部分異常",
+  "outage": "中斷",
+  "paused": "暫停",
+  "trading": "交易",
+  "deposits": "存款",
+  "withdrawals": "提領",
+  "realtime": "即時更新",
+  "api": "API",
+  "terms": "服務條款",
+  "privacy": "隱私權政策",
+  "risk": "風險揭露",
+  "legalNote": "以英文版本為準。"
  }
 }

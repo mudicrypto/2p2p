@@ -214,5 +214,21 @@
   "start": "Gönderimi başlat",
   "leg1": "Adım 1: ödeyin ve USDT alın",
   "leg2": "Adım 2: USDT satılır ve ödemeyi alırsınız"
+ },
+ "launch": {
+  "statusTitle": "Sistem durumu",
+  "operational": "Çalışıyor",
+  "degraded": "Kısmi sorun",
+  "outage": "Kesinti",
+  "paused": "Duraklatıldı",
+  "trading": "Alım satım",
+  "deposits": "Yatırımlar",
+  "withdrawals": "Çekimler",
+  "realtime": "Canlı güncellemeler",
+  "api": "API",
+  "terms": "Hizmet şartları",
+  "privacy": "Gizlilik politikası",
+  "risk": "Risk bildirimi",
+  "legalNote": "Bağlayıcı olan İngilizce sürümdür."
  }
 }
