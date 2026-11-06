@@ -98,4 +98,6 @@ jobs:
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile && pnpm build && node packages/db/dist/migrate.js && node loadtest/setup.mjs
         env: { BUYERS: "500", SELLERS: "20" }
+      - name: Postgres 16 client tools (must match the server major version)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-16 && echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
       - run: DUMP=$(BACKUP_DIR=$RUNNER_TEMP infra/backup/backup.sh) && DUMP=$DUMP RESTORE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres SOURCE_URL=$DATABASE_URL infra/backup/restore-test.sh
