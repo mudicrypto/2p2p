@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@n
 import { DomainError, TransitionError, type ErrorCode } from '@p2p/shared';
 import { ZodError } from 'zod';
 import { redactPii } from '@p2p/core';
+import { captureException } from './sentry';
 
 const STATUS: Record<ErrorCode, number> = {
   VALIDATION: 400, UNAUTHORIZED: 401, FORBIDDEN: 403, NOT_FOUND: 404, CONFLICT: 409, IDEMPOTENCY_MISMATCH: 422,
@@ -22,6 +23,7 @@ export class ErrorsFilter implements ExceptionFilter {
     if (e instanceof ZodError || (e as { name?: string })?.name === 'ZodError') return res.status(400).json({ error: 'VALIDATION', message: 'invalid request', details: (e as ZodError).flatten() });
     if (e instanceof HttpException) return res.status(e.getStatus()).json({ error: e.getStatus() === 404 ? 'NOT_FOUND' : 'HTTP_ERROR', message: e.message });
     this.log.error(redactPii(String((e as Error)?.stack ?? e)));
+    captureException(e);
     return res.status(500).json({ error: 'INTERNAL', message: 'internal error' });
   }
 }

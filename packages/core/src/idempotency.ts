@@ -3,7 +3,9 @@
  * retries with the same key replay the stored result. A different payload with the same key is rejected.
  * A concurrent duplicate blocks on the unique row until the first commits.
  */
-import { idempotencyKeys, and, eq, type Db } from '@p2p/db';
+import { idempotencyKeys, and, eq, lt, type Db } from '@p2p/db';
+
+const STALE_MS = Number(process.env.IDEMPOTENCY_STALE_MS ?? 120_000);
 import { DomainError, jsonBigint } from '@p2p/shared';
 import { sha256 } from './crypto';
 
@@ -18,7 +20,10 @@ export async function withIdempotency<T>(db: Db, scope: string, key: string, req
     const [row] = await db.select().from(idempotencyKeys).where(and(eq(idempotencyKeys.scope, scope), eq(idempotencyKeys.key, key)));
     if (row.requestHash !== requestHash) throw new DomainError('IDEMPOTENCY_MISMATCH', 'Idempotency-Key reused with a different request');
     if (row.status === 'done') return { status: row.responseCode!, body: row.responseBody as T, replayed: true };
-    throw new DomainError('CONFLICT', 'request with this Idempotency-Key is still in progress');
+    // A reservation abandoned by a crashed process (no result after STALE_MS) can be taken over atomically.
+    const takeover = await db.update(idempotencyKeys).set({ createdAt: new Date() })
+      .where(and(eq(idempotencyKeys.scope, scope), eq(idempotencyKeys.key, key), eq(idempotencyKeys.status, 'in_progress'), lt(idempotencyKeys.createdAt, new Date(Date.now() - STALE_MS)))).returning();
+    if (!takeover.length) throw new DomainError('CONFLICT', 'request with this Idempotency-Key is still in progress');
   }
   try {
     const res = await fn();

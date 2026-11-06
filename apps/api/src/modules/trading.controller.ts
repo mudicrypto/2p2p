@@ -9,6 +9,7 @@ import { paymentMethodTypes, fiatCurrencies, countryRules, eq } from '@p2p/db';
 import { CTX, type Ctx } from '../common/ctx';
 import { CurrentUser, Public } from '../common/auth.guard';
 import { Zod } from '../common/zod';
+import { bookCache } from '../common/book-cache';
 
 const AddPmSchema = z.object({ type: z.string().max(64), holderName: z.string().min(2).max(128), details: z.record(z.string()) });
 const uuid = new Zod(z.string().uuid());
@@ -57,7 +58,7 @@ export class TradingController {
 
   // ---- ads
   @Public() @Get('ads')
-  book(@Query(new Zod(OrderBookQuerySchema, 'OrderBookQuery')) q: z.infer<typeof OrderBookQuerySchema>) { return orderBook(this.ctx, q); }
+  book(@Query(new Zod(OrderBookQuerySchema, 'OrderBookQuery')) q: z.infer<typeof OrderBookQuerySchema>) { return bookCache().get(q as Record<string, unknown>, () => orderBook(this.ctx, q)); }
   @Get('me/ads') mine(@CurrentUser() u: User) { return myAds(this.ctx, u.id); }
   @Public() @Get('ads/:id')
   async one(@Param('id', uuid) id: string) { const a = await getAd(this.ctx, id); return presentAd(a, await fiatDecimals(this.ctx.db, a.fiat)); }

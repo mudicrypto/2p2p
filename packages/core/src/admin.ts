@@ -14,6 +14,7 @@ import { audit } from './audit';
 import { randomToken, sha256, decrypt } from './crypto';
 import { passkeyAuthOptions, passkeyVerify, passkeyRegistrationOptions, passkeyRegister, hashPassword } from './auth';
 import { setConfig, getConfig, type ConfigKey } from './config';
+import { clearCountryRuleCache } from './compliance';
 import { userBalances } from './ledger';
 import { userRiskScore } from './fraud';
 
@@ -207,6 +208,7 @@ export async function upsertCountryRule(ctx: Ctx, admin: Admin, country: string,
     const [before] = await t.tx.select().from(countryRules).where(eq(countryRules.country, code));
     const values = { ...patch, country: code, updatedAt: ctx.now() };
     const [r] = await t.tx.insert(countryRules).values(values).onConflictDoUpdate({ target: countryRules.country, set: values }).returning();
+    t.afterCommit(() => clearCountryRuleCache());
     await audit(t.tx, { actorType: 'admin', actorId: admin.id, action: 'country_rules.changed', subjectType: 'country', subjectId: code, before, after: r });
     return r;
   });

@@ -21,7 +21,9 @@ async function main() {
   const worker = new Worker(QUEUE, async (job) => {
     const h = JOBS[job.name];
     if (!h) throw new Error(`unknown job ${job.name}`);
-    return h(ctx, job.data);
+    const out = await h(ctx, job.data);
+    if (job.name === 'invariants.check') await pub.set('invariants:last', JSON.stringify({ ok: (out as { ok: boolean }).ok, at: Date.now() }));
+    return out;
   }, { connection, concurrency: Number(process.env.WORKER_CONCURRENCY ?? 8) });
   worker.on('failed', (job, err) => console.error(`[job ${job?.name}] failed: ${redactPii(err.message)}`));
   console.log('worker started');

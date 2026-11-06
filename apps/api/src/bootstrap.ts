@@ -12,6 +12,9 @@ import { createProviders, type Providers } from '@p2p/providers';
 import type { Ctx, DomainEvent, EventSink } from '@p2p/core';
 import { AppModule } from './app.module';
 import { RealtimeGateway } from './modules/realtime.gateway';
+import { httpMetricsMiddleware, metricsSink } from './common/metrics';
+import { initSentry } from './common/sentry';
+import { BookCache, setBookCache } from './common/book-cache';
 
 class RedisIoAdapter extends IoAdapter {
   constructor(app: any, private pub: Redis) { super(app); }
@@ -31,6 +34,7 @@ export class CompositeSink implements EventSink {
 export interface AppOptions { databaseUrl?: string; redisUrl?: string | null; providers?: Providers; logger?: boolean }
 
 export async function createApp(opts: AppOptions = {}) {
+  initSentry();
   const dbh = createDb(opts.databaseUrl ?? process.env.DATABASE_URL);
   const redisUrl = opts.redisUrl === undefined ? process.env.REDIS_URL : opts.redisUrl;
   const redis = redisUrl ? new Redis(redisUrl, { maxRetriesPerRequest: 2 }) : null;
@@ -40,15 +44,20 @@ export async function createApp(opts: AppOptions = {}) {
   const queue = redis ? new Queue('p2p', { connection: redis.duplicate({ maxRetriesPerRequest: null }) }) : null;
   if (queue) ctx.jobs = { enqueue: async (name, data, o) => { await queue.add(name, data, { delay: o?.delayMs, jobId: o?.jobId, removeOnComplete: 1000, removeOnFail: 5000 }); } };
   // Relay events published by workers to this instance's sockets.
-  if (redis) { const sub = redis.duplicate(); void sub.subscribe('p2p:events'); sub.on('message', (_c, m) => { try { app.get(RealtimeGateway).publish(JSON.parse(m)); } catch { /* ignore */ } }); }
+  if (redis) { const sub = redis.duplicate(); void sub.subscribe('p2p:events'); sub.on('message', (_c, m) => { try { const e = JSON.parse(m); app.get(RealtimeGateway).publish(e); const r = e.room && /^ads:([A-Z]+):([A-Z]{3})$/.exec(e.room); if (r) void new BookCache(redis).invalidate(r[1], r[2]); } catch { /* ignore */ } }); }
   const app = await NestFactory.create<NestExpressApplication>(AppModule.register(ctx, redis), { logger: opts.logger === false ? false : ['error', 'warn', 'log'], rawBody: true });
   app.set('trust proxy', process.env.TRUST_PROXY ?? 'loopback');
   app.use(helmet({ contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } } }));
+  app.use(httpMetricsMiddleware);
   app.useBodyParser('json', { limit: '15mb' });
   app.use(cookieParser());
   app.enableCors({ origin: (process.env.WEB_ORIGIN ?? 'http://localhost:3000').split(','), credentials: true });
   if (redis) app.useWebSocketAdapter(new RedisIoAdapter(app, redis));
-  sink.sinks.push(app.get(RealtimeGateway));
+  sink.sinks.push(app.get(RealtimeGateway), metricsSink);
+  const cache = new BookCache(redis);
+  setBookCache(cache);
+  // Invalidate cached order books on any book change (events from this instance; other instances via p2p:events).
+  sink.sinks.push({ publish: (e) => { const m = e.room && /^ads:([A-Z]+):([A-Z]{3})$/.exec(e.room); if (m) void cache.invalidate(m[1], m[2]); } });
   app.enableShutdownHooks();
   const close = async () => { await app.close(); await queue?.close(); await dbh.close(); redis?.disconnect(); };
   return { app, ctx, redis, sink, close };

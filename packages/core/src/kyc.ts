@@ -1,3 +1,4 @@
+import { clearLimitsCache } from './limits';
 /**
  * KYC tier upgrades (spec 5, M4). The provider (Sumsub; mock in dev) reviews the applicant and calls our
  * webhook. Approved levels raise users.kyc_tier after a person-level sanctions screen with the verified
@@ -105,6 +106,8 @@ export async function assertTierAllowed(db: DbOrTx, user: Pick<User, 'country' |
 export interface LimitValues { dailyLimit: bigint; monthlyLimit: bigint; perOrderMax: bigint; withdrawDaily: bigint }
 /** Admin edit of limits_config (USD-cent row is authoritative). Audited with before/after. */
 export async function setLimits(ctx: Ctx, adminId: string, tier: number, v: LimitValues, asset = 'USD') {
+  clearLimitsCache();
+  setTimeout(clearLimitsCache, 0);
   if (!KYC_TIERS.includes(tier as KycTier)) throw new DomainError('VALIDATION', 'invalid tier');
   for (const x of Object.values(v)) if (x < 0n) throw new DomainError('VALIDATION', 'limits must be non-negative');
   if (v.perOrderMax > v.dailyLimit || v.dailyLimit > v.monthlyLimit) throw new DomainError('VALIDATION', 'require perOrder <= daily <= monthly');
@@ -115,4 +118,6 @@ export async function setLimits(ctx: Ctx, adminId: string, tier: number, v: Limi
     await audit(t.tx, { actorType: 'admin', actorId: adminId, action: 'limits.changed', subjectType: 'limits_config', subjectId: `${tier}:${asset}`, before: before ?? null, after });
     return after;
   });
+  // (cache) admin edits take effect immediately on this instance
+
 }

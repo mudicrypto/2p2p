@@ -12,11 +12,17 @@ import { getCountryRule } from './compliance';
 import { getReferencePrice } from './rates';
 import type { User } from './auth';
 
+const limitsCache = new Map<number, { at: number; v: typeof limitsConfig.$inferSelect | undefined }>();
+const LIMITS_TTL_MS = Number(process.env.CONFIG_CACHE_MS ?? 2000);
+export const clearLimitsCache = () => limitsCache.clear();
+
 export interface EffectiveLimits { daily: bigint; monthly: bigint; perOrder: bigint; withdrawDaily: bigint; cooldown: boolean; multiplierBps: number }
 
 export async function getLimits(ctx: Ctx, db: DbOrTx, user: Pick<User, 'kycTier' | 'country' | 'createdAt'>): Promise<EffectiveLimits> {
   const tier = user.kycTier as KycTier;
-  const [row] = await db.select().from(limitsConfig).where(and(eq(limitsConfig.tier, tier), eq(limitsConfig.asset, 'USD')));
+  const ck = limitsCache.get(tier);
+  const row = ck && Date.now() - ck.at < LIMITS_TTL_MS ? ck.v : (await db.select().from(limitsConfig).where(and(eq(limitsConfig.tier, tier), eq(limitsConfig.asset, 'USD'))))[0];
+  if (!ck || Date.now() - ck.at >= LIMITS_TTL_MS) limitsCache.set(tier, { at: Date.now(), v: row });
   const d = DEFAULT_TIER_LIMITS_USD_CENTS[tier];
   const base = row ? { daily: row.dailyLimit, monthly: row.monthlyLimit, perOrder: row.perOrderMax, withdrawDaily: row.withdrawDaily } : d;
   const rule = await getCountryRule(db, user.country);

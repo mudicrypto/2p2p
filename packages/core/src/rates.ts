@@ -33,10 +33,26 @@ export async function refreshRate(ctx: Ctx, asset: Asset, fiat: string) {
 }
 
 const MAX_AGE_MS = Number(process.env.RATE_MAX_AGE_MS ?? 10 * 60_000);
-/** Reference price (scaled). Refreshes on demand when stale. */
+
+/** Aggregate live quotes in memory (no DB writes). */
+export async function computeRate(ctx: Ctx, asset: Asset, fiat: string): Promise<bigint | null> {
+  const quotes = (await Promise.all(ctx.providers.rateSources.map((s) => s.fetch(asset, fiat).catch(() => null)))).filter((q) => !!q);
+  return aggregateQuotes(quotes.map((q) => q!.price))?.price ?? null;
+}
+
+/**
+ * Reference price (scaled). Never writes from inside a caller's transaction: a stale/missing rate is computed
+ * in memory and persisted on a separate connection afterwards (worker `rates.refresh` keeps rates fresh anyway).
+ * Writing inside the order transaction would need a second pool connection while holding one (pool deadlock
+ * under load) and could block on ad rows locked by the same transaction.
+ */
 export async function getReferencePrice(ctx: Ctx, db: DbOrTx, asset: Asset, fiat: string): Promise<bigint | null> {
   const [r] = await db.select().from(rates).where(and(eq(rates.asset, asset), eq(rates.fiat, fiat)));
   if (r && ctx.now().getTime() - r.updatedAt.getTime() < MAX_AGE_MS) return r.price;
-  return (await refreshRate(ctx, asset, fiat)) ?? r?.price ?? null;
+  const inTx = db !== ctx.db;
+  if (!inTx) return (await refreshRate(ctx, asset, fiat)) ?? r?.price ?? null;
+  const live = await computeRate(ctx, asset, fiat);
+  setImmediate(() => { void refreshRate(ctx, asset, fiat).catch(() => null); });
+  return live ?? r?.price ?? null;
 }
 export const floatingPrice = (ref: bigint, marginBps: number) => applyMargin(ref, marginBps);

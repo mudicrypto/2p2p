@@ -18,9 +18,9 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M10 Payment auto-confirm | ✅ done on mocks + provider-format payloads — live sandboxes need keys |
 | M11 Corridors | ✅ done |
 | M12 Telegram Mini App & mobile | ✅ Mini App done; mobile apps built + flow-tested — device/store builds need Apple/Google/EAS accounts |
-| M13 Merchant program | ☐ |
-| M14 Scale & observability | ☐ |
-| M15 Security hardening & audit package | ☐ |
+| M13 Merchant program | ✅ done (parallel stream) |
+| M14 Scale & observability | ✅ done (k6 binary run in CI; Node-equivalent run here) |
+| M15 Security hardening & audit package | ⏳ next |
 | M16 Launch readiness | ☐ |
 
 ## Running locally
@@ -217,3 +217,30 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 - ✅ Full trade flow in the Mini App (Playwright, Pixel 7 viewport, signed initData): first-launch country, browse book, place order, mark paid, realtime COMPLETED after the seller's 2FA release, wallet balance.
 - ✅ Both mobile builds compile: `expo export --platform ios` and `--platform android` produce Hermes bundles. The full trade flow runs through the mobile app's own API client against a live API (incl. wrong-2FA rejection and push delivery to the registered Expo token). Deep-link parsing and the biometric lock policy are unit-tested.
 - ⛔ **Blocked:** installing and running on real devices / simulators and store builds need an Expo (EAS) account + project id, an Apple Developer account (bundle id, APNs key, associated domain) and a Google Play account (FCM credentials, assetlinks for the app domain). `TODO(provider)` in `apps/mobile/src/native.ts`.
+
+## M13 — Merchant program ✅ (parallel stream, merged)
+
+**Built**
+- `merchants.ts`: apply (KYC tier ≥ 2), security deposit locked through the ledger into a `security_deposit` account (2FA, min $5,000 equiv., configurable), compliance review (needs level-3 KYC + locked deposit checked against the ledger), deposit release (finance) suspends the merchant, merchant levels from 30-day volume (hourly job) → maker fee 10 → 8 / 6 / 4 bps.
+- `merchant-api.ts`: scoped HMAC keys (`ads:read|write`, `orders:read|write|release`), secret shown once and envelope-encrypted, signature over `timestamp\nMETHOD\npath\nbody`, ±30 s window, single-use signatures, constant-time compare, revocation.
+- API: `/v1/merchant/*` (HMAC guard, scope required — fails closed): book, ads, bulk create (≤50, per-item results), bulk reprice/status, orders, paid, release; `/v1/merchant-program/*` for apply/deposit/status/keys; admin merchant review + deposit release. Docs: `docs/merchant-api.md` (signing worked example, every endpoint).
+- `packages/merchant-sdk`: `MerchantClient` (signing, retries reuse the Idempotency-Key) and `AutoPricer` (undercut/outbid by a bps step within floor/ceiling around a reference) + CLI `p2p-autopricer`.
+
+**Acceptance**
+- ✅ A test merchant bot runs ads and completes trades through the API alone (real HTTP + real SDK): bulk ads, auto-repricing against a competitor, bot releases a buyer's PAID order, bot marks paid on its buy ad; balances exact; level-1 maker fee 8 bps.
+- ✅ HMAC rejects bad/stale/replayed/tampered signatures, wrong scope and revoked keys.
+
+**Decisions**
+- Merchant API release needs no TOTP: the signed request with an `orders:release` key is the second factor (keys are created with 2FA). Bulk operations are per-item transactions.
+
+## M14 — Scale and observability ✅
+
+**Built**
+- Read replica (`DATABASE_REPLICA_URL` → `ctx.read` for book/profiles), Redis order-book cache (2 s TTL, invalidated by `book.updated` across instances), Socket.IO Redis adapter for horizontal WS scaling, `API_WORKERS` cluster mode with crash-loop backoff, Prometheus `/metrics` (HTTP latency histogram, domain events, cache hits, `ledger_invariant_ok`, `withdrawals_paused`), alert rules + Grafana dashboard (`infra/observability`), Sentry with PII scrubbing (TODO(provider): DSN), multi-region topology in `docs/architecture/scaling.md`.
+- Load test: `loadtest/setup.mjs` (5,000 buyers, 200 funded ads), `loadtest/orders.k6.js` (CI job `load`, k6 constant-arrival-rate), `loadtest/run.mjs` (same scenario in Node), `loadtest/verify.mjs` (double-spend checks).
+- **Bugs found and fixed by the load test:** (1) stale reference rates were refreshed through a second pool connection *inside* the order transaction → pool deadlock under concurrency (and possible lock wait on floating ads); rates are now computed in memory inside transactions and persisted afterwards. (2) Idempotency reservations orphaned by a crashed process blocked retries forever; they're now reclaimable after 120 s. (3) Country rules and limits config cached (2 s TTL, invalidated on admin edit on the same instance) to cut per-order queries.
+
+**Acceptance** (single 4-core box shared by Postgres, Redis, 3 API workers and the load generator)
+- ✅ 5,000 orders by 5,000 distinct buyers at 60 orders/s, all 5,000 open concurrently: **0 failures, p50 35 ms, p95 73 ms**, p99 586 ms. Post-run: ledger invariants OK, 0 unbalanced txs, 0 negative accounts, ad remaining == orders for every ad, escrow == open orders for every seller → **no double spend**.
+- Capacity notes: at 90/s the box saturates (p95 543 ms, still 0 failures and no double spend); a closed loop of 300 always-in-flight clients reaches ~95 orders/s with multi-second p95 (Little's law at saturation). Per-order cost is ~14 ms Node CPU + ~12 ms DB; production scales by adding API pods.
+- ⚠️ The k6 binary itself couldn't be downloaded in this sandbox (blocked); CI installs it via `grafana/setup-k6-action` and runs the same scenario with a p95 < 300 ms threshold.

@@ -7,10 +7,19 @@ const DEFAULT_RULE = (country: string): CountryRule => ({
   allowedPaymentMethods: null, requiredDisclosures: [], launchEnabled: true, updatedAt: new Date(0),
 });
 
+const cache = new Map<string, { at: number; v: CountryRule }>();
+const TTL_MS = Number(process.env.CONFIG_CACHE_MS ?? 2000);
+/** Country rules are read on every order; cached for CONFIG_CACHE_MS (admin edits take effect within that window). */
 export async function getCountryRule(db: DbOrTx, country: string): Promise<CountryRule> {
-  const [r] = await db.select().from(countryRules).where(eq(countryRules.country, country.toUpperCase()));
-  return r ?? DEFAULT_RULE(country.toUpperCase());
+  const code = country.toUpperCase();
+  const c = cache.get(code);
+  if (c && Date.now() - c.at < TTL_MS) return c.v;
+  const [r] = await db.select().from(countryRules).where(eq(countryRules.country, code));
+  const v = r ?? DEFAULT_RULE(code);
+  cache.set(code, { at: Date.now(), v });
+  return v;
 }
+export const clearCountryRuleCache = () => cache.clear();
 /** Throws COUNTRY_BLOCKED if the country is blocked or not launched. */
 export async function assertCountryAllowed(db: DbOrTx, country: string) {
   const r = await getCountryRule(db, country);
