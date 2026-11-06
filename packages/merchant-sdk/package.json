@@ -1,0 +1,9 @@
+{
+  "name": "@p2p/merchant-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": { "p2p-autopricer": "dist/bin.js" },
+  "scripts": { "build": "tsc -p tsconfig.build.json", "typecheck": "tsc --noEmit", "test": "vitest run" }
+}
