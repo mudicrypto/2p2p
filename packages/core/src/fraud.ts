@@ -1,5 +1,5 @@
 /** Anti-fraud scoring (expanded in M8). */
-import { orders, riskFlags, reputation, devices, and, eq, or, gt, sql, isNull, inArray, type DbOrTx } from '@p2p/db';
+import { orders, riskFlags, reputation, devices, and, eq, gt, sql, isNull, type DbOrTx } from '@p2p/db';
 import type { Ctx } from './context';
 import { getConfig } from './config';
 import type { OrderRiskInput, RiskFlagSpec } from './risk';
@@ -15,24 +15,27 @@ export async function scoreOrderFull(ctx: Ctx, db: DbOrTx, i: OrderRiskInput) {
   if (i.buyer.kycTier === 0) score += 10;
   if (i.paymentRisk === 'high') score += 20; else if (i.paymentRisk === 'medium') score += 8;
   if (i.reversible) score += 15;
+  // All history signals in ONE round trip (this runs inside every order-creation transaction).
+  const since = new Date(now - 3600_000).toISOString();
+  const r = await db.execute<{ hist_n: number; hist_avg: string; vel_n: number; freeze: number; high_flags: number; shared: number }>(sql`
+    select
+      (select count(*)::int from ${orders} where buyer_id = ${i.buyer.id} and status = 'COMPLETED') as hist_n,
+      (select coalesce(avg(usd_value_cents), 0)::text from ${orders} where buyer_id = ${i.buyer.id} and status = 'COMPLETED') as hist_avg,
+      (select count(*)::int from ${orders} where (buyer_id = ${i.buyer.id} or seller_id = ${i.buyer.id}) and created_at > ${since}) as vel_n,
+      (select coalesce(max(freeze_reports), 0)::int from ${reputation} where user_id = ${i.buyer.id}) as freeze,
+      (select count(*)::int from ${riskFlags} where subject_type = 'user' and subject_id in (${i.buyer.id}, ${i.seller.id}) and severity = 'high' and resolved_at is null) as high_flags,
+      (select count(*)::int from ${devices} a join ${devices} b on a.fingerprint = b.fingerprint where a.user_id = ${i.buyer.id} and b.user_id = ${i.seller.id}) as shared`);
+  const h = r.rows[0];
   // Amount vs history: first trade or > 5x the buyer's average.
-  const [hist] = await db.select({ n: sql<number>`count(*)::int`, avg: sql<string>`coalesce(avg(${orders.usdValueCents}),0)::text` })
-    .from(orders).where(and(eq(orders.buyerId, i.buyer.id), eq(orders.status, 'COMPLETED')));
-  if (hist.n === 0 && i.usdCents > 100_000n) { score += 10; flags.push({ code: 'FIRST_TRADE_LARGE', severity: 'low' }); }
-  else if (hist.n > 0 && i.usdCents > BigInt(Math.floor(Number(hist.avg))) * 5n) { score += 15; flags.push({ code: 'AMOUNT_SPIKE', severity: 'medium', details: { avg: hist.avg } }); }
+  if (h.hist_n === 0 && i.usdCents > 100_000n) { score += 10; flags.push({ code: 'FIRST_TRADE_LARGE', severity: 'low' }); }
+  else if (h.hist_n > 0 && i.usdCents > BigInt(Math.floor(Number(h.hist_avg))) * 5n) { score += 15; flags.push({ code: 'AMOUNT_SPIKE', severity: 'medium', details: { avg: h.hist_avg } }); }
   // Velocity: orders in the last hour.
-  const [vel] = await db.select({ n: sql<number>`count(*)::int` }).from(orders)
-    .where(and(or(eq(orders.buyerId, i.buyer.id), eq(orders.sellerId, i.buyer.id)), gt(orders.createdAt, new Date(now - 3600_000))));
-  if (vel.n >= cfg.velocityOrdersPerHour) { score += 25; flags.push({ code: 'VELOCITY', severity: 'high', details: { lastHour: vel.n } }); }
+  if (h.vel_n >= cfg.velocityOrdersPerHour) { score += 25; flags.push({ code: 'VELOCITY', severity: 'high', details: { lastHour: h.vel_n } }); }
   // Counterparty freeze reports and open high-severity flags.
-  const [rep] = await db.select({ fr: reputation.freezeReports }).from(reputation).where(eq(reputation.userId, i.buyer.id));
-  if ((rep?.fr ?? 0) > 0) { score += 20 * Math.min(rep!.fr, 3); flags.push({ code: 'COUNTERPARTY_FREEZE_REPORTS', severity: 'high', details: { reports: rep!.fr } }); }
-  const open = await db.select({ code: riskFlags.code, sub: riskFlags.subjectId }).from(riskFlags)
-    .where(and(eq(riskFlags.subjectType, 'user'), inArray(riskFlags.subjectId, [i.buyer.id, i.seller.id]), eq(riskFlags.severity, 'high'), isNull(riskFlags.resolvedAt)));
-  if (open.length) score += 25;
+  if (h.freeze > 0) { score += 20 * Math.min(h.freeze, 3); flags.push({ code: 'COUNTERPARTY_FREEZE_REPORTS', severity: 'high', details: { reports: h.freeze } }); }
+  if (h.high_flags > 0) score += 25;
   // Buyer and seller share a device -> collusion / self-trade.
-  const shared = await db.execute<{ n: number }>(sql`select count(*)::int n from ${devices} a join ${devices} b on a.fingerprint = b.fingerprint where a.user_id = ${i.buyer.id} and b.user_id = ${i.seller.id}`);
-  if ((shared.rows[0]?.n ?? 0) > 0) { score += 40; flags.push({ code: 'SHARED_DEVICE_COUNTERPARTIES', severity: 'high' }); }
+  if (h.shared > 0) { score += 40; flags.push({ code: 'SHARED_DEVICE_COUNTERPARTIES', severity: 'high' }); }
   score = Math.min(100, score);
   // Any high-severity signal forces the manual-confirmation path regardless of the numeric score.
   return { score, manual: score >= cfg.manualConfirmScore || flags.some((f) => f.severity === 'high'), flags };

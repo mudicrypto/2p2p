@@ -11,6 +11,8 @@ export const options = {
 };
 export default function () {
   const i = exec.scenario.iterationInTest;
+  // constant-arrival-rate rounds the duration up and can schedule a few extra iterations: no fixture, no request.
+  if (i >= fx.tokens.length) return;
   const r = http.post(`${__ENV.API}/v1/orders`, JSON.stringify({ adId: fx.adIds[i % fx.adIds.length], cryptoAmount: '10' }), {
     headers: { 'content-type': 'application/json', authorization: `Bearer ${fx.tokens[i]}`, 'idempotency-key': `lt-${i}`, 'x-device-fingerprint': `lt-dev-${i}` },
     tags: { name: 'create_order' },
