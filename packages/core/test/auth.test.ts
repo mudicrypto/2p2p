@@ -86,3 +86,14 @@ describe('auth', () => {
     expect(redactPii('mail ana@example.com phone +4915112345678')).toBe('mail a***@example.com phone +49***78');
   });
 });
+
+describe('envelope encryption tamper resistance', () => {
+  it('rejects truncated auth tags and modified ciphertext', async () => {
+    const { encrypt, decrypt } = await import('../src');
+    const c = encrypt('secret');
+    const [v, w, iv, tag, ct] = c.split('.');
+    expect(() => decrypt([v, w, iv, Buffer.from(tag, 'base64url').subarray(0, 4).toString('base64url'), ct].join('.'))).toThrow();
+    const flipped = Buffer.from(ct, 'base64url'); flipped[0] ^= 1;
+    expect(() => decrypt([v, w, iv, tag, flipped.toString('base64url')].join('.'))).toThrow();
+  });
+});

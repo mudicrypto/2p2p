@@ -14,12 +14,12 @@ class LocalKms implements Kms {
   constructor(private kek: Buffer) {}
   wrap(dek: Buffer) {
     const iv = randomBytes(12);
-    const c = createCipheriv('aes-256-gcm', this.kek, iv);
+    const c = createCipheriv('aes-256-gcm', this.kek, iv, { authTagLength: 16 });
     const ct = Buffer.concat([c.update(dek), c.final()]);
     return Buffer.concat([iv, c.getAuthTag(), ct]);
   }
   unwrap(w: Buffer) {
-    const d = createDecipheriv('aes-256-gcm', this.kek, w.subarray(0, 12));
+    const d = createDecipheriv('aes-256-gcm', this.kek, w.subarray(0, 12), { authTagLength: 16 });
     d.setAuthTag(w.subarray(12, 28));
     return Buffer.concat([d.update(w.subarray(28)), d.final()]);
   }
@@ -48,16 +48,18 @@ const unb64 = (s: string) => Buffer.from(s, 'base64url');
 export function encrypt(plain: string): string {
   const dek = randomBytes(32);
   const iv = randomBytes(12);
-  const c = createCipheriv('aes-256-gcm', dek, iv);
+  const c = createCipheriv('aes-256-gcm', dek, iv, { authTagLength: 16 });
   const ct = Buffer.concat([c.update(plain, 'utf8'), c.final()]);
   return ['v1', b64(getKms().wrap(dek)), b64(iv), b64(c.getAuthTag()), b64(ct)].join('.');
 }
 export function decrypt(blob: string): string {
   const [v, w, iv, tag, ct] = blob.split('.');
   if (v !== 'v1') throw new Error('unknown ciphertext version');
+  const tagB = unb64(tag);
+  if (tagB.length !== 16) throw new Error('invalid auth tag');
   const dek = getKms().unwrap(unb64(w));
-  const d = createDecipheriv('aes-256-gcm', dek, unb64(iv));
-  d.setAuthTag(unb64(tag));
+  const d = createDecipheriv('aes-256-gcm', dek, unb64(iv), { authTagLength: 16 });
+  d.setAuthTag(tagB);
   return Buffer.concat([d.update(unb64(ct)), d.final()]).toString('utf8');
 }
 export const encryptJson = (v: unknown) => encrypt(JSON.stringify(v));

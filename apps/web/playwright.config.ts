@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 const E2E_DB = process.env.E2E_DATABASE_URL ?? 'postgres://postgres:postgres@localhost:5432/p2p_e2e';
-const env = { DATABASE_URL: E2E_DB, PROVIDER_MODE: 'mock', RATE_LIMIT_DISABLED: '1', API_PORT: '4000', WEB_ORIGIN: 'http://localhost:3000', REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379' };
+const env = { TOTP_REPLAY_PROTECTION: 'on', DATABASE_URL: E2E_DB, PROVIDER_MODE: 'mock', RATE_LIMIT_DISABLED: '1', API_PORT: '4000', WEB_ORIGIN: 'http://localhost:3000', REDIS_URL: process.env.REDIS_URL ?? 'redis://localhost:6379' };
 export default defineConfig({
   testDir: './e2e',
   timeout: 120_000,

@@ -11,7 +11,7 @@ import { CurrentUser, Public } from '../common/auth.guard';
 import { Zod } from '../common/zod';
 import { bookCache } from '../common/book-cache';
 
-const AddPmSchema = z.object({ type: z.string().max(64), holderName: z.string().min(2).max(128), details: z.record(z.string()) });
+const AddPmSchema = z.object({ type: z.string().max(64), holderName: z.string().min(2).max(128), details: z.record(z.string(), z.string()) });
 const uuid = new Zod(z.string().uuid());
 
 @Controller('v1')

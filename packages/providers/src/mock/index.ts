@@ -14,12 +14,17 @@ import type {
   AiTriageProvider, TriageInput, TriageOutput,
 } from '../interfaces';
 
-const MOCK_SECRET = () => process.env.MOCK_WEBHOOK_SECRET ?? 'mock-webhook-secret';
+const MOCK_SECRET = () => {
+  const s = process.env.MOCK_WEBHOOK_SECRET ?? (process.env.NODE_ENV === 'production' ? '' : 'mock-webhook-secret');
+  if (!s) throw new Error('MOCK_WEBHOOK_SECRET must be set to use mock webhooks in production');
+  return s;
+};
 export function mockSign(body: string): string {
   return createHmac('sha256', MOCK_SECRET()).update(body).digest('hex');
 }
 function verifySig(body: string, sig?: string): boolean {
   if (!sig) return false;
+  if (process.env.NODE_ENV === 'production' && !process.env.MOCK_WEBHOOK_SECRET) return false;
   const a = Buffer.from(mockSign(body));
   const b = Buffer.from(sig);
   return a.length === b.length && timingSafeEqual(a, b);

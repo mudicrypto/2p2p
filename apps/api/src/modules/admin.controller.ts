@@ -82,7 +82,7 @@ export class AdminController {
   @Perm('country_rules.write') @Put('country-rules/:country')
   country(@CurrentAdmin() a: Admin, @Param('country') c: string, @Body(new Zod(z.object({
     status: z.enum(['allowed', 'blocked']).optional(), tier0Allowed: z.boolean().optional(), limitMultiplierBps: z.number().int().min(0).max(100000).optional(),
-    allowedPaymentMethods: z.array(z.string()).nullable().optional(), requiredDisclosures: z.array(z.string()).optional(), tierOverrides: z.record(z.unknown()).optional(), launchEnabled: z.boolean().optional(),
+    allowedPaymentMethods: z.array(z.string()).nullable().optional(), requiredDisclosures: z.array(z.string()).optional(), tierOverrides: z.record(z.string(), z.unknown()).optional(), launchEnabled: z.boolean().optional(),
   }).strict(), 'AdminCountryRule')) b: any) { return core.upsertCountryRule(this.ctx, a, c, b); }
   @Perm('config.read') @Get('payment-method-types') pmts() { return this.ctx.db.select().from(paymentMethodTypes); }
   @Perm('payment_methods.write') @Patch('payment-method-types/:code')
@@ -97,7 +97,7 @@ export class AdminController {
   @Perm('config.read') @Get('config/:key')
   config(@Param('key') key: string) { if (!(key in core.CONFIG_DEFAULTS)) return {}; return core.getConfig(this.ctx.db, key as core.ConfigKey); }
   @Perm('fees.write') @Put('config/fees')
-  fees(@CurrentAdmin() a: Admin, @Body(new Zod(z.object({ makerBps: z.number().int().min(0).max(500).optional(), takerBps: z.number().int().min(0).max(500).optional(), insuranceShareBps: z.number().int().min(0).max(10000).optional(), merchantLevelMakerBps: z.record(z.number().int().min(0).max(500)).optional() }).strict(), 'AdminFees')) b: any) {
+  fees(@CurrentAdmin() a: Admin, @Body(new Zod(z.object({ makerBps: z.number().int().min(0).max(500).optional(), takerBps: z.number().int().min(0).max(500).optional(), insuranceShareBps: z.number().int().min(0).max(10000).optional(), merchantLevelMakerBps: z.record(z.string(), z.number().int().min(0).max(500)).optional() }).strict(), 'AdminFees')) b: any) {
     return core.adminSetConfig(this.ctx, a, 'fees', b);
   }
   @Perm('withdrawals.pause') @Put('config/withdrawals')

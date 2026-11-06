@@ -7,7 +7,7 @@ let t: TestApp; let base = '';
 beforeAll(async () => {
   t = await startApp(); await seed(t.ctx.db);
   await t.app.listen(0, '127.0.0.1');
-  const addr = t.app.getHttpServer().address();
+  const addr = t.app.getHttpServer().address() as { port: number };
   base = `http://127.0.0.1:${addr.port}`;
 });
 afterAll(async () => { await t.close(); });

@@ -1,11 +1,11 @@
 import type { ZodTypeAny } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from 'zod';
 /** OpenAPI document generated from the shared zod schemas used for validation (spec 10). */
 const schemas = new Map<string, ZodTypeAny>();
 export function registerSchema(name: string, s: ZodTypeAny) { schemas.set(name, s); }
 export function buildOpenApi(routes: Array<{ method: string; path: string; body?: string; query?: string; summary?: string }>) {
   const components: Record<string, unknown> = {};
-  for (const [n, s] of schemas) components[n] = zodToJsonSchema(s as any, { target: 'openApi3', $refStrategy: 'none' });
+  for (const [n, s] of schemas) components[n] = z.toJSONSchema(s as any, { target: 'openapi-3.0', unrepresentable: 'any', io: 'input' });
   const paths: Record<string, Record<string, unknown>> = {};
   for (const r of routes) {
     const p = r.path.replace(/:(\w+)/g, '{$1}');

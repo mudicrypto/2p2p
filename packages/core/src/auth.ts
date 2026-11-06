@@ -3,7 +3,7 @@ import argon2 from 'argon2';
 import { authenticator } from 'otplib';
 import { createHmac } from 'node:crypto';
 import {
-  users, sessions, devices, verificationTokens, loginEvents, webauthnCredentials, webauthnChallenges,
+  users, sessions, devices, verificationTokens, loginEvents, webauthnCredentials, webauthnChallenges, idempotencyKeys,
   and, eq, gt, isNull, sql, desc,
 } from '@p2p/db';
 import {
@@ -148,7 +148,7 @@ export async function login(ctx: Ctx, input: { email: string; password: string; 
   let mfa = false;
   if (u.totpEnabledAt) {
     if (!input.totp) throw new DomainError('TWO_FA_REQUIRED', 'TOTP code required');
-    if (!checkTotp(u, input.totp)) throw new DomainError('TWO_FA_INVALID', 'invalid TOTP code');
+    if (!(await useTotp(ctx, u, input.totp))) throw new DomainError('TWO_FA_INVALID', 'invalid or already used TOTP code');
     mfa = true;
   }
   return createSession(ctx, u, meta, mfa);
@@ -176,10 +176,14 @@ export function signTelegramInitData(fields: Record<string, string>, botToken: s
   const hash = createHmac('sha256', secret).update(dataCheck).digest('hex');
   return new URLSearchParams({ ...fields, hash }).toString();
 }
-export const telegramBotToken = () => process.env.TELEGRAM_BOT_TOKEN || (process.env.NODE_ENV === 'production' ? '' : 'mock-bot-token'); // TODO(provider): real bot token
+/** TODO(provider): real bot token. The well-known dev token is only accepted in mock mode outside production. */
+export const telegramBotToken = () => process.env.TELEGRAM_BOT_TOKEN || (process.env.NODE_ENV !== 'production' && (process.env.PROVIDER_MODE ?? 'mock') === 'mock' ? 'mock-bot-token' : '');
+const TG_MAX_AGE_SEC = Number(process.env.TELEGRAM_INITDATA_MAX_AGE_SEC ?? 3600);
 
 export async function telegramLogin(ctx: Ctx, initData: string, country: string | undefined, meta: ReqMeta = {}) {
-  const tg = validateTelegramInitData(initData, telegramBotToken());
+  const bot = telegramBotToken();
+  if (!bot) throw new DomainError('UNAUTHORIZED', 'Telegram login not configured');
+  const tg = validateTelegramInitData(initData, bot, TG_MAX_AGE_SEC);
   if (!tg) throw new DomainError('UNAUTHORIZED', 'invalid Telegram initData');
   let [u] = await ctx.db.select().from(users).where(eq(users.tgId, String(tg.id)));
   if (!u) {
@@ -193,6 +197,17 @@ export async function telegramLogin(ctx: Ctx, initData: string, country: string 
 export function checkTotp(u: Pick<User, 'totpSecretEnc'>, code: string) {
   if (!u.totpSecretEnc) return false;
   return authenticator.check(code, decrypt(u.totpSecretEnc));
+}
+/** Verify a TOTP and burn it: each (user, code, time-step) can be used once, so an intercepted code can't be replayed. */
+export async function useTotp(ctx: Ctx, u: Pick<User, 'id' | 'totpSecretEnc'>, code: string): Promise<boolean> {
+  if (!checkTotp(u, code)) return false;
+  // Test suites perform many 2FA actions per 30 s window; never disable outside tests.
+  if (process.env.TOTP_REPLAY_PROTECTION === 'off' && process.env.NODE_ENV !== 'production') return true;
+  const step = Math.floor(ctx.now().getTime() / 30_000);
+  const ins = await ctx.db.insert(idempotencyKeys).values({ scope: `totp:${u.id}`, key: `${code}:${step}`, requestHash: 'totp', status: 'done' }).onConflictDoNothing().returning();
+  // The same code is also valid in the adjacent window; block it there too.
+  if (ins.length) await ctx.db.insert(idempotencyKeys).values([{ scope: `totp:${u.id}`, key: `${code}:${step - 1}`, requestHash: 'totp', status: 'done' }, { scope: `totp:${u.id}`, key: `${code}:${step + 1}`, requestHash: 'totp', status: 'done' }]).onConflictDoNothing();
+  return ins.length > 0;
 }
 export async function totpSetup(ctx: Ctx, userId: string) {
   const [u] = await ctx.db.select().from(users).where(eq(users.id, userId));
@@ -213,7 +228,7 @@ export async function totpConfirm(ctx: Ctx, userId: string, code: string, meta: 
 /** 2FA re-prompt for sensitive actions (release, withdrawal, security changes). */
 export async function require2fa(ctx: Ctx, user: User, code: string | undefined) {
   if (!user.totpEnabledAt) throw new DomainError('TWO_FA_REQUIRED', 'enable 2FA first');
-  if (!code || !checkTotp(user, code)) throw new DomainError('TWO_FA_INVALID', 'invalid 2FA code');
+  if (!code || !(await useTotp(ctx, user, code))) throw new DomainError('TWO_FA_INVALID', 'invalid or already used 2FA code');
 }
 export async function changePassword(ctx: Ctx, user: User, oldPw: string, newPw: string, totp: string | undefined, meta: ReqMeta = {}) {
   if (!user.passwordHash || !(await argon2.verify(user.passwordHash, oldPw))) throw new DomainError('UNAUTHORIZED', 'invalid password');

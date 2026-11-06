@@ -50,7 +50,8 @@ test('full trade flow inside the Telegram Mini App', async ({ page }) => {
   await expect(page.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID');
 
   // seller releases with 2FA via the API; the Mini App updates in realtime
-  const rel = await api.post(`/v1/orders/${orderId}/release`, { data: { totp: authenticator.generate(setup.secret) }, headers: { ...auth, ...idem() } });
+  // The current code was spent on login (replay-protected); use the next time-step's code (server accepts ±1 step).
+  const rel = await api.post(`/v1/orders/${orderId}/release`, { data: { totp: authenticator.clone({ epoch: Date.now() + 30_000 }).generate(setup.secret) }, headers: { ...auth, ...idem() } });
   expect(rel.ok(), await rel.text()).toBeTruthy();
   await expect(page.getByTestId('order-status')).toHaveAttribute('data-status', 'COMPLETED');
   await page.getByTestId('tg-tab-nav.wallet').click();
