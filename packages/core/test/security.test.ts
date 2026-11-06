@@ -31,3 +31,14 @@ describe('M15 security hardening', () => {
     } finally { process.env = env; }
   });
 });
+
+describe('2FA brute-force lockout', () => {
+  it('locks 2FA-gated actions after 5 wrong codes', async () => {
+    const u = await mkUser(ctx);
+    const { secret } = await totpSetup(ctx, u.id);
+    await totpConfirm(ctx, u.id, authenticator.generate(secret));
+    const user = await refresh(ctx, u);
+    for (let i = 0; i < 5; i++) await expect(require2fa(ctx, user, '000000')).rejects.toMatchObject({ code: 'TWO_FA_INVALID' });
+    await expect(require2fa(ctx, user, authenticator.generate(secret))).rejects.toMatchObject({ code: 'RATE_LIMITED' });
+  });
+});

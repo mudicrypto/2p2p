@@ -4,7 +4,7 @@ import { authenticator } from 'otplib';
 import { createHmac } from 'node:crypto';
 import {
   users, sessions, devices, verificationTokens, loginEvents, webauthnCredentials, webauthnChallenges, idempotencyKeys,
-  and, eq, gt, isNull, sql, desc,
+  and, eq, gt, lt, isNull, sql, desc,
 } from '@p2p/db';
 import {
   generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse,
@@ -226,9 +226,22 @@ export async function totpConfirm(ctx: Ctx, userId: string, code: string, meta: 
   });
 }
 /** 2FA re-prompt for sensitive actions (release, withdrawal, security changes). */
+const TOTP_MAX_FAILS = Number(process.env.TOTP_MAX_FAILS ?? 5);
 export async function require2fa(ctx: Ctx, user: User, code: string | undefined) {
   if (!user.totpEnabledAt) throw new DomainError('TWO_FA_REQUIRED', 'enable 2FA first');
-  if (!code || !(await useTotp(ctx, user, code))) throw new DomainError('TWO_FA_INVALID', 'invalid or already used 2FA code');
+  // Brute-force lockout: too many wrong codes in 15 minutes blocks 2FA-gated actions for this user.
+  const since = new Date(ctx.now().getTime() - 15 * 60_000);
+  const [f] = await ctx.db.select({ n: sql<number>`count(*)::int` }).from(idempotencyKeys).where(and(eq(idempotencyKeys.scope, `totpfail:${user.id}`), gt(idempotencyKeys.createdAt, since)));
+  if (f.n >= TOTP_MAX_FAILS) throw new DomainError('RATE_LIMITED', 'too many invalid 2FA codes; try again later');
+  if (!code || !(await useTotp(ctx, user, code))) {
+    await ctx.db.insert(idempotencyKeys).values({ scope: `totpfail:${user.id}`, key: randomToken(9), requestHash: 'fail', status: 'done' });
+    if (f.n + 1 >= TOTP_MAX_FAILS) await audit(ctx.db, { actorType: 'system', action: 'user.2fa_lockout', subjectType: 'user', subjectId: user.id });
+    throw new DomainError('TWO_FA_INVALID', 'invalid or already used 2FA code');
+  }
+}
+/** Housekeeping for spent TOTP codes and 2FA failure counters. */
+export async function pruneTotpState(ctx: Ctx) {
+  await ctx.db.delete(idempotencyKeys).where(and(sql`(${idempotencyKeys.scope} like 'totp:%' or ${idempotencyKeys.scope} like 'totpfail:%')`, lt(idempotencyKeys.createdAt, new Date(ctx.now().getTime() - 3600_000))));
 }
 export async function changePassword(ctx: Ctx, user: User, oldPw: string, newPw: string, totp: string | undefined, meta: ReqMeta = {}) {
   if (!user.passwordHash || !(await argon2.verify(user.passwordHash, oldPw))) throw new DomainError('UNAUTHORIZED', 'invalid password');

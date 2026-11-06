@@ -20,8 +20,8 @@ Spec: `CLAUDE.md`. Milestones are executed in order (section 13). Each entry lis
 | M12 Telegram Mini App & mobile | ✅ Mini App done; mobile apps built + flow-tested — device/store builds need Apple/Google/EAS accounts |
 | M13 Merchant program | ✅ done (parallel stream) |
 | M14 Scale & observability | ✅ done (k6 binary run in CI; Node-equivalent run here) |
-| M15 Security hardening & audit package | ⏳ next |
-| M16 Launch readiness | ☐ |
+| M15 Security hardening & audit package | ✅ done |
+| M16 Launch readiness | ⏳ next |
 
 ## Running locally
 
@@ -244,3 +244,14 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 - ✅ 5,000 orders by 5,000 distinct buyers at 60 orders/s, all 5,000 open concurrently: **0 failures, p50 35 ms, p95 73 ms**, p99 586 ms. Post-run: ledger invariants OK, 0 unbalanced txs, 0 negative accounts, ad remaining == orders for every ad, escrow == open orders for every seller → **no double spend**.
 - Capacity notes: at 90/s the box saturates (p95 543 ms, still 0 failures and no double spend); a closed loop of 300 always-in-flight clients reaches ~95 orders/s with multi-second p95 (Little's law at saturation). Per-order cost is ~14 ms Node CPU + ~12 ms DB; production scales by adding API pods.
 - ⚠️ The k6 binary itself couldn't be downloaded in this sandbox (blocked); CI installs it via `grafana/setup-k6-action` and runs the same scenario with a p95 < 300 ms threshold.
+
+## M15 — Security hardening and audit package ✅
+
+**Done**
+- Dependency audit 16 → 0 (zod 4 migration, drizzle-orm 0.45.4, Sentry 10, overrides), Semgrep 2 → 0, secret scan clean (reviewed baseline), manual review of money/auth/webhook paths.
+- Fixed: mock providers refused in production (critical), Telegram dev token gating + 1 h initData, TOTP replay protection, 2FA brute-force lockout, GCM tag pinning, strict nonce CSP for web/tg/admin (+ earlier load-test fixes).
+- Audit package in `docs/audit/`: architecture, ledger specification, threat model (STRIDE), security findings, test report.
+
+**Acceptance**
+- ✅ Zero high or critical findings open (`docs/audit/security-findings.md`); audit package complete.
+- Note: the `/security-review` skill needs a base branch (`origin/HEAD`) and this branch has none, so the equivalent review was done manually; it can be re-run on the first PR against `main`.

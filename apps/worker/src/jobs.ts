@@ -36,3 +36,5 @@ SCHEDULES.push({ name: 'corridors.sweep', everyMs: 60_000 });
 JOBS['merchants.levels'] = (ctx) => core.recomputeMerchantLevels(ctx);
 JOBS['merchants.prune_signatures'] = (ctx) => core.pruneMerchantSignatures(ctx);
 SCHEDULES.push({ name: 'merchants.levels', everyMs: 3600_000 }, { name: 'merchants.prune_signatures', everyMs: 600_000 });
+JOBS['totp.prune'] = (ctx) => core.pruneTotpState(ctx);
+SCHEDULES.push({ name: 'totp.prune', everyMs: 15 * 60_000 });
