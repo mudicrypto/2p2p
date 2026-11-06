@@ -28,20 +28,20 @@ variable "admin_cidrs" {
 
 # Home region: database primary.
 module "home" {
-  source    = "../../modules/platform"
-  providers = { aws = aws.home }
-  env       = "production"
-  region    = "eu-central-1"
-  primary   = true
-  vpc_cidr  = "10.10.0.0/16"
-  azs       = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
-  admin_cidrs = var.admin_cidrs
-  db_instance = "db.r7g.2xlarge"
-  db_replicas = 1
-  redis_node = "cache.r7g.large"
+  source        = "../../modules/platform"
+  providers     = { aws = aws.home }
+  env           = "production"
+  region        = "eu-central-1"
+  primary       = true
+  vpc_cidr      = "10.10.0.0/16"
+  azs           = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+  admin_cidrs   = var.admin_cidrs
+  db_instance   = "db.r7g.2xlarge"
+  db_replicas   = 1
+  redis_node    = "cache.r7g.large"
   eks_node_type = "m7g.xlarge"
-  eks_min = 3
-  eks_max = 20
+  eks_min       = 3
+  eks_max       = 20
 }
 
 # Additional regions: stateless app tier + regional read replicas and Redis.

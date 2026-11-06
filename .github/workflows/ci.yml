@@ -27,8 +27,14 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm i18n:check
       - run: pnpm test
-      - name: Playwright E2E
-        run: pnpm --filter @p2p/web exec playwright install --with-deps chromium && pnpm --filter @p2p/web e2e
+      - name: Create E2E database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -c 'CREATE DATABASE p2p_e2e'
+      - name: Install Playwright browser
+        run: pnpm --filter @p2p/web exec playwright install --with-deps chromium
+      - name: Playwright E2E (web)
+        run: pnpm --filter @p2p/web e2e --trace off
+      - name: Playwright E2E (Telegram Mini App)
+        run: pnpm --filter @p2p/tg e2e --trace off
   security:
     runs-on: ubuntu-latest
     steps:
