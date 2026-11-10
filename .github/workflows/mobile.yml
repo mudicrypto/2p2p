@@ -9,7 +9,9 @@ on:
     paths: ['apps/mobile/**', 'packages/i18n/locales/**', '.github/workflows/mobile.yml', 'pnpm-lock.yaml']
   workflow_dispatch:
 permissions: { contents: read }
-concurrency: { group: mobile-${{ github.ref }}, cancel-in-progress: true }
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
 env:
   EXPO_PUBLIC_API_URL: https://api.example.com
 jobs:

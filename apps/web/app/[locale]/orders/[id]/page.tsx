@@ -31,6 +31,8 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const [fb, setFb] = useState(false);
   const [busy, setBusy] = useState('');
   const [disputeOpen, setDisputeOpen] = useState(false);
+  const statusRef = useRef('');
+  statusRef.current = o?.status ?? '';
   const load = useCallback(() => api(`/orders/${id}`).then((x) => { setO(x); if (x.status === 'DISPUTED') api(`/orders/${id}/dispute`).then(setDispute).catch(() => {}); }).catch(setErr), [id]);
   useEffect(() => {
     void load();
@@ -39,7 +41,9 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
     join(); s.on('connect', join);
     const on = (p: any) => { if (p.type === 'order.status' || p.type?.startsWith?.('dispute')) void load(); };
     s.on('order', on);
-    return () => { s.off('order', on); s.off('connect', join); };
+    // Fallback if the realtime connection drops: poll while the order is still moving.
+    const poll = setInterval(() => { if (!document.hidden && ['CREATED', 'AWAITING_PAYMENT', 'PAID', 'DISPUTED'].includes(statusRef.current)) void load(); }, 4000);
+    return () => { s.off('order', on); s.off('connect', join); clearInterval(poll); };
   }, [id, load]);
   const left = useCountdown(o?.status === 'AWAITING_PAYMENT' ? o.expiresAt : null);
   const disputeIn = useCountdown(o?.status === 'PAID' ? o.disputeAvailableAt : null);
