@@ -10,12 +10,12 @@ export default async function TgLayout({ children, params }: { children: React.R
   if (!isLocale(locale)) notFound();
   const messages = await loadMessages(locale);
   return (
-    <html lang={locale} dir={dir(locale)}>
+    <html lang={locale} dir={dir(locale)} data-theme="dark">
       <head><Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" /></head>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen bg-background text-foreground antialiased">
         <Providers locale={locale} messages={messages}>
           <TelegramGate>
-            <main className="mx-auto w-full max-w-xl px-3 pb-20 pt-3">{children}</main>
+            <main className="mx-auto w-full max-w-xl px-3 pb-24 pt-3">{children}</main>
             <TgNav />
           </TelegramGate>
         </Providers>

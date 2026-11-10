@@ -44,7 +44,7 @@ export class SystemController {
       realtime: redis, api: 'operational',
     };
     const overall = Object.values(components).includes('outage') ? 'outage' : Object.values(components).some((c) => c !== 'operational') ? 'degraded' : 'operational';
-    return { overall, components, ledgerCheckedAt: inv?.at ? new Date(inv.at).toISOString() : null, responseMs: Date.now() - t0, updatedAt: new Date().toISOString() };
+    return { overall, components, testMode: this.ctx.providers.mode === 'mock' && process.env.NODE_ENV !== 'production', ledgerCheckedAt: inv?.at ? new Date(inv.at).toISOString() : null, responseMs: Date.now() - t0, updatedAt: new Date().toISOString() };
   }
   @Public() @Get('v1/openapi.json') openapi() { return buildOpenApi(ROUTES()); }
 }

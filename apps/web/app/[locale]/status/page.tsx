@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Badge, Card, CardContent, CardHeader, CardTitle } from '@p2p/ui';
+import { Activity, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { Badge, Card, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
 import { api } from '../../../lib/api';
 
@@ -11,11 +12,19 @@ export default function Status() {
   const [s, setS] = useState<any>(null);
   useEffect(() => { const load = () => api('/status').then(setS).catch(() => setS({ overall: 'outage', components: {} })); load(); const i = setInterval(load, 30_000); return () => clearInterval(i); }, []);
   if (!s) return null;
+  const Icon = s.overall === 'operational' ? CheckCircle2 : s.overall === 'outage' ? XCircle : AlertTriangle;
   return (
-    <Card className="mx-auto max-w-xl"><CardHeader><CardTitle className="flex items-center justify-between">{t('launch.statusTitle')}<Badge variant={VARIANT[s.overall]} data-testid="status-overall">{t(`launch.${s.overall}`)}</Badge></CardTitle></CardHeader>
-      <CardContent className="space-y-2">
-        {Object.entries(s.components ?? {}).map(([k, v]) => <div key={k} className="flex justify-between text-sm"><span>{t(`launch.${k}`)}</span><Badge variant={VARIANT[v as string]}>{t(`launch.${v}`)}</Badge></div>)}
-        {s.updatedAt && <p className="pt-2 text-xs text-muted-foreground">{date(s.updatedAt)}</p>}
-      </CardContent></Card>
+    <div className="mx-auto max-w-2xl space-y-5">
+      <Card className={cn('flex items-center gap-4 p-6', s.overall === 'operational' ? 'border-buy/40 bg-buy/5' : s.overall === 'outage' ? 'border-sell/40 bg-sell/5' : 'border-warn/40 bg-warn/5')}>
+        <Icon size={36} className={s.overall === 'operational' ? 'text-buy' : s.overall === 'outage' ? 'text-sell' : 'text-warn'} />
+        <div className="flex-1"><h1 className="text-xl font-bold">{t('launch.statusTitle')}</h1>{s.updatedAt && <p className="text-xs text-muted-foreground">{date(s.updatedAt)}</p>}</div>
+        <Badge variant={VARIANT[s.overall]} data-testid="status-overall">{t(`launch.${s.overall}`)}</Badge>
+      </Card>
+      <Card className="divide-y divide-border">
+        {Object.entries(s.components ?? {}).map(([k, v]) => (
+          <div key={k} className="flex items-center justify-between px-5 py-4 text-sm"><span className="flex items-center gap-2"><Activity size={15} className="text-muted-foreground" />{t(`launch.${k}`)}</span><Badge variant={VARIANT[v as string]}>{t(`launch.${v}`)}</Badge></div>
+        ))}
+      </Card>
+    </div>
   );
 }

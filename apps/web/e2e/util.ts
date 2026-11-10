@@ -22,7 +22,7 @@ export async function signupAndLogin(page: Page, country = 'DE'): Promise<Acct> 
   return a;
 }
 export async function enable2fa(page: Page, a: Acct) {
-  await page.goto('/en/wallet');
+  await page.goto('/en/account');
   await page.getByTestId('totp-setup').click();
   a.secret = (await page.getByTestId('totp-secret').textContent())!.trim();
   await page.getByTestId('totp-code').fill(authenticator.generate(a.secret));

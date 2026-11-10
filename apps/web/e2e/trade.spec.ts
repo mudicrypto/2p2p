@@ -25,13 +25,13 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await seller.getByTestId('pm-SEPA').check();
   await seller.getByLabel('Terms').fill('SEPA only, include the reference code.');
   await seller.getByTestId('publish-ad').click();
-  await expect(seller).toHaveURL(/\/en\/wallet/);
+  await expect(seller).toHaveURL(/\/en\/ads$/);
 
   // ---------------- buyer / taker
   const bCtx = await browser.newContext();
   const buyer = await bCtx.newPage();
   await signupAndLogin(buyer);
-  await buyer.goto('/en');
+  await buyer.goto('/en/p2p');
   await buyer.getByTestId('fiat').selectOption('EUR');
   const row = buyer.getByTestId('ad-row').filter({ hasText: '0.97' }).first();
   await expect(row).toBeVisible();
