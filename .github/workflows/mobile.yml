@@ -44,6 +44,7 @@ jobs:
         run: npx expo prebuild --platform android --no-install
       - name: Build release APK
         working-directory: apps/mobile/android
+        shell: bash
         run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,x86_64
       - uses: actions/upload-artifact@v4
         with:
@@ -68,12 +69,25 @@ jobs:
         run: pod install
       - name: Build simulator app
         working-directory: apps/mobile/ios
+        shell: bash
         run: |
+          set -euo pipefail
           WS=$(ls -d *.xcworkspace | head -1); SCHEME="${WS%.xcworkspace}"
-          xcodebuild -workspace "$WS" -scheme "$SCHEME" -configuration Release -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO | tail -n 50
+          echo "workspace=$WS scheme=$SCHEME"
+          if ! xcodebuild -workspace "$WS" -scheme "$SCHEME" -configuration Release -sdk iphonesimulator \
+               -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO > xcodebuild.log 2>&1; then
+            grep -nE "error:|fatal error|\*\* BUILD FAILED" -A4 xcodebuild.log | head -150 || true
+            tail -60 xcodebuild.log
+            exit 1
+          fi
+          grep -E "\*\* BUILD SUCCEEDED" xcodebuild.log
           APP=$(ls -d build/Build/Products/Release-iphonesimulator/*.app | head -1)
+          test -n "$APP" && test -f "$APP/Info.plist"
+          du -sh "$APP"
           ditto -c -k --sequesterRsrc --keepParent "$APP" ../p2p-exchange-ios-simulator.zip
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: xcodebuild-log, path: apps/mobile/ios/xcodebuild.log }
       - uses: actions/upload-artifact@v4
         with:
           name: p2p-exchange-ios-simulator
