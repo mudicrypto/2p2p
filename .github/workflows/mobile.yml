@@ -53,10 +53,14 @@ jobs:
           if-no-files-found: error
   ios:
     needs: checks
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+      # Expo SDK 58 native modules need Swift 6.2+ (Xcode 26)
+      - uses: maxim-lobanov/setup-xcode@v1
+        with: { xcode-version: latest-stable }
+      - run: xcodebuild -version && swift --version
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
