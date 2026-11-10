@@ -343,6 +343,9 @@
   "authTitle": "Kişiden kişiye kriptoya açılan kapınız",
   "authSub": "150+ ülkedeki yatırımcılara katılın. Her siparişte emanet, sıfır alıcı ücreti.",
   "welcome": "Tekrar hoş geldiniz",
-  "corridorSub": "Tek dokunuşla para birimleri arasında para gönderin. USDT ve iki emanetli işlemle piyasa kuruna yakın sonuç alırsınız."
+  "corridorSub": "Tek dokunuşla para birimleri arasında para gönderin. USDT ve iki emanetli işlemle piyasa kuruna yakın sonuç alırsınız.",
+  "unlock": "Kilidi aç",
+  "theme": "Tema",
+  "themeAuto": "Otomatik"
  }
 }

@@ -343,6 +343,9 @@
   "authTitle": "Your gateway to peer-to-peer crypto",
   "authSub": "Join traders in 150+ countries. Escrow on every order, zero taker fees.",
   "welcome": "Welcome back",
-  "corridorSub": "Send money between currencies in one tap. We route through USDT and two escrowed trades, so you get close to the market rate."
+  "corridorSub": "Send money between currencies in one tap. We route through USDT and two escrowed trades, so you get close to the market rate.",
+  "unlock": "Unlock",
+  "theme": "Theme",
+  "themeAuto": "Auto"
  }
 }

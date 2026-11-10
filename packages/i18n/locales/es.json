@@ -343,6 +343,9 @@
   "authTitle": "Tu puerta al cripto entre personas",
   "authSub": "Únete a operadores de más de 150 países. Custodia en cada orden, sin comisiones para el comprador.",
   "welcome": "Bienvenido de nuevo",
-  "corridorSub": "Envía dinero entre monedas con un toque. Lo enrutamos vía USDT con dos operaciones en custodia para acercarte al tipo de mercado."
+  "corridorSub": "Envía dinero entre monedas con un toque. Lo enrutamos vía USDT con dos operaciones en custodia para acercarte al tipo de mercado.",
+  "unlock": "Desbloquear",
+  "theme": "Tema",
+  "themeAuto": "Automático"
  }
 }

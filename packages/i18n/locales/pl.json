@@ -343,6 +343,9 @@
   "authTitle": "Twoja brama do kryptowalut P2P",
   "authSub": "Dołącz do traderów z ponad 150 krajów. Escrow przy każdym zleceniu, zero opłat dla biorącego.",
   "welcome": "Witaj ponownie",
-  "corridorSub": "Wysyłaj pieniądze między walutami jednym dotknięciem. Kierujemy je przez USDT i dwie transakcje escrow, blisko kursu rynkowego."
+  "corridorSub": "Wysyłaj pieniądze między walutami jednym dotknięciem. Kierujemy je przez USDT i dwie transakcje escrow, blisko kursu rynkowego.",
+  "unlock": "Odblokuj",
+  "theme": "Motyw",
+  "themeAuto": "Auto"
  }
 }

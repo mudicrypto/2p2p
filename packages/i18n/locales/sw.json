@@ -343,6 +343,9 @@
   "authTitle": "Lango lako la kripto ya mtu kwa mtu",
   "authSub": "Jiunge na wafanyabiashara katika nchi 150+. Escrow kwenye kila oda, hakuna ada ya mpokeaji.",
   "welcome": "Karibu tena",
-  "corridorSub": "Tuma pesa kati ya sarafu kwa mguso mmoja. Tunapitisha kupitia USDT na biashara mbili za escrow ili upate kiwango karibu na cha soko."
+  "corridorSub": "Tuma pesa kati ya sarafu kwa mguso mmoja. Tunapitisha kupitia USDT na biashara mbili za escrow ili upate kiwango karibu na cha soko.",
+  "unlock": "Fungua",
+  "theme": "Mandhari",
+  "themeAuto": "Otomatiki"
  }
 }

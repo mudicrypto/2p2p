@@ -343,6 +343,9 @@
   "authTitle": "Sua porta de entrada para cripto P2P",
   "authSub": "Junte-se a negociadores de mais de 150 países. Custódia em cada ordem, zero taxa taker.",
   "welcome": "Bem-vindo de volta",
-  "corridorSub": "Envie dinheiro entre moedas com um toque. Roteamos via USDT em duas negociações com custódia para você chegar perto da taxa de mercado."
+  "corridorSub": "Envie dinheiro entre moedas com um toque. Roteamos via USDT em duas negociações com custódia para você chegar perto da taxa de mercado.",
+  "unlock": "Desbloquear",
+  "theme": "Tema",
+  "themeAuto": "Automático"
  }
 }

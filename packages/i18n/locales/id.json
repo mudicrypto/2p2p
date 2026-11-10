@@ -343,6 +343,9 @@
   "authTitle": "Gerbang Anda ke kripto P2P",
   "authSub": "Bergabung dengan trader di 150+ negara. Escrow di setiap pesanan, tanpa biaya taker.",
   "welcome": "Selamat datang kembali",
-  "corridorSub": "Kirim uang antarmata uang dalam satu ketukan. Kami rutekan via USDT dan dua transaksi escrow agar kurs mendekati pasar."
+  "corridorSub": "Kirim uang antarmata uang dalam satu ketukan. Kami rutekan via USDT dan dua transaksi escrow agar kurs mendekati pasar.",
+  "unlock": "Buka kunci",
+  "theme": "Tema",
+  "themeAuto": "Otomatis"
  }
 }

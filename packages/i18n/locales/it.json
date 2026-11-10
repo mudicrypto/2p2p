@@ -343,6 +343,9 @@
   "authTitle": "La tua porta verso le cripto P2P",
   "authSub": "Unisciti a trader in oltre 150 paesi. Garanzia su ogni ordine, zero commissioni per chi accetta.",
   "welcome": "Bentornato",
-  "corridorSub": "Invia denaro tra valute con un tocco. Passiamo per USDT e due scambi in garanzia per avvicinarci al tasso di mercato."
+  "corridorSub": "Invia denaro tra valute con un tocco. Passiamo per USDT e due scambi in garanzia per avvicinarci al tasso di mercato.",
+  "unlock": "Sblocca",
+  "theme": "Tema",
+  "themeAuto": "Auto"
  }
 }

@@ -343,6 +343,9 @@
   "authTitle": "Cánh cửa đến với tiền mã hóa P2P",
   "authSub": "Tham gia cùng nhà giao dịch tại hơn 150 quốc gia. Ký quỹ mọi lệnh, không phí người khớp.",
   "welcome": "Chào mừng trở lại",
-  "corridorSub": "Chuyển tiền giữa các loại tiền chỉ với một chạm. Đi qua USDT và hai giao dịch ký quỹ để gần với tỷ giá thị trường."
+  "corridorSub": "Chuyển tiền giữa các loại tiền chỉ với một chạm. Đi qua USDT và hai giao dịch ký quỹ để gần với tỷ giá thị trường.",
+  "unlock": "Mở khóa",
+  "theme": "Giao diện",
+  "themeAuto": "Tự động"
  }
 }

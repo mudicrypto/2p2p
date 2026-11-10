@@ -343,6 +343,9 @@
   "authTitle": "Ihr Zugang zu Peer-to-Peer-Krypto",
   "authSub": "Handeln Sie mit Menschen in über 150 Ländern. Treuhand bei jedem Auftrag, keine Taker-Gebühren.",
   "welcome": "Willkommen zurück",
-  "corridorSub": "Geld mit einem Tipp zwischen Währungen senden. Wir routen über USDT und zwei Treuhand-Trades – nah am Marktkurs."
+  "corridorSub": "Geld mit einem Tipp zwischen Währungen senden. Wir routen über USDT und zwei Treuhand-Trades – nah am Marktkurs.",
+  "unlock": "Entsperren",
+  "theme": "Design",
+  "themeAuto": "Auto"
  }
 }

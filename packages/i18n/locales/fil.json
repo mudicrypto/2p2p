@@ -343,6 +343,9 @@
   "authTitle": "Ang daan mo sa peer-to-peer na crypto",
   "authSub": "Sumali sa mga trader sa 150+ bansa. Escrow sa bawat order, walang bayad para sa taker.",
   "welcome": "Maligayang pagbabalik",
-  "corridorSub": "Magpadala ng pera sa ibang currency sa isang tap. Dumadaan sa USDT at dalawang escrow trade para malapit sa market rate."
+  "corridorSub": "Magpadala ng pera sa ibang currency sa isang tap. Dumadaan sa USDT at dalawang escrow trade para malapit sa market rate.",
+  "unlock": "I-unlock",
+  "theme": "Tema",
+  "themeAuto": "Auto"
  }
 }

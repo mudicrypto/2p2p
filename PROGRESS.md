@@ -275,6 +275,32 @@ pnpm test                          # needs Postgres at TEST_DATABASE_URL (defaul
 - ✅ Status and legal pages render in the browser (Playwright, 56/56 web tests).
 - ⛔ `terraform validate/plan/apply` and `kubectl apply` were not run here (no terraform binary / cloud account in this sandbox); CI job `infra` validates both. Needs: AWS account + state bucket/lock table, domains + TLS certs, container registry.
 
+## Post-M16 — Complete UI redesign (web, Telegram, iOS & Android) ✅
+
+**Web** (`apps/web`, shared `packages/ui`): own brand (violet→cyan gradient, Inter, dark-first with light mode), Binance-class
+information density. New landing page with live offers; market at `/p2p`; two-way trade dialog (fiat ⇄ crypto, bigint maths,
+limit validation); order page with progress stepper, countdown, copyable payee details, safety tips, dispute flow with evidence
+upload, feedback and a redesigned chat; wallet with deposit address + QR, withdrawals with the address allowlist, internal
+transfers, history, limits and payment methods; new `/account` (KYC levels, 2FA, phone, password, merchant program) and `/ads`
+(my ads: pause/resume/close); split-layout auth; restyled profile, notifications, corridor, status and legal pages.
+Test-mode faucet only shows when `/v1/status` reports mock providers (`testMode`).
+**Telegram Mini App:** icon tab bar, theme follows Telegram's colour scheme. **i18n:** 115 new strings in all 26 locales.
+
+**Mobile** (`apps/mobile`): full native redesign — tab navigation (Market / My orders / Wallet / Account), market feed,
+trade sheet, order screen with stepper, countdown, copy-to-clipboard payee details, biometric-confirmed release, chat;
+wallet with QR deposits and allowlisted withdrawals; account with verification levels, language picker (26 locales, bundled
+statically) and theme; sign up / log in; notifications; haptics; app icon, adaptive icon, splash. Bearer-token API client,
+Keychain/Keystore token storage, biometric lock, push, deep links unchanged. `eas.json` profiles; CI workflow
+`.github/workflows/mobile.yml` builds a release **Android APK** and an **iOS simulator app** as downloadable artifacts.
+
+**Acceptance**
+- ✅ Web E2E 56/56 + Telegram E2E 1/1 on the new UI (routes/test ids updated); API 27/27; i18n complete in 26 locales.
+- ✅ Screenshot review desktop/mobile, dark/light, RTL (`/ar`) — no horizontal overflow.
+- ✅ Mobile: typecheck, 7 logic tests (float-free conversions, formatting, locale bundling), `expo export` iOS + Android;
+  UI verified via react-native-web preview against the real API (sign-up → faucet → buy → order).
+- ⚠️ Native binaries are built in GitHub Actions (this sandbox may not run the Android SDK/Xcode). Store builds need your
+  Expo/EAS, Apple Developer and Google Play accounts (`apps/mobile/README.md`).
+
 ---
 
 # Summary of blockers (everything else is built and tested on mocks)

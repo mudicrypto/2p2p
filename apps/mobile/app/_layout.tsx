@@ -1,25 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppState, Button, Text, View } from 'react-native';
+import { AppState, I18nManager, View } from 'react-native';
 import { Stack, router } from 'expo-router';
 import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { biometricUnlock, registerForPush, tokenStore } from '../src/native';
 import { initialLock, onAppState, onUnlock } from '../src/lock';
 import { parseDeepLink, routeForNotification, routeToPath } from '../src/deeplink';
+import { AppProvider, useApp } from '../src/app';
+import { useI18n } from '../src/i18n';
+import { Button, Gradient, Text } from '../src/ui';
 
-export default function Root() {
+function Shell() {
+  const { colors: c, scheme, me } = useApp();
+  const { t, rtl } = useI18n();
   const [lock, setLock] = useState(initialLock);
   const lockRef = useRef(lock);
   lockRef.current = lock;
-  const unlock = async () => { if (await biometricUnlock('Unlock P2P Exchange')) setLock(onUnlock); };
-  useEffect(() => { void unlock(); }, []);
+  const unlock = async () => { if (await biometricUnlock(t('app.name'))) setLock(onUnlock); };
+  useEffect(() => { void unlock(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+  useEffect(() => { if (I18nManager.isRTL !== rtl) { I18nManager.allowRTL(rtl); I18nManager.forceRTL(rtl); } }, [rtl]); // applies on next launch
   useEffect(() => {
     const sub = AppState.addEventListener('change', (s) => setLock((l) => onAppState(l, s === 'active' ? 'active' : 'background', Date.now())));
     return () => sub.remove();
   }, []);
-  useEffect(() => { if (!lock.locked) void tokenStore.get().then((t) => t && registerForPush().catch(() => null)); }, [lock.locked]);
-  // Deep links (custom scheme + universal links) and notification taps.
+  useEffect(() => { if (!lock.locked && me) void tokenStore.get().then((tk) => tk && registerForPush().catch(() => null)); }, [lock.locked, me]);
   useEffect(() => {
     const go = (url: string | null) => { if (!url) return; const r = parseDeepLink(url); if (r.screen !== 'unknown') router.push(routeToPath(r) as never); };
     void Linking.getInitialURL().then(go);
@@ -28,10 +35,32 @@ export default function Root() {
     return () => { l.remove(); n.remove(); };
   }, []);
   if (lock.locked) return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-      <Text style={{ fontSize: 18 }}>P2P Exchange is locked</Text>
-      <Button title="Unlock" onPress={unlock} />
+    <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 32 }}>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <Gradient style={{ width: 84, height: 84, borderRadius: 26, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="swap-horizontal" size={42} color="#fff" /></Gradient>
+      <Text size="h2">{t('app.name')}</Text>
+      <Button title={t('ui.unlock')} icon="finger-print" onPress={unlock} style={{ alignSelf: 'stretch' }} />
     </View>
   );
-  return (<><StatusBar style="auto" /><Stack screenOptions={{ headerTitleAlign: 'center' }} /></>);
+  const modal = { presentation: 'modal' as const, headerShown: true, headerStyle: { backgroundColor: c.card }, headerTintColor: c.text, headerShadowVisible: false, contentStyle: { backgroundColor: c.bg } };
+  return (
+    <>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg }, headerStyle: { backgroundColor: c.bg }, headerTintColor: c.text, headerShadowVisible: false, headerBackButtonDisplayMode: 'minimal' }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="orders/[id]" options={{ headerShown: true, title: '' }} />
+        <Stack.Screen name="trade" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="deposit" options={{ ...modal, title: t('ui.deposit') }} />
+        <Stack.Screen name="withdraw" options={{ ...modal, title: t('ui.withdraw') }} />
+        <Stack.Screen name="login" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="signup" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="notifications" options={{ headerShown: true, title: t('notifications.title') }} />
+        <Stack.Screen name="language" options={{ ...modal, title: t('nav.language') }} />
+      </Stack>
+    </>
+  );
+}
+
+export default function Root() {
+  return <SafeAreaProvider><AppProvider><Shell /></AppProvider></SafeAreaProvider>;
 }

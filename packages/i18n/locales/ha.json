@@ -343,6 +343,9 @@
   "authTitle": "Ƙofarka zuwa kirifto tsakanin mutane",
   "authSub": "Shiga 'yan kasuwa a ƙasashe 150+. Escrow a kowace oda, babu kuɗin taker.",
   "welcome": "Barka da dawowa",
-  "corridorSub": "Aika kuɗi tsakanin kuɗaɗe da taɓawa ɗaya. Muna bi ta USDT da cinikai biyu na escrow don kusa da farashin kasuwa."
+  "corridorSub": "Aika kuɗi tsakanin kuɗaɗe da taɓawa ɗaya. Muna bi ta USDT da cinikai biyu na escrow don kusa da farashin kasuwa.",
+  "unlock": "Buɗe",
+  "theme": "Jigo",
+  "themeAuto": "Atomatik"
  }
 }

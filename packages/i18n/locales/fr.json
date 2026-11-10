@@ -343,6 +343,9 @@
   "authTitle": "Votre porte d'entrée vers la crypto P2P",
   "authSub": "Rejoignez des traders dans plus de 150 pays. Séquestre sur chaque commande, zéro frais preneur.",
   "welcome": "Bon retour",
-  "corridorSub": "Envoyez de l'argent entre devises en un geste. Nous passons par l'USDT et deux échanges sous séquestre, au plus près du taux du marché."
+  "corridorSub": "Envoyez de l'argent entre devises en un geste. Nous passons par l'USDT et deux échanges sous séquestre, au plus près du taux du marché.",
+  "unlock": "Déverrouiller",
+  "theme": "Thème",
+  "themeAuto": "Auto"
  }
 }
