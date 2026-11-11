@@ -27,7 +27,7 @@ export default function MyAds() {
         {ads === null && Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-44 rounded-2xl" />)}
         {ads?.length === 0 && (
           <Card className="col-span-full flex flex-col items-center gap-4 p-12 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-white"><Megaphone size={26} /></div>
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-primary-foreground"><Megaphone size={26} /></div>
             <p className="max-w-sm text-sm text-muted-foreground">{t('ui.noAds')}</p>
             <Link href={L('/ads/new')}><Button>{t('ad.new')}</Button></Link>
           </Card>
@@ -40,7 +40,7 @@ export default function MyAds() {
                 <div className={cn('font-semibold', a.side === 'sell' ? 'text-sell' : 'text-buy')}>{t(a.side === 'sell' ? 'market.sellAction' : 'market.buyAction', { asset: a.asset })} · {a.fiat}</div>
                 <div className="num text-xl font-bold">{money(a.price, a.fiat)}</div>
               </div>
-              <Badge variant={a.status === 'active' ? 'success' : 'warning'}>{a.status === 'active' ? t('ui.active') : t('ui.paused')}</Badge>
+              <Badge variant={a.status === 'active' ? 'success' : 'warning'}>{a.status === 'active' ? t('ui.adActive') : t('ui.paused')}</Badge>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div><div className="text-xs text-muted-foreground">{t('market.available')}</div><div className="num">{num(a.remainingAmount)} / {num(a.totalAmount)} {a.asset}</div></div>

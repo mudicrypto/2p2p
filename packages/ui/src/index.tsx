@@ -17,7 +17,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-brand text-white shadow-[0_8px_24px_-10px_rgb(123_97_255/0.8)] hover:brightness-110',
+        default: 'bg-brand font-bold text-primary-foreground shadow-[0_10px_30px_-12px_rgb(245_181_10/0.7)] hover:brightness-105',
         buy: 'bg-buy text-[#04130d] hover:brightness-110 shadow-[0_8px_24px_-12px_rgb(31_203_139/0.9)]',
         sell: 'bg-sell text-white hover:brightness-110 shadow-[0_8px_24px_-12px_rgb(255_77_106/0.9)]',
         outline: 'border border-border bg-transparent text-foreground hover:bg-muted',
@@ -157,13 +157,34 @@ export function PayChip({ code, label, className }: { code: string; label?: stri
     </span>
   );
 }
-export function Logo({ className, size = 30 }: { className?: string; size?: number }) {
+/** Brand configuration: the product name is temporary, change it here (and `app.name` in the locales). */
+export const BRAND = { name: 'KRYPTA', tagline: 'Trade Crypto Your Way' } as const;
+
+/** Gold "K" monogram: a slanted stem, an upper arm and a detached lower leg. */
+export function Logo({ className, size = 30, mono }: { className?: string; size?: number; mono?: boolean }) {
+  const id = React.useId().replace(/:/g, '');
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className} aria-hidden>
-      <defs><linearGradient id="p2p-lg" x1="2" y1="2" x2="30" y2="30" gradientUnits="userSpaceOnUse"><stop stopColor="#7b61ff" /><stop offset="1" stopColor="#37c8ff" /></linearGradient></defs>
-      <rect width="32" height="32" rx="9" fill="url(#p2p-lg)" />
-      <path d="M9 12.5h11.5m0 0-3.2-3.2m3.2 3.2-3.2 3.2M23 19.5H11.5m0 0 3.2-3.2m-3.2 3.2 3.2 3.2" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className} aria-hidden>
+      <defs>
+        <linearGradient id={`k${id}`} x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#ffd866" /><stop offset="0.5" stopColor="#f5b50a" /><stop offset="1" stopColor="#d98e00" />
+        </linearGradient>
+      </defs>
+      <g fill={mono ? 'currentColor' : `url(#k${id})`}>
+        <path d="M9 5h9.5l-4.6 38H4.4L9 5Z" />
+        <path d="M19.4 27.2 37.8 5H48L26.6 30.6l-7.2-3.4Z" />
+        <path d="M27.8 32.4 35.6 43H46L33.6 26.2l-5.8 6.2Z" />
+      </g>
     </svg>
+  );
+}
+/** Monogram + wordmark lockup. */
+export function Wordmark({ className, size = 30 }: { className?: string; size?: number }) {
+  return (
+    <span className={cn('inline-flex items-center gap-2.5', className)}>
+      <Logo size={size} />
+      <span className="font-bold tracking-[0.08em] text-foreground" style={{ fontSize: size * 0.62 }}>{BRAND.name}</span>
+    </span>
   );
 }
 
@@ -217,7 +238,7 @@ export function Stepper({ steps, current, failed }: { steps: React.ReactNode[]; 
           <li key={i} className="relative flex flex-1 flex-col items-center text-center">
             {i > 0 && <span className={cn('absolute end-1/2 top-3.5 -z-0 h-0.5 w-full', done || active ? 'bg-primary' : 'bg-border')} />}
             <span className={cn('relative z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 text-xs font-bold',
-              done ? 'border-primary bg-primary text-white' : active ? (failed ? 'border-sell bg-sell/15 text-sell' : 'border-primary bg-background text-primary') : 'border-border bg-background text-muted-foreground')}>
+              done ? 'border-primary bg-primary text-primary-foreground' : active ? (failed ? 'border-sell bg-sell/15 text-sell' : 'border-primary bg-background text-primary') : 'border-border bg-background text-muted-foreground')}>
               {done ? <Check size={14} /> : i + 1}
             </span>
             <span className={cn('mt-2 px-1 text-[11px] font-medium leading-tight sm:text-xs', done || active ? 'text-foreground' : 'text-muted-foreground')}>{s}</span>

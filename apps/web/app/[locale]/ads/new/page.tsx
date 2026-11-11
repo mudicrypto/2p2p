@@ -15,7 +15,7 @@ const ASSETS = ['USDT', 'BTC', 'ETH'];
 function Section({ n, title, children }: { n: number; title: React.ReactNode; children: React.ReactNode }) {
   return (
     <Card className="p-5 sm:p-6">
-      <div className="mb-4 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">{n}</span><h2 className="font-semibold">{title}</h2></div>
+      <div className="mb-4 flex items-center gap-3"><span className="flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs font-bold text-primary-foreground">{n}</span><h2 className="font-semibold">{title}</h2></div>
       {children}
     </Card>
   );

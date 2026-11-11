@@ -49,7 +49,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const disputeIn = useCountdown(o?.status === 'PAID' ? o.disputeAvailableAt : null);
   if (!o) return err ? <ErrorText error={err} /> : <div className="grid gap-4 lg:grid-cols-[1fr_400px]"><Skeleton className="h-[520px] rounded-2xl" /><Skeleton className="h-[520px] rounded-2xl" /></div>;
   const act = async (path: string, body?: unknown) => { setErr(null); setBusy(path); try { setO(await api(`/orders/${id}/${path}`, { body: body ?? {} })); } catch (e) { setErr(e); } finally { setBusy(''); } };
-  const step = o.status === 'AWAITING_PAYMENT' || o.status === 'CREATED' ? 0 : o.status === 'PAID' || o.status === 'DISPUTED' ? 1 : o.status === 'COMPLETED' ? 3 : 0;
+  const step = o.status === 'AWAITING_PAYMENT' || o.status === 'CREATED' ? 1 : o.status === 'PAID' || o.status === 'DISPUTED' ? 2 : o.status === 'COMPLETED' ? 4 : 1;
   const buyer = o.role === 'buyer';
   const cpName = o.counterparty?.displayName ?? o.counterparty?.id?.slice(0, 8);
   const canDispute = o.status === 'PAID' && disputeIn && disputeIn.s === 0;
@@ -71,10 +71,10 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                 <h1 className="text-xl font-bold tracking-tight sm:text-2xl">{headline}</h1>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><Badge variant={variant(o.status) as any} data-testid="order-status" data-status={o.status}>{t(`order.status.${o.status}`)}</Badge><span className="font-mono">#{o.id.slice(0, 8)}</span><span>{date(o.createdAt)}</span></div>
               </div>
-              {left && <div className="rounded-2xl bg-card px-4 py-2 text-center shadow-sm"><div className="flex items-center justify-center gap-1 text-[11px] text-muted-foreground"><Timer size={12} />{t('order.timeLeft')}</div><div className={cn('num font-mono text-2xl font-bold', left.s < 120 ? 'text-sell' : 'text-foreground')} data-testid="countdown">{left.text}</div></div>}
+              {left && <div className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-card px-4 py-2 shadow-sm"><span className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary text-primary"><Timer size={18} /></span><div><div className="text-[11px] text-muted-foreground">{t('ui.paymentTime')}</div><div className={cn('num font-mono text-2xl font-bold', left.s < 120 ? 'text-sell' : 'text-foreground')} data-testid="countdown">{left.text}</div></div></div>}
             </div>
             <div className="px-5 py-5 sm:px-6">
-              <Stepper steps={[buyer ? t('ui.stepPay') : t('ui.stepWaitPay'), buyer ? t('ui.stepWaitRelease') : t('ui.stepRelease'), t('order.status.COMPLETED')]} current={step} failed={o.status === 'DISPUTED' || o.status === 'CANCELLED'} />
+              <Stepper steps={[t('ui.stepCreated'), t('ui.stepAwaiting'), t('ui.stepVerify'), t('ui.stepReleaseCrypto')]} current={step} failed={o.status === 'DISPUTED' || o.status === 'CANCELLED'} />
             </div>
           </Card>
 
@@ -82,7 +82,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
           <Card className="p-5 sm:p-6">
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               <div><div className="text-xs text-muted-foreground">{t('order.amount')}</div><div className="num text-xl font-bold" data-testid="fiat-amount">{money(o.fiatAmount, o.fiat)}</div></div>
-              <div><div className="text-xs text-muted-foreground">{t('order.price')}</div><div className="num font-semibold">{money(o.price, o.fiat)}</div></div>
+              <div><div className="text-xs text-muted-foreground">{t('order.price')}</div><div className="num font-semibold">{num(o.price, 8)} {o.fiat}</div></div>
               <div><div className="text-xs text-muted-foreground">{buyer ? t('trade.youReceive') : t('trade.youSell')}</div><div className="num font-semibold">{num(o.cryptoAmount)} {o.asset}</div></div>
               <div><div className="text-xs text-muted-foreground">{t('order.fee')}</div><div className="num font-semibold">{num(o.fee)} {o.asset}</div></div>
             </div>
@@ -114,6 +114,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
               <div className="flex flex-col gap-2 sm:flex-row"><Button variant="buy" size="lg" className="flex-1" loading={busy === 'paid'} onClick={() => act('paid')} data-testid="mark-paid"><CheckCircle2 size={18} />{t('order.markPaid')}</Button>
                 <Button variant="outline" size="lg" onClick={() => act('cancel')} data-testid="cancel"><XCircle size={18} />{t('order.cancel')}</Button></div>
             </>}
+            {buyer && ['AWAITING_PAYMENT', 'PAID'].includes(o.status) && <ReceiptButton orderId={id} />}
             {!buyer && o.status === 'AWAITING_PAYMENT' && <Alert>{t('ui.sellerWaiting')}</Alert>}
             {buyer && o.status === 'PAID' && <Alert>{t('ui.buyerWaiting')}</Alert>}
             {!buyer && o.status === 'PAID' && <>
@@ -198,5 +199,24 @@ function DisputeCard({ dispute, orderId, onEvidence }: { dispute: any; orderId: 
         <Button size="sm" variant="outline" onClick={() => ref.current?.click()}><Paperclip size={14} />{t('ui.evidence')}</Button>
       </>}
     </div>
+  );
+}
+
+/** Buyer uploads proof of payment; it is posted into the order chat (visible to the seller and to arbiters). */
+function ReceiptButton({ orderId }: { orderId: string }) {
+  const { t } = useI18n();
+  const ref = useRef<HTMLInputElement>(null);
+  const [state, setState] = useState<'idle' | 'busy' | 'done'>('idle');
+  return (
+    <>
+      <input ref={ref} type="file" hidden accept="image/png,image/jpeg,image/webp,application/pdf" data-testid="receipt-file" onChange={async (e) => {
+        const f = e.target.files?.[0]; if (!f) return; setState('busy');
+        try { const key = await uploadAttachment(orderId, f); await api(`/orders/${orderId}/messages`, { body: { body: '', attachmentKey: key } }); setState('done'); } catch { setState('idle'); }
+        e.target.value = '';
+      }} />
+      <Button variant="outline" className="w-full" loading={state === 'busy'} onClick={() => ref.current?.click()} data-testid="upload-receipt">
+        {state === 'done' ? <CheckCircle2 size={16} className="text-buy" /> : <Paperclip size={16} />}{state === 'done' ? t('ui.receiptSent') : t('ui.uploadReceipt')}
+      </Button>
+    </>
   );
 }

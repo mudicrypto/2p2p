@@ -113,7 +113,7 @@ export default function Account() {
       <Card className="relative overflow-hidden p-6">
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/15 via-transparent to-primary-2/10" />
         <div className="relative flex flex-wrap items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-white"><Store size={22} /></div>
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand text-primary-foreground"><Store size={22} /></div>
           <div className="min-w-0 flex-1"><div className="font-semibold">{t('ui.merchantTitle')}</div><p className="text-sm text-muted-foreground">{t('ui.merchantDesc')}</p></div>
           {merchant && merchant.status !== 'none' ? <Badge variant={merchant.verifiedBadge ? 'success' : 'warning'}>{merchant.status}</Badge>
             : <Button disabled={tier < 2} onClick={() => run(() => api('/merchant-program/apply', { body: { businessName: name, country: me.country, expectedMonthlyVolumeUsd: 100000 } }))}><ShieldCheck size={16} />{t('ui.apply')}</Button>}

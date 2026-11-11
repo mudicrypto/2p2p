@@ -9,6 +9,7 @@ import { useSession } from '../../../lib/session';
 import { api } from '../../../lib/api';
 import { useL } from '../../../components/nav';
 import { ErrorText } from '../../../components/errors';
+import { useDisplayFiat, useQuotes, valuate } from '../../../lib/market';
 
 type Bal = Record<string, Record<string, string>>;
 /** Mirrors packages/shared ASSETS (networks per asset). */
@@ -24,6 +25,9 @@ export default function Wallet() {
   const [limits, setLimits] = useState<any>(null);
   const [testMode, setTestMode] = useState(false);
   const [hide, setHide] = useState(false);
+  const [fiat] = useDisplayFiat();
+  const quotes = useQuotes(fiat);
+  const est = bal ? valuate(bal, quotes) : null;
   const [dlg, setDlg] = useState<null | { kind: 'deposit' | 'withdraw' | 'transfer'; asset: string }>(null);
   const [hist, setHist] = useState<'deposits' | 'withdrawals'>('deposits');
   const [rows, setRows] = useState<{ deposits: any[]; withdrawals: any[] }>({ deposits: [], withdrawals: [] });
@@ -33,6 +37,10 @@ export default function Wallet() {
     setBal(b); setLimits(l); setRows({ deposits: d, withdrawals: w });
   }, []);
   useEffect(() => { void load(); api('/status').then((s) => setTestMode(!!s.testMode)).catch(() => {}); }, [load]);
+  useEffect(() => { // deep link from Home: /wallet?action=deposit|withdraw|transfer
+    const a = new URLSearchParams(window.location.search).get('action');
+    if (a === 'deposit' || a === 'withdraw' || a === 'transfer') setDlg({ kind: a, asset: 'USDT' });
+  }, []);
   const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); await load(); await refresh(); } catch (e) { setErr(e); } };
   const mask = (v: string) => (hide ? '••••' : v);
   const usedPct = limits && limits.daily && limits.daily !== '0' ? Math.min(100, Math.round((Number(limits.usedToday) / Number(limits.daily)) * 100)) : 0;
@@ -41,12 +49,12 @@ export default function Wallet() {
     <div className="space-y-6">
       {/* Overview */}
       <Card className="relative overflow-hidden p-6 sm:p-8">
-        <div className="pointer-events-none absolute -end-24 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute -end-24 -top-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">{t('wallet.title')}<button aria-label="toggle" onClick={() => setHide(!hide)} className="hover:text-foreground">{hide ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
-            <div className="num mt-1 text-4xl font-bold tracking-tight sm:text-5xl">{mask(num(bal?.USDT?.available ?? '0'))} <span className="text-xl font-semibold text-muted-foreground">USDT</span></div>
-            <div className="mt-1 text-sm text-muted-foreground">{t('wallet.available')}</div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">{t('ui.totalBalance')}<button aria-label="toggle" onClick={() => setHide(!hide)} className="hover:text-foreground">{hide ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
+            <div className="num mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl">{est ? mask(`≈ ${money(est.total, fiat)}`) : '—'}</div>
+            <div className="mt-1 text-sm text-muted-foreground">{mask(num(bal?.USDT?.available ?? '0'))} USDT {t('wallet.available').toLowerCase()} · {t('ui.indicativeNote')}</div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setDlg({ kind: 'deposit', asset: 'USDT' })} data-testid="open-deposit"><ArrowDownToLine size={16} />{t('ui.deposit')}</Button>

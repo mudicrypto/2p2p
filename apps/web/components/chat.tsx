@@ -54,7 +54,7 @@ export function Chat({ orderId, counterparty, className }: { orderId: string; co
           if (system) return <div key={m.id} className="mx-auto max-w-[90%] rounded-full bg-muted px-3 py-1 text-center text-[11px] text-muted-foreground">{m.body}</div>;
           return (
             <div key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
-              <div className={cn('max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-sm', mine ? 'rounded-ee-md bg-primary text-white' : 'rounded-es-md bg-muted')}>
+              <div className={cn('max-w-[80%] rounded-2xl px-3.5 py-2 text-sm shadow-sm', mine ? 'rounded-ee-md bg-primary text-primary-foreground' : 'rounded-es-md bg-muted')}>
                 {m.body && <div className="whitespace-pre-wrap break-words">{m.body}</div>}
                 {m.attachmentKey && <a className="mt-1 flex items-center gap-1.5 underline-offset-2 hover:underline" target="_blank" rel="noreferrer" href={`/v1/orders/${orderId}/attachments?key=${encodeURIComponent(m.attachmentKey)}`}><FileText size={14} />{t('chat.attach')}</a>}
                 <div className={cn('mt-0.5 text-end text-[10px]', mine ? 'text-white/70' : 'text-muted-foreground')}>{date(m.createdAt)}</div>
