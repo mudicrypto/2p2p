@@ -416,6 +416,8 @@
   "faq": "Pertanyaan umum",
   "disputeHelp": "Buka sengketa dari halaman pesanan jika pembayaran atau pelepasan bermasalah.",
   "statusHelp": "Status langsung trading, setoran, dan penarikan.",
-  "helpSub": "Jawaban, tips keamanan, dan cara menghubungi kami."
+  "helpSub": "Jawaban, tips keamanan, dan cara menghubungi kami.",
+  "secretKey": "Kunci rahasia",
+  "openAuthenticator": "Buka aplikasi autentikator"
  }
 }

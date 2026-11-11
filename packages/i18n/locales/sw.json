@@ -416,6 +416,8 @@
   "faq": "Maswali yanayoulizwa mara kwa mara",
   "disputeHelp": "Fungua mzozo kutoka ukurasa wa oda iwapo malipo au utoaji una tatizo.",
   "statusHelp": "Hali ya sasa ya biashara, amana na utoaji.",
-  "helpSub": "Majibu, vidokezo vya usalama na jinsi ya kutufikia."
+  "helpSub": "Majibu, vidokezo vya usalama na jinsi ya kutufikia.",
+  "secretKey": "Ufunguo wa siri",
+  "openAuthenticator": "Fungua programu ya uthibitishaji"
  }
 }

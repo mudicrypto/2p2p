@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Linking, View } from 'react-native';
+import { View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../src/native';
@@ -7,12 +7,11 @@ import { useApp } from '../src/app';
 import { useI18n } from '../src/i18n';
 import { fromScaled, toScaled } from '../src/decimal';
 import { space } from '../src/theme';
-import { Badge, Button, Card, Press, Row, Screen, Skeleton, Text, type IconName } from '../src/ui';
+import { Badge, Button, Card, Input, Notice, Press, Row, Screen, Skeleton, Text, errText, success, type IconName } from '../src/ui';
 
-const WEB = 'https://app.example.com'; // TODO(provider): production web origin
 
 export default function Merchant() {
-  const { colors: c, me, locale } = useApp();
+  const { colors: c, me } = useApp();
   const { t, money, pct, num } = useI18n();
   const [status, setStatus] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -42,7 +41,7 @@ export default function Merchant() {
       <Text size="tiny" weight="600">{label}</Text>
     </Press>
   );
-  const web = (path: string) => void Linking.openURL(`${WEB}/${locale}${path}`);
+  const [showStats, setShowStats] = useState(false);
   return (
     <Screen>
       <Row style={{ justifyContent: 'space-between' }}>
@@ -61,11 +60,18 @@ export default function Merchant() {
         <Card style={{ flex: 1, gap: 4 }}><Text style={{ fontSize: 22, fontWeight: '800' }}>{orders ? num(String(stats.done)) : '—'}</Text><Text size="tiny" tone="sub">{t('ui.completedOrders')}</Text></Card>
       </Row>
       <Row style={{ alignItems: 'flex-start' }}>
-        {tile('megaphone-outline', t('ad.mine'), () => web('/ads'))}
-        {tile('bar-chart-outline', t('ui.analytics'), () => web('/merchant'))}
+        {tile('megaphone-outline', t('ad.mine'), () => router.push('/ads'))}
+        {tile('bar-chart-outline', t('ui.analytics'), () => setShowStats((x) => !x))}
         {tile('settings-outline', t('ui.settings'), () => router.navigate('/account'))}
         {tile('headset-outline', t('ui.support'), () => router.push('/help'))}
       </Row>
+      {showStats && profile && <Card style={{ gap: 10 }}>
+        <Text weight="700">{t('ui.analytics')}</Text>
+        <Row style={{ justifyContent: 'space-between' }}><Text size="small" tone="sub">{t('profile.avgRelease')}</Text><Text size="small" weight="600">{t('common.seconds', { n: profile.avgReleaseSec })}</Text></Row>
+        <Row style={{ justifyContent: 'space-between' }}><Text size="small" tone="sub">{t('profile.disputes')}</Text><Text size="small" weight="600">{pct(profile.disputeRateBps)}</Text></Row>
+        <Row style={{ justifyContent: 'space-between' }}><Text size="small" tone="sub">{t('profile.trades30d')}</Text><Text size="small" weight="600">{profile.trades30d}</Text></Row>
+        <Row style={{ justifyContent: 'space-between' }}><Text size="small" tone="sub">{t('profile.feedback')}</Text><Text size="small" weight="600">👍 {profile.positiveFeedback} · 👎 {profile.negativeFeedback}</Text></Row>
+      </Card>}
       <Text size="h3">{t('ad.mine')}</Text>
       {ads.filter((a) => a.status !== 'closed').slice(0, 5).map((a) => (
         <Card key={a.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -75,8 +81,35 @@ export default function Merchant() {
         </Card>
       ))}
       {ads.length === 0 && <Text tone="sub" size="small" style={{ textAlign: 'center' }}>{t('ui.noAds')}</Text>}
-      {!isMerchant && status && <Card style={{ gap: 6, borderColor: `${c.primary}55` }}><Text weight="700">{t('ui.merchantTitle')}</Text><Text size="small" tone="sub">{t('ui.merchantDesc')}</Text><Button variant="outline" size="sm" title={t('ui.apply')} onPress={() => web('/merchant')} /></Card>}
-      <Button size="lg" icon="add" title={t('ui.createAd')} onPress={() => web('/ads/new')} />
+      {!isMerchant && status && <ApplyCard onDone={() => api.merchantStatus().then(setStatus).catch(() => null)} />}
+      <Button size="lg" icon="add" title={t('ui.createAd')} onPress={() => router.push('/ads/new')} />
     </Screen>
+  );
+}
+
+function ApplyCard({ onDone }: { onDone: () => void }) {
+  const { colors: c, me } = useApp();
+  const { t } = useI18n();
+  const [f, setF] = useState({ businessName: '', country: me?.country ?? '', volume: '' });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const tierOk = (me?.kycTier ?? 0) >= 2;
+  return (
+    <Card style={{ gap: 10, borderColor: `${c.primary}55` }}>
+      <Text weight="700">{t('ui.merchantTitle')}</Text>
+      <Text size="small" tone="sub">{t('ui.merchantDesc')}</Text>
+      {!tierOk ? <Notice tone="warn" text={t('errors.TIER_REQUIRED')} /> : <>
+        <Input label={t('ui.businessName')} value={f.businessName} onChangeText={(v) => setF({ ...f, businessName: v })} />
+        <Row style={{ gap: 10 }}>
+          <View style={{ flex: 1 }}><Input label={t('auth.country')} autoCapitalize="characters" maxLength={2} value={f.country} onChangeText={(v) => setF({ ...f, country: v.toUpperCase() })} /></View>
+          <View style={{ flex: 1 }}><Input label={t('ui.monthlyVolume')} keyboardType="number-pad" value={f.volume} onChangeText={(v) => setF({ ...f, volume: v.replace(/\D/g, '') })} /></View>
+        </Row>
+        {err && <Notice tone="error" text={err} />}
+        <Button variant="outline" title={t('ui.apply')} loading={busy} disabled={f.businessName.length < 2 || f.country.length !== 2} onPress={async () => {
+          setBusy(true); setErr(null);
+          try { await api.merchantApply({ businessName: f.businessName, country: f.country, expectedMonthlyVolumeUsd: Number(f.volume || '0') }); success(); onDone(); } catch (e) { setErr(errText(t, e)); } finally { setBusy(false); }
+        }} />
+      </>}
+    </Card>
   );
 }

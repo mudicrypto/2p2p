@@ -318,6 +318,12 @@ are written down in `docs/design/`. **Backend unchanged.**
 - **Data honesty:** ticker, balance valuation and market card use **indicative prices from the public order book**,
   because there is no price-history API. No synthetic 24h changes or charts. USDC is omitted (the backend doesn't support
   it). Referrals are "coming soon".
+- **Mobile feature parity (follow-up):** native create ad, my ads (pause, resume, close), payment methods, security
+  (2FA setup with QR code and copyable secret, phone verification, password change), internal transfer, disputes (reason,
+  description, photo evidence, status and adding evidence), public trader profiles, merchant application. The web origin
+  for legal and status links and universal links comes from `EXPO_PUBLIC_WEB_URL`. The web 2FA setup also shows a QR code.
+  Verified end to end in the app against the real API: payment method → 2FA → create ad → buyer order → mark paid →
+  2FA release → completed.
 - **Tests:** web E2E 56/56, Telegram 1/1, 507 unit/integration tests, mobile 7/7, i18n complete (70 new strings × 26
   locales), screenshot review in dark, light and RTL on desktop and phone.
 

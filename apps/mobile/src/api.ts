@@ -58,6 +58,20 @@ export function createApi(baseUrl: string, getToken: () => string | null | Promi
     notifications: () => call<any[]>('/notifications'),
     profile: (id: string) => call<any>(`/users/${id}/profile`),
     ad: (id: string) => call<any>(`/ads/${id}`),
+    myAds: () => call<any[]>('/me/ads'),
+    createAd: (b: Record<string, unknown>) => call<any>('/ads', { body: b }),
+    setAdStatus: (id: string, status: 'active' | 'paused' | 'closed') => call<any>(`/ads/${id}`, { method: 'PATCH', body: { status } }),
+    totpSetup: () => call<{ secret: string; otpauthUrl: string }>('/auth/2fa/setup', { body: {} }),
+    totpConfirm: (code: string) => call('/auth/2fa/confirm', { body: { code } }),
+    changePassword: (oldPassword: string, newPassword: string, totp?: string) => call('/auth/password', { body: { oldPassword, newPassword, totp } }),
+    phoneStart: (phone: string) => call<{ sent: boolean; devCode?: string }>('/auth/phone/start', { body: { phone } }),
+    phoneVerify: (phone: string, code: string) => call<{ user: any }>('/auth/phone/verify', { body: { phone, code } }),
+    transfer: (b: { asset: string; toUserId: string; amount: string; totp: string }) => call('/wallet/transfers', { body: b }),
+    dispute: (orderId: string) => call<any>(`/orders/${orderId}/dispute`),
+    openDispute: (orderId: string, b: { reason: string; note: string; evidenceKeys: string[] }) => call<any>(`/orders/${orderId}/dispute`, { body: b }),
+    addEvidence: (disputeId: string, fileKey: string, note?: string) => call(`/disputes/${disputeId}/evidence`, { body: { fileKey, note } }),
+    merchantStatus: () => call<any>('/merchant-program/status'),
+    merchantApply: (b: { businessName: string; country: string; expectedMonthlyVolumeUsd: number }) => call('/merchant-program/apply', { body: b }),
   };
 }
 export type MobileApi = ReturnType<typeof createApi>;

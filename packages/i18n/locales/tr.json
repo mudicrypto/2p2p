@@ -416,6 +416,8 @@
   "faq": "Sık sorulan sorular",
   "disputeHelp": "Ödeme veya serbest bırakmada sorun olursa sipariş sayfasından itiraz açın.",
   "statusHelp": "İşlem, yatırma ve çekimlerin canlı durumu.",
-  "helpSub": "Yanıtlar, güvenlik ipuçları ve bize nasıl ulaşacağınız."
+  "helpSub": "Yanıtlar, güvenlik ipuçları ve bize nasıl ulaşacağınız.",
+  "secretKey": "Gizli anahtar",
+  "openAuthenticator": "Doğrulayıcı uygulamayı aç"
  }
 }

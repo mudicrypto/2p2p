@@ -3,6 +3,7 @@ import { Linking, View } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../src/app';
+import { WEB_URL } from '../src/native';
 import { useI18n } from '../src/i18n';
 import { space } from '../src/theme';
 import { Card, Divider, Press, Row, Screen, Text, type IconName } from '../src/ui';
@@ -12,7 +13,7 @@ const FAQ: Array<[string, string[]]> = [
   ['ui.faqDispute', ['ui.disputeHint']], ['ui.faqFees', ['ui.hero2']], ['ui.faqSafety', ['ui.tip1', 'ui.tip2', 'ui.tip3']],
 ];
 export default function Help() {
-  const { colors: c } = useApp();
+  const { colors: c, locale } = useApp();
   const { t } = useI18n();
   const [open, setOpen] = useState<string | null>(null);
   const card = (icon: IconName, title: string, desc: string, onPress: () => void) => (
@@ -25,7 +26,7 @@ export default function Help() {
       <Text tone="sub">{t('ui.helpSub')}</Text>
       <Row style={{ flexWrap: 'wrap', gap: 10 }}>
         {card('hammer', t('order.dispute'), t('ui.disputeHelp'), () => router.navigate('/orders'))}
-        {card('pulse', t('launch.statusTitle'), t('ui.statusHelp'), () => void Linking.openURL('https://app.example.com/en/status'))}
+        {card('pulse', t('launch.statusTitle'), t('ui.statusHelp'), () => void Linking.openURL(`${WEB_URL}/${locale}/status`))}
       </Row>
       <Text size="h3">{t('ui.faq')}</Text>
       <Card style={{ paddingVertical: 0 }}>

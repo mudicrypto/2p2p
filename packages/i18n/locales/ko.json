@@ -416,6 +416,8 @@
   "faq": "자주 묻는 질문",
   "disputeHelp": "입금이나 지급에 문제가 있으면 주문 페이지에서 분쟁을 여세요.",
   "statusHelp": "거래, 입금, 출금의 실시간 상태.",
-  "helpSub": "답변, 안전 수칙, 문의 방법."
+  "helpSub": "답변, 안전 수칙, 문의 방법.",
+  "secretKey": "비밀 키",
+  "openAuthenticator": "인증 앱 열기"
  }
 }

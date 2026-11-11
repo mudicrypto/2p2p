@@ -1,13 +1,13 @@
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api, biometricUnlock } from '../../src/native';
 import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { radius, space } from '../../src/theme';
-import { AssetIcon, Avatar, Badge, Button, Card, CopyRow, Divider, Input, Notice, PayChip, Row, Skeleton, Steps, Text, errText, success } from '../../src/ui';
+import { AssetIcon, Avatar, Badge, Button, Card, CopyRow, Divider, Input, Notice, PayChip, PickerChip, Press, Row, Skeleton, Steps, Text, errText, success } from '../../src/ui';
 
 const tone = (s: string) => (s === 'COMPLETED' ? 'success' : s === 'CANCELLED' ? 'default' : s === 'DISPUTED' ? 'danger' : 'warning') as 'success' | 'default' | 'danger' | 'warning';
 function useCountdown(to?: string | null) {
@@ -45,6 +45,7 @@ export default function Order() {
   }, [id]);
   useEffect(() => { void load(); const i = setInterval(load, 3000); return () => clearInterval(i); }, [load]);
   const left = useCountdown(o?.status === 'AWAITING_PAYMENT' ? o.expiresAt : null);
+  const disputeIn = useCountdown(o?.status === 'PAID' ? o.disputeAvailableAt : null);
   if (!o) return <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}><Skeleton height={160} /><Skeleton height={220} /></View>;
   const buyer = o.role === 'buyer';
   const act = async (name: string, f: () => Promise<unknown>) => { setBusy(name); setErr(null); try { setO(await f()); success(); } catch (e) { setErr(errText(t, e)); } finally { setBusy(''); } };
@@ -108,6 +109,8 @@ export default function Order() {
           <Input label={t('order.totp')} keyboardType="number-pad" maxLength={6} value={totp} onChangeText={(v) => setTotp(v.replace(/\D/g, ''))} placeholder="••••••" style={{ letterSpacing: 8, textAlign: 'center', fontSize: 22 }} />
           <Button size="lg" variant="sell" icon="lock-open" title={t('order.release')} disabled={totp.length !== 6} loading={busy === 'release'} onPress={async () => { if (await biometricUnlock(t('order.release'))) await act('release', () => api.release(id, totp)); }} />
         </View>}
+        {o.status === 'PAID' && disputeIn && disputeIn.s > 0 && <Text size="tiny" tone="sub" style={{ textAlign: 'center' }}>{t('order.disputeIn', { time: disputeIn.text })}</Text>}
+        {(o.status === 'DISPUTED' || (o.status === 'PAID' && disputeIn?.s === 0)) && <DisputePanel orderId={id} disputed={o.status === 'DISPUTED'} onChange={load} />}
         {o.status === 'COMPLETED' && (fb ? <Notice tone="success" text={t('order.thanks')} /> : (
           <Card style={{ alignItems: 'center', gap: 12 }}>
             <Ionicons name="checkmark-circle" size={44} color={c.buy} />
@@ -118,7 +121,7 @@ export default function Order() {
 
         {/* Chat */}
         <Card style={{ gap: space(3), padding: 0, overflow: 'hidden' }}>
-          <Row style={{ padding: space(4), paddingBottom: 0 }}><Avatar name={cp} seed={o.counterparty?.id} size={32} online /><View style={{ flex: 1 }}><Text weight="700">{cp}</Text><Text size="tiny" tone="sub">{t('chat.title')}</Text></View></Row>
+          <Row style={{ padding: space(4), paddingBottom: 0 }}><Press onPress={() => o.counterparty?.id && router.push(`/profile/${o.counterparty.id}`)}><Avatar name={cp} seed={o.counterparty?.id} size={32} online /></Press><View style={{ flex: 1 }}><Text weight="700">{cp}</Text><Text size="tiny" tone="sub">{t('chat.title')}</Text></View></Row>
           <View style={{ marginHorizontal: space(4) }}><Notice tone="warn" icon="shield-half" text={t('ui.chatSafety')} /></View>
           <View style={{ paddingHorizontal: space(4), gap: 8 }}>
             {msgs.map((m) => {
@@ -141,5 +144,52 @@ export default function Order() {
         </Card>
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+}
+
+const REASONS = [['not_paid', 'ui.rNotPaid'], ['not_released', 'ui.rNotReleased'], ['wrong_amount', 'ui.rWrongAmount'], ['other', 'ui.rOther']] as const;
+async function pickImage(orderId: string) {
+  const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], base64: true, quality: 0.7 });
+  const a = r.canceled ? null : r.assets[0];
+  if (!a?.base64) return null;
+  return (await api.uploadAttachment(orderId, a.mimeType ?? 'image/jpeg', a.base64)).key;
+}
+/** Open a dispute (reason, description, evidence) or follow an open one. */
+function DisputePanel({ orderId, disputed, onChange }: { orderId: string; disputed: boolean; onChange: () => void }) {
+  const { colors: c } = useApp();
+  const { t, date } = useI18n();
+  const [d, setD] = useState<any>(null);
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState<string>('not_released');
+  const [note, setNote] = useState('');
+  const [keys, setKeys] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { if (disputed) api.dispute(orderId).then(setD).catch(() => null); }, [disputed, orderId]);
+  const addFile = async () => { try { const k = await pickImage(orderId); if (k) setKeys((x) => [...x, k]); } catch (e) { setErr(errText(t, e)); } };
+  if (disputed) return (
+    <Card style={{ gap: 8, borderColor: `${c.sell}66` }}>
+      <Row style={{ justifyContent: 'space-between' }}><Row><Ionicons name="hammer" size={18} color={c.sell} /><Text weight="700">{t('order.status.DISPUTED')}</Text></Row>{d && <Badge label={d.status} tone="danger" />}</Row>
+      {d && <Text size="small">{t('ui.reason')}: {t(REASONS.find(([v]) => v === d.reason)?.[1] ?? 'ui.rOther')}</Text>}
+      {d?.slaDueAt && <Text size="tiny" tone="sub">{t('ui.arbiterBy', { time: date(d.slaDueAt) })}</Text>}
+      {d && <Text size="tiny" tone="sub">{t('ui.evidence')}: {d.evidence?.length ?? 0}</Text>}
+      {d?.decisionNote && <Notice text={d.decisionNote} />}
+      {d && !d.resolvedAt && <Button size="sm" variant="outline" icon="attach" title={t('ui.evidence')} onPress={async () => { const k = await pickImage(orderId).catch(() => null); if (k) { await api.addEvidence(d.id, k).catch(() => null); api.dispute(orderId).then(setD).catch(() => null); } }} />}
+    </Card>
+  );
+  if (!open) return <Button variant="outline" icon="hammer-outline" title={t('order.dispute')} onPress={() => setOpen(true)} style={{ borderColor: `${c.sell}88` }} />;
+  return (
+    <Card style={{ gap: 10, borderColor: `${c.sell}66` }}>
+      <Text weight="700">{t('order.dispute')}</Text>
+      <Notice tone="warn" text={t('ui.disputeHint')} />
+      <PickerChip fixed label={t(REASONS.find(([v]) => v === reason)![1])} value={reason} options={REASONS.map(([v, k]) => ({ value: v, label: t(k) }))} onChange={setReason} title={t('ui.reason')} />
+      <Input label={t('ui.describe')} multiline value={note} onChangeText={setNote} maxLength={4000} style={{ height: 90, textAlignVertical: 'top', paddingTop: 12 }} />
+      <Button variant="soft" size="sm" icon="image-outline" title={`${t('ui.evidence')} (${keys.length})`} onPress={addFile} />
+      {err && <Notice tone="error" text={err} />}
+      <Button variant="sell" title={t('ui.submit')} loading={busy} disabled={!note.trim() || keys.length === 0} onPress={async () => {
+        setBusy(true); setErr(null);
+        try { await api.openDispute(orderId, { reason, note, evidenceKeys: keys }); success(); onChange(); } catch (e) { setErr(errText(t, e)); } finally { setBusy(false); }
+      }} />
+    </Card>
   );
 }

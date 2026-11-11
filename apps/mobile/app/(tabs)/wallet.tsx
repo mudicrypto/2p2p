@@ -50,7 +50,7 @@ export default function Wallet() {
         </Row>
         <Text style={{ fontSize: 36, fontWeight: '800', letterSpacing: -1 }}>{est && !(est.total === '0' && !est.complete) ? mask(`≈ ${money(est.total, 'USD')}`) : '—'}</Text>
         <Text size="tiny" tone="sub">{mask(num(bal.USDT?.available ?? '0'))} USDT · {t('ui.indicativeNote')}</Text>
-        <Row style={{ marginTop: space(4) }}>{action('arrow-down', t('ui.deposit'), () => router.push('/deposit'))}{action('arrow-up', t('ui.withdraw'), () => router.push('/withdraw'))}{action('swap-horizontal', t('ui.trade'), () => router.navigate('/p2p'))}{action('time-outline', t('ui.history'), () => setHist('deposits'))}</Row>
+        <Row style={{ marginTop: space(4) }}>{action('arrow-down', t('ui.deposit'), () => router.push('/deposit'))}{action('arrow-up', t('ui.withdraw'), () => router.push('/withdraw'))}{action('swap-horizontal', t('ui.transfer'), () => router.push('/transfer'))}{action('time-outline', t('ui.history'), () => setHist('deposits'))}</Row>
       </View>
       {testMode && <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderStyle: 'dashed', borderColor: c.warn }}>
         <Ionicons name="flask" size={18} color={c.warn} /><Text size="small" tone="sub" style={{ flex: 1 }}>{t('ui.testMode')}</Text>

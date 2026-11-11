@@ -416,6 +416,8 @@
   "faq": "Häufige Fragen",
   "disputeHelp": "Eröffnen Sie auf der Auftragsseite einen Streitfall, wenn Zahlung oder Freigabe scheitern.",
   "statusHelp": "Live-Status von Handel, Einzahlungen und Auszahlungen.",
-  "helpSub": "Antworten, Sicherheitstipps und Kontakt."
+  "helpSub": "Antworten, Sicherheitstipps und Kontakt.",
+  "secretKey": "Geheimer Schlüssel",
+  "openAuthenticator": "Authenticator-App öffnen"
  }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanDecimal, cryptoFor, fiatFor, fromScaled, inRange, toScaled } from '../src/decimal';
+import { cleanDecimal, cryptoFor, fiatFor, fromScaled, inRange, marginToBps, toScaled } from '../src/decimal';
 import { formatDecimal, formatMoney, pickLocale, translate } from '../src/i18n';
 import { LOCALES, MESSAGES } from '../src/locales';
 
@@ -15,6 +15,9 @@ describe('decimal (no floats)', () => {
     expect(inRange('400.01', '10', '400')).toBe(false);
     expect(cleanDecimal('1,5a.2')).toBe('1.52');
     expect(fromScaled(toScaled('123.456789'), 3)).toBe('123.456');
+    expect(marginToBps('1.5')).toBe(150);
+    expect(marginToBps('-0.25')).toBe(-25);
+    expect(marginToBps('2')).toBe(200);
   });
 });
 

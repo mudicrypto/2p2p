@@ -416,6 +416,8 @@
   "faq": "Câu hỏi thường gặp",
   "disputeHelp": "Mở tranh chấp từ trang lệnh nếu thanh toán hoặc giải phóng gặp sự cố.",
   "statusHelp": "Tình trạng trực tiếp của giao dịch, nạp và rút.",
-  "helpSub": "Câu trả lời, mẹo an toàn và cách liên hệ chúng tôi."
+  "helpSub": "Câu trả lời, mẹo an toàn và cách liên hệ chúng tôi.",
+  "secretKey": "Khóa bí mật",
+  "openAuthenticator": "Mở ứng dụng xác thực"
  }
 }

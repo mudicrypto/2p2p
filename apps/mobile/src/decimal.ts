@@ -15,3 +15,9 @@ export const cryptoFor = (fiat: string, price: string) => (!fiat || toScaled(pri
 export const fiatFor = (crypto: string, price: string) => (!crypto || !price ? '' : fromScaled((toScaled(crypto) * toScaled(price)) / P, 2));
 export const inRange = (v: string, min: string, max: string) => { const x = toScaled(v); return x >= toScaled(min) && x <= toScaled(max); };
 export const cleanDecimal = (s: string) => { const x = s.replace(',', '.').replace(/[^\d.]/g, ''); const [i, ...r] = x.split('.'); return r.length ? `${i}.${r.join('')}` : i; };
+/** Margin "%" with up to 2 decimals -> integer basis points, without floats. */
+export function marginToBps(m: string) {
+  const neg = m.trim().startsWith('-');
+  const [i, f = ''] = m.replace('-', '').split('.');
+  return (neg ? -1 : 1) * (Number(i || '0') * 100 + Number((f + '00').slice(0, 2)));
+}

@@ -1,7 +1,8 @@
 /** Deep links: p2p://orders/{id}, https://app.example.com/{locale?}/orders/{id}, p2p://market?asset=&fiat=, notification payloads. */
 export type Route = { screen: 'order'; id: string } | { screen: 'market'; asset?: string; fiat?: string } | { screen: 'wallet' } | { screen: 'unknown' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-export const UNIVERSAL_HOSTS = ['app.example.com'];
+const webHost = (() => { try { return new URL(process.env.EXPO_PUBLIC_WEB_URL || 'https://app.example.com').hostname; } catch { return 'app.example.com'; } })();
+export const UNIVERSAL_HOSTS = [webHost]; // TODO(provider): production domain via EXPO_PUBLIC_WEB_URL
 
 export function parseDeepLink(raw: string): Route {
   let u: URL;

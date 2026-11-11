@@ -416,6 +416,8 @@
   "faq": "Soalan lazim",
   "disputeHelp": "Buka pertikaian dari halaman pesanan jika bayaran atau pelepasan bermasalah.",
   "statusHelp": "Status langsung dagangan, deposit dan pengeluaran.",
-  "helpSub": "Jawapan, petua keselamatan dan cara menghubungi kami."
+  "helpSub": "Jawapan, petua keselamatan dan cara menghubungi kami.",
+  "secretKey": "Kunci rahsia",
+  "openAuthenticator": "Buka aplikasi pengesah"
  }
 }

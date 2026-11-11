@@ -416,6 +416,8 @@
   "faq": "Mga madalas itanong",
   "disputeHelp": "Magbukas ng dispute sa order page kung may problema sa bayad o release.",
   "statusHelp": "Live na status ng trading, deposito at withdrawal.",
-  "helpSub": "Mga sagot, safety tips at paano kami makontak."
+  "helpSub": "Mga sagot, safety tips at paano kami makontak.",
+  "secretKey": "Secret key",
+  "openAuthenticator": "Buksan ang authenticator app"
  }
 }

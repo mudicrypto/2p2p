@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import QRCode from 'qrcode';
 import { BadgeCheck, Check, Fingerprint, KeyRound, Lock, Mail, Phone, ShieldCheck, Smartphone, Store, UserRound } from 'lucide-react';
 import { Alert, Avatar, Badge, Button, Card, CopyButton, Input, Label, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
@@ -16,7 +17,7 @@ export default function Account() {
   const [kyc, setKyc] = useState<any>(null);
   const [testMode, setTestMode] = useState(false);
   const [err, setErr] = useState<unknown>(null);
-  const [totp, setTotp] = useState<{ secret?: string; code: string }>({ code: '' });
+  const [totp, setTotp] = useState<{ secret?: string; qr?: string; code: string }>({ code: '' });
   const [phone, setPhone] = useState({ phone: '', code: '', sent: false, dev: '' });
   const [pw, setPw] = useState({ oldPassword: '', newPassword: '', totp: '', ok: false });
   const [merchant, setMerchant] = useState<any>(null);
@@ -82,11 +83,12 @@ export default function Account() {
             {me.totpEnabled ? <Alert variant="success" className="py-2">{t('auth.enabled')}</Alert> : totp.secret ? (
               <div className="w-full space-y-2 sm:w-80">
                 <p className="text-xs text-muted-foreground">{t('auth.scan')}</p>
+                {totp.qr && <img src={totp.qr} alt="2FA QR" className="h-40 w-40 rounded-xl bg-white p-2" data-testid="totp-qr" />}
                 <div className="flex items-center gap-2 rounded-xl bg-muted px-3 py-2"><code className="min-w-0 flex-1 break-all text-xs" data-testid="totp-secret">{totp.secret}</code><CopyButton value={totp.secret} /></div>
                 <div className="flex gap-2"><Input data-testid="totp-code" inputMode="numeric" maxLength={6} value={totp.code} onChange={(e) => setTotp({ ...totp, code: e.target.value })} placeholder="123456" className="font-mono" />
                   <Button data-testid="totp-enable" onClick={() => run(() => api('/auth/2fa/confirm', { body: { code: totp.code } }))}>{t('auth.enable')}</Button></div>
               </div>
-            ) : <Button size="sm" data-testid="totp-setup" onClick={() => run(async () => setTotp({ secret: (await api('/auth/2fa/setup', { body: {} })).secret, code: '' }))}>{t('auth.setup2fa')}</Button>}
+            ) : <Button size="sm" data-testid="totp-setup" onClick={() => run(async () => { const r = await api('/auth/2fa/setup', { body: {} }); setTotp({ secret: r.secret, qr: await QRCode.toDataURL(r.otpauthUrl, { margin: 1, width: 220 }), code: '' }); })}>{t('auth.setup2fa')}</Button>}
           </Row>
           <Row icon={<Phone size={18} />} title={t('auth.phone')} desc={t('ui.phoneDesc')}>
             {me.phoneVerified ? <Badge variant="success">{t('auth.verifyPhone')} ✓</Badge> : (

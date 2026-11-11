@@ -416,6 +416,8 @@
   "faq": "Questions fréquentes",
   "disputeHelp": "Ouvrez un litige depuis la page de la commande en cas de problème de paiement ou de libération.",
   "statusHelp": "État en direct des échanges, dépôts et retraits.",
-  "helpSub": "Réponses, conseils de sécurité et comment nous joindre."
+  "helpSub": "Réponses, conseils de sécurité et comment nous joindre.",
+  "secretKey": "Clé secrète",
+  "openAuthenticator": "Ouvrir l'application d'authentification"
  }
 }

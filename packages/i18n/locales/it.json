@@ -416,6 +416,8 @@
   "faq": "Domande frequenti",
   "disputeHelp": "Apri una controversia dalla pagina dell'ordine se pagamento o rilascio non vanno a buon fine.",
   "statusHelp": "Stato in tempo reale di scambi, depositi e prelievi.",
-  "helpSub": "Risposte, consigli di sicurezza e come contattarci."
+  "helpSub": "Risposte, consigli di sicurezza e come contattarci.",
+  "secretKey": "Chiave segreta",
+  "openAuthenticator": "Apri l'app di autenticazione"
  }
 }

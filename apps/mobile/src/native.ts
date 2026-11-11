@@ -20,6 +20,8 @@ export const tokenStore = {
     if (t) await SecureStore.setItemAsync(TOKEN_KEY, t, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY }); else await SecureStore.deleteItemAsync(TOKEN_KEY);
   },
 };
+/** Public web origin for legal/status pages and deep links (set per build). */
+export const WEB_URL: string = process.env.EXPO_PUBLIC_WEB_URL || 'https://app.example.com'; // TODO(provider): production domain
 export const api = createApi(API_URL, tokenStore.get, Constants.sessionId);
 
 export async function biometricUnlock(reason: string): Promise<boolean> {

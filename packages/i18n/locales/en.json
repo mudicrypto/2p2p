@@ -416,6 +416,8 @@
   "statusHelp": "Live health of trading, deposits and withdrawals.",
   "helpSub": "Answers, safety tips and how to reach us.",
   "adActive": "Active",
-  "fastSecureGlobal": "Fast. Secure. Global."
+  "fastSecureGlobal": "Fast. Secure. Global.",
+  "secretKey": "Secret key",
+  "openAuthenticator": "Open authenticator app"
  }
 }

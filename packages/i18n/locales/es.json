@@ -416,6 +416,8 @@
   "faq": "Preguntas frecuentes",
   "disputeHelp": "Abre una disputa desde la página de la orden si el pago o la liberación fallan.",
   "statusHelp": "Estado en vivo del comercio, los depósitos y los retiros.",
-  "helpSub": "Respuestas, consejos de seguridad y cómo contactarnos."
+  "helpSub": "Respuestas, consejos de seguridad y cómo contactarnos.",
+  "secretKey": "Clave secreta",
+  "openAuthenticator": "Abrir app autenticadora"
  }
 }

@@ -3,7 +3,7 @@ import { Linking, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { api } from '../../src/native';
+import { api, WEB_URL } from '../../src/native';
 import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { NATIVE_NAMES } from '../../src/locales';
@@ -30,8 +30,8 @@ export default function Account() {
       <View style={{ paddingVertical: 12, gap: 8 }}><Row><Ionicons name="contrast" size={18} color={c.primary} /><Text weight="600">{t('ui.theme')}</Text></Row>
         <Segmented value={themePref} onChange={setThemePref} options={[{ value: 'system', label: t('ui.themeAuto') }, { value: 'dark', label: '☾' }, { value: 'light', label: '☀︎' }]} /></View>
       <Divider />
-      {item('document-text', t('launch.terms'), undefined, () => void Linking.openURL('https://app.example.com/en/legal/terms'))}
-      {item('pulse', t('launch.statusTitle'), undefined, () => void Linking.openURL('https://app.example.com/en/status'))}
+      {item('document-text', t('launch.terms'), undefined, () => void Linking.openURL(`${WEB_URL}/${locale}/legal/terms`))}
+      {item('pulse', t('launch.statusTitle'), undefined, () => void Linking.openURL(`${WEB_URL}/${locale}/status`))}
     </Card>
   );
   if (!me) return (
@@ -71,11 +71,17 @@ export default function Account() {
       <Card style={{ paddingVertical: 4 }}>
         {item('notifications', t('nav.notifications'), undefined, () => router.push('/notifications'))}
         <Divider />
-        {item('phone-portrait', t('ui.twoFa'), <Badge label={me.totpEnabled ? '✓' : '—'} tone={me.totpEnabled ? 'success' : 'default'} />)}
+        {item('phone-portrait', t('ui.twoFa'), <Badge label={me.totpEnabled ? '✓' : '—'} tone={me.totpEnabled ? 'success' : 'default'} />, () => router.push('/security'))}
         <Divider />
-        {item('finger-print', t('ui.passkeys'))}
+        {item('card', t('wallet.paymentMethods'), undefined, () => router.push('/payment-methods'))}
         <Divider />
-        {item('person', t('profile.title'), undefined, () => void Linking.openURL(`https://app.example.com/en/profile/${me.id}`))}
+        {item('megaphone', t('ad.mine'), undefined, () => router.push('/ads'))}
+        <Divider />
+        {item('storefront', t('ui.merchantCentre'), undefined, () => router.push('/merchant'))}
+        <Divider />
+        {item('shield-checkmark', t('ui.security'), undefined, () => router.push('/security'))}
+        <Divider />
+        {item('person', t('profile.title'), undefined, () => router.push(`/profile/${me.id}`))}
       </Card>
       {prefs}
       <Button variant="outline" icon="log-out-outline" title={t('nav.logout')} onPress={signOut} />

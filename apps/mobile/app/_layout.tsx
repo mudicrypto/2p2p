@@ -66,6 +66,12 @@ function Shell() {
         <Stack.Screen name="merchant" options={{ headerShown: true, title: '' }} />
         <Stack.Screen name="rewards" options={{ headerShown: true, title: t('ui.rewards') }} />
         <Stack.Screen name="help" options={{ headerShown: true, title: t('ui.help') }} />
+        <Stack.Screen name="ads/index" options={{ headerShown: true, title: t('ad.mine') }} />
+        <Stack.Screen name="ads/new" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="payment-methods" options={{ headerShown: true, title: t('wallet.paymentMethods') }} />
+        <Stack.Screen name="security" options={{ headerShown: true, title: t('ui.security') }} />
+        <Stack.Screen name="transfer" options={{ ...modal, title: t('ui.transfer') }} />
+        <Stack.Screen name="profile/[id]" options={{ headerShown: true, title: t('profile.title') }} />
       </Stack>
     </>
   );

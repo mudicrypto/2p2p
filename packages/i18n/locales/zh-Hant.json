@@ -416,6 +416,8 @@
   "faq": "常見問題",
   "disputeHelp": "若付款或放幣出現問題，可在訂單頁發起爭議。",
   "statusHelp": "交易、充值與提領的即時狀態。",
-  "helpSub": "解答、安全提示與聯絡方式。"
+  "helpSub": "解答、安全提示與聯絡方式。",
+  "secretKey": "密鑰",
+  "openAuthenticator": "開啟驗證器 App"
  }
 }

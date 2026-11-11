@@ -416,6 +416,8 @@
   "faq": "Najczęstsze pytania",
   "disputeHelp": "Otwórz spór na stronie zlecenia, jeśli coś pójdzie nie tak z płatnością lub zwolnieniem.",
   "statusHelp": "Bieżący stan handlu, wpłat i wypłat.",
-  "helpSub": "Odpowiedzi, wskazówki bezpieczeństwa i kontakt z nami."
+  "helpSub": "Odpowiedzi, wskazówki bezpieczeństwa i kontakt z nami.",
+  "secretKey": "Klucz tajny",
+  "openAuthenticator": "Otwórz aplikację uwierzytelniającą"
  }
 }
