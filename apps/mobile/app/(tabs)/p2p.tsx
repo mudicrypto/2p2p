@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, RefreshControl, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,9 +27,11 @@ export default function P2P() {
   const [types, setTypes] = useState<Array<{ code: string; name: string; countries?: string[] }>>([]);
   const [items, setItems] = useState<any[] | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const seq = useRef(0); // ignore out-of-order responses when filters change quickly
   const load = useCallback(async () => {
+    const my = ++seq.current;
     const r = await api.book({ side, asset, fiat, ...(pm ? { paymentType: pm } : {}) }).catch(() => ({ items: [] }));
-    setItems(r.items);
+    if (my === seq.current) setItems(r.items);
   }, [side, asset, fiat, pm]);
   useEffect(() => { setItems(null); void load(); const i = setInterval(load, 15000); return () => clearInterval(i); }, [load]);
   useEffect(() => { api.fiats().then((r) => r.length && setFiats(r.map((x) => x.code))).catch(() => null); }, []);

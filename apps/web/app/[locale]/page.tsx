@@ -120,7 +120,7 @@ function MarketDepth() {
   const quotes = useQuotes(fiat);
   const [asset, setAsset] = useState('BTC');
   const [rows, setRows] = useState<any[] | null>(null);
-  useEffect(() => { setRows(null); api<{ items: any[] }>(`/ads?side=buy&asset=${asset}&fiat=${fiat}&limit=8`).then((r) => setRows(r.items)).catch(() => setRows([])); }, [asset, fiat]);
+  useEffect(() => { let live = true; setRows(null); api<{ items: any[] }>(`/ads?side=buy&asset=${asset}&fiat=${fiat}&limit=8`).then((r) => live && setRows(r.items)).catch(() => live && setRows([])); return () => { live = false; }; }, [asset, fiat]);
   const max = rows?.reduce((m, r) => Math.max(m, Number(r.remainingAmount)), 0) || 1; // display-only bar width
   const q = quotes?.find((x) => x.asset === asset);
   return (

@@ -1,6 +1,6 @@
 'use client';
 /** P2P offers: filter bar (side, asset, currency, payment methods, regions, filter) + offers table. Used on Home and /p2p. */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { BadgeCheck, ChevronRight, Clock, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import { AssetIcon, Avatar, Button, Input, PayChip, Select, Skeleton, cn } from '@p2p/ui';
@@ -30,7 +30,9 @@ export function Offers({ initial, compact, onChange }: { initial?: Partial<Offer
   useEffect(() => { api<Array<{ code: string }>>('/fiats').then((r) => r.length && setFiats(r.map((x) => x.code))).catch(() => {}); }, []);
   useEffect(() => { api<any[]>(`/payment-method-types?fiat=${f.fiat}`).then(setTypes).catch(() => setTypes([])); }, [f.fiat]);
 
+  const seq = useRef(0); // guards against out-of-order responses when filters change quickly
   const load = useCallback(async (append = false) => {
+    const my = ++seq.current;
     const q = new URLSearchParams({ side: f.side, asset: f.asset, fiat: f.fiat, limit: compact ? '6' : '20' });
     if (f.amount) q.set('amount', f.amount);
     if (f.paymentType) q.set('paymentType', f.paymentType);
@@ -38,6 +40,7 @@ export function Offers({ initial, compact, onChange }: { initial?: Partial<Offer
     if (append && cursor) q.set('cursor', cursor);
     setSpin(true);
     const r = await api<{ items: any[]; nextCursor: string | null }>(`/ads?${q}`).catch(() => ({ items: [], nextCursor: null }));
+    if (my !== seq.current) return; // a newer request superseded this one
     setItems((prev) => (append ? [...(prev ?? []), ...r.items] : r.items));
     setCursor(r.nextCursor);
     setTimeout(() => setSpin(false), 400);
