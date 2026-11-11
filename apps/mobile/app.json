@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "P2P Exchange",
+    "name": "KRYPTA",
     "slug": "p2p-exchange",
     "scheme": "p2p",
     "version": "1.0.0",
@@ -46,7 +46,7 @@
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#7b61ff"
+        "backgroundColor": "#07080a"
       },
       "versionCode": 1
     },
@@ -63,7 +63,14 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#7b61ff"
+          "color": "#f5b50a"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a payment receipt to attach to your order.",
+          "cameraPermission": false
         }
       ]
     ],
@@ -78,8 +85,8 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#090b10"
+      "backgroundColor": "#07080a"
     },
-    "backgroundColor": "#090b10"
+    "backgroundColor": "#07080a"
   }
 }

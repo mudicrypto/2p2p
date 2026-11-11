@@ -1,12 +1,13 @@
-/** Design tokens shared with the web theme (packages/ui/src/theme.css). */
+/** Design tokens shared with the web theme (packages/ui/src/theme.css) — KRYPTA gold on black. */
+export const BRAND = { name: 'KRYPTA' } as const;
 export const palette = {
   dark: {
-    bg: '#090b10', card: '#11141b', surface: '#171b25', muted: '#1b1f2a', border: '#232838',
-    text: '#f4f6fb', sub: '#8a91a6', primary: '#7b61ff', primary2: '#37c8ff', buy: '#1fcb8b', sell: '#ff4d6a', warn: '#ffb020', onBuy: '#04130d',
+    bg: '#07080a', card: '#101114', surface: '#15171b', muted: '#1a1c21', border: '#24262c',
+    text: '#f5f5f4', sub: '#8c8f98', primary: '#f5b50a', primary2: '#ffcf4a', primary3: '#e09a00', onPrimary: '#111111', info: '#3b82f6', buy: '#18c27a', sell: '#f6465d', warn: '#f0a020', onBuy: '#04130d',
   },
   light: {
-    bg: '#f6f7fb', card: '#ffffff', surface: '#ffffff', muted: '#eef0f6', border: '#e3e6ef',
-    text: '#0b0d12', sub: '#5f667a', primary: '#6a4dff', primary2: '#1fb6f0', buy: '#0faa6f', sell: '#e8344f', warn: '#d98a00', onBuy: '#ffffff',
+    bg: '#f7f6f2', card: '#ffffff', surface: '#ffffff', muted: '#efede6', border: '#e4e1d8',
+    text: '#0b0b0c', sub: '#5d606a', primary: '#d99a00', primary2: '#f0b400', primary3: '#c58500', onPrimary: '#111111', info: '#2563eb', buy: '#0e9f62', sell: '#d83148', warn: '#c47f00', onBuy: '#ffffff',
   },
 };
 export type Colors = typeof palette.dark;

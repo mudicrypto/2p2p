@@ -6,8 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '../../src/native';
 import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
+import { getQuotes, valuate, type Quote } from '../../src/market';
 import { ASSETS, space } from '../../src/theme';
-import { AssetIcon, Badge, Button, Card, Divider, Empty, Gradient, Notice, Press, Row, Segmented, Text, errText } from '../../src/ui';
+import { AssetIcon, Badge, Button, Card, Divider, Empty, Notice, Press, Row, Segmented, Text, errText } from '../../src/ui';
 
 export default function Wallet() {
   const { colors: c, me, testMode } = useApp();
@@ -20,31 +21,37 @@ export default function Wallet() {
   const [hide, setHide] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [quotes, setQuotes] = useState<Quote[] | null>(null);
   const load = useCallback(async () => {
     if (!me) return;
+    void getQuotes('USD').then(setQuotes);
     const [b, l, d, w] = await Promise.all([api.balances().catch(() => ({})), api.limits().catch(() => null), api.deposits().catch(() => []), api.withdrawals().catch(() => [])]);
     setBal(b); setLimits(l); setRows({ deposits: d, withdrawals: w });
   }, [me]);
   useFocusEffect(useCallback(() => { void load(); }, [load]));
   if (!me) return <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: ins.top }}><Empty icon="wallet-outline" text={t('errors.UNAUTHORIZED')} action={<Button title={t('nav.login')} onPress={() => router.push('/login')} />} /></View>;
   const mask = (v: string) => (hide ? '••••' : v);
+  const est = valuate(bal, quotes);
   const action = (icon: keyof typeof Ionicons.glyphMap, label: string, onPress: () => void) => (
     <Press onPress={onPress} style={{ alignItems: 'center', gap: 6, flex: 1 }}>
-      <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}><Ionicons name={icon} size={22} color="#fff" /></View>
-      <Text size="tiny" tone="white" weight="600">{label}</Text>
+      <View style={{ width: 50, height: 50, borderRadius: 25, backgroundColor: c.muted, borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center' }}><Ionicons name={icon} size={21} color={c.text} /></View>
+      <Text size="tiny" weight="600">{label}</Text>
     </Press>
   );
   return (
     <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: space(4), paddingTop: ins.top + space(2), gap: space(4), paddingBottom: space(10) }}
       refreshControl={<RefreshControl tintColor={c.primary} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}>
-      <Gradient style={{ borderRadius: 28, padding: space(5), gap: space(4) }}>
+      <Row style={{ justifyContent: 'space-between' }}><Text size="h2">{t('nav.wallet')}</Text><Press onPress={() => router.push('/help')}><Ionicons name="headset-outline" size={22} color={c.text} /></Press></Row>
+      <View style={{ borderRadius: 24, padding: space(5), gap: space(1), backgroundColor: c.card, borderWidth: 1, borderColor: `${c.primary}55`, overflow: 'hidden' }}>
+        <View style={{ position: 'absolute', right: -60, top: -40, width: 200, height: 200, borderRadius: 100, backgroundColor: `${c.primary}22` }} />
         <Row style={{ justifyContent: 'space-between' }}>
-          <Text size="small" tone="white" style={{ opacity: 0.85 }}>{t('wallet.available')}</Text>
-          <Press onPress={() => setHide(!hide)}><Ionicons name={hide ? 'eye-off' : 'eye'} size={18} color="#fff" /></Press>
+          <Text size="small" tone="sub">{t('ui.totalBalance')}</Text>
+          <Press onPress={() => setHide(!hide)}><Ionicons name={hide ? 'eye-off' : 'eye'} size={18} color={c.sub} /></Press>
         </Row>
-        <Row style={{ alignItems: 'flex-end' }}><Text tone="white" style={{ fontSize: 40, fontWeight: '800', letterSpacing: -1 }}>{mask(num(bal.USDT?.available ?? '0'))}</Text><Text tone="white" weight="700" style={{ marginBottom: 8, opacity: 0.85 }}>USDT</Text></Row>
-        <Row>{action('arrow-down', t('ui.deposit'), () => router.push('/deposit'))}{action('arrow-up', t('ui.withdraw'), () => router.push('/withdraw'))}{action('swap-horizontal', t('nav.market'), () => router.navigate('/'))}</Row>
-      </Gradient>
+        <Text style={{ fontSize: 36, fontWeight: '800', letterSpacing: -1 }}>{est && !(est.total === '0' && !est.complete) ? mask(`≈ ${money(est.total, 'USD')}`) : '—'}</Text>
+        <Text size="tiny" tone="sub">{mask(num(bal.USDT?.available ?? '0'))} USDT · {t('ui.indicativeNote')}</Text>
+        <Row style={{ marginTop: space(4) }}>{action('arrow-down', t('ui.deposit'), () => router.push('/deposit'))}{action('arrow-up', t('ui.withdraw'), () => router.push('/withdraw'))}{action('swap-horizontal', t('ui.trade'), () => router.navigate('/p2p'))}{action('time-outline', t('ui.history'), () => setHist('deposits'))}</Row>
+      </View>
       {testMode && <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderStyle: 'dashed', borderColor: c.warn }}>
         <Ionicons name="flask" size={18} color={c.warn} /><Text size="small" tone="sub" style={{ flex: 1 }}>{t('ui.testMode')}</Text>
         <Button size="sm" variant="outline" title={t('wallet.faucet')} onPress={async () => { try { await api.faucet(); await load(); } catch (e) { setErr(errText(t, e)); } }} />

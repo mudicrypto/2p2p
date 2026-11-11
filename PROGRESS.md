@@ -301,6 +301,26 @@ Keychain/Keystore token storage, biometric lock, push, deep links unchanged. `ea
 - ⚠️ Native binaries are built in GitHub Actions (this sandbox may not run the Android SDK/Xcode). Store builds need your
   Expo/EAS, Apple Developer and Google Play accounts (`apps/mobile/README.md`).
 
+## Post-M16 (2) — KRYPTA brand and frontend (web, Telegram, iOS/Android) ✅
+
+Source of truth: the product mockup (no separate UI spec documents existed). Its design system, screen checklist and plan
+are written down in `docs/design/`. **Backend unchanged.**
+- **Brand:** temporary name KRYPTA, gold "K" monogram, gold on near-black (dark default, light kept). The name lives in
+  `packages/ui` `BRAND`, `apps/mobile/src/theme.ts` `BRAND` and `app.name` in the locale files.
+- **Web:** app shell with sidebar (Orders badge, invite card), ticker, search, notifications and user menu; phone bottom
+  tabs. Home dashboard (hero with SVG night globe, trust strip, estimated balance, offers widget, order-book depth). P2P
+  table (regions filter grouped from payment-method countries). Order page with 4-step stepper, payment timer and upload
+  receipt. New pages: Merchant Centre (performance, volume, completed orders, ads, 14-day analytics, program
+  application), Rewards (coming soon), Help & Support. Wallet total balance header.
+- **Mobile:** Welcome screen; tabs Home · P2P · Orders (badge) · Wallet · Profile; picker sheets for currency, methods and
+  regions; Merchant Centre, Rewards and Help screens; order screen with 4-step stepper and receipt upload (photo library);
+  gold app icon, adaptive icon and splash.
+- **Data honesty:** ticker, balance valuation and market card use **indicative prices from the public order book**,
+  because there is no price-history API. No synthetic 24h changes or charts. USDC is omitted (the backend doesn't support
+  it). Referrals are "coming soon".
+- **Tests:** web E2E 56/56, Telegram 1/1, 507 unit/integration tests, mobile 7/7, i18n complete (70 new strings × 26
+  locales), screenshot review in dark, light and RTL on desktop and phone.
+
 ---
 
 # Summary of blockers (everything else is built and tested on mocks)

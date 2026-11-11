@@ -11,10 +11,11 @@ import { initialLock, onAppState, onUnlock } from '../src/lock';
 import { parseDeepLink, routeForNotification, routeToPath } from '../src/deeplink';
 import { AppProvider, useApp } from '../src/app';
 import { useI18n } from '../src/i18n';
-import { Button, Gradient, Text } from '../src/ui';
+import { Button, Logo, Text } from '../src/ui';
 
 function Shell() {
-  const { colors: c, scheme, me } = useApp();
+  const { colors: c, scheme, me, ready } = useApp();
+  const welcomed = useRef(false);
   const { t, rtl } = useI18n();
   const [lock, setLock] = useState(initialLock);
   const lockRef = useRef(lock);
@@ -34,10 +35,15 @@ function Shell() {
     const n = Notifications.addNotificationResponseReceivedListener((resp) => router.push(routeToPath(routeForNotification(resp.notification.request.content.data as Record<string, unknown>)) as never));
     return () => { l.remove(); n.remove(); };
   }, []);
+  useEffect(() => { // signed-out users land on the welcome screen once per launch
+    if (lock.locked || !ready || me || welcomed.current) return;
+    welcomed.current = true;
+    setTimeout(() => router.push('/welcome'), 0);
+  }, [lock.locked, ready, me]);
   if (lock.locked) return (
     <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 32 }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <Gradient style={{ width: 84, height: 84, borderRadius: 26, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="swap-horizontal" size={42} color="#fff" /></Gradient>
+      <Logo size={84} />
       <Text size="h2">{t('app.name')}</Text>
       <Button title={t('ui.unlock')} icon="finger-print" onPress={unlock} style={{ alignSelf: 'stretch' }} />
     </View>
@@ -56,6 +62,10 @@ function Shell() {
         <Stack.Screen name="signup" options={{ ...modal, title: '' }} />
         <Stack.Screen name="notifications" options={{ headerShown: true, title: t('notifications.title') }} />
         <Stack.Screen name="language" options={{ ...modal, title: t('nav.language') }} />
+        <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }} />
+        <Stack.Screen name="merchant" options={{ headerShown: true, title: '' }} />
+        <Stack.Screen name="rewards" options={{ headerShown: true, title: t('ui.rewards') }} />
+        <Stack.Screen name="help" options={{ headerShown: true, title: t('ui.help') }} />
       </Stack>
     </>
   );

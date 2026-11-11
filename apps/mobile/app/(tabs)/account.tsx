@@ -8,7 +8,7 @@ import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { NATIVE_NAMES } from '../../src/locales';
 import { space } from '../../src/theme';
-import { Avatar, Badge, Button, Card, Divider, Gradient, Notice, Press, Row, Segmented, Text, errText, type IconName } from '../../src/ui';
+import { Avatar, Badge, Button, Card, Divider, Globe, Logo, Notice, Press, Row, Segmented, Text, errText, type IconName } from '../../src/ui';
 
 export default function Account() {
   const { colors: c, me, refresh, signOut, themePref, setThemePref, locale, testMode } = useApp();
@@ -36,12 +36,13 @@ export default function Account() {
   );
   if (!me) return (
     <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: space(4), paddingTop: ins.top + space(4), gap: space(4) }}>
-      <Gradient style={{ borderRadius: 28, padding: space(6), gap: space(3) }}>
-        <Ionicons name="swap-horizontal" size={36} color="#fff" />
-        <Text size="h2" tone="white">{t('ui.authTitle')}</Text>
-        <Text tone="white" style={{ opacity: 0.85 }}>{t('ui.authSub')}</Text>
-        <Row style={{ marginTop: space(2) }}><Button variant="outline" title={t('nav.login')} onPress={() => router.push('/login')} style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'transparent' }} /><Button variant="soft" title={t('nav.signup')} onPress={() => router.push('/signup')} style={{ flex: 1, backgroundColor: '#fff' }} /></Row>
-      </Gradient>
+      <View style={{ borderRadius: 28, padding: space(6), gap: space(3), backgroundColor: c.card, borderWidth: 1, borderColor: `${c.primary}55`, overflow: 'hidden' }}>
+        <View style={{ position: 'absolute', right: -80, bottom: -90 }}><Globe size={260} opacity={0.6} /></View>
+        <Logo size={44} />
+        <Text size="h2">{t('ui.authTitle')}</Text>
+        <Text tone="sub">{t('ui.authSub')}</Text>
+        <Row style={{ marginTop: space(2) }}><Button title={t('nav.signup')} onPress={() => router.push('/signup')} style={{ flex: 1 }} /><Button variant="outline" title={t('nav.login')} onPress={() => router.push('/login')} style={{ flex: 1 }} /></Row>
+      </View>
       {prefs}
     </ScrollView>
   );

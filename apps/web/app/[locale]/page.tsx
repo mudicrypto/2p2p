@@ -96,7 +96,7 @@ function BalanceCard() {
         </div>
       </div>
       <div className="relative mt-3 min-h-[44px]">
-        {v === null ? <Skeleton className="h-10 w-48" /> : <div className="num text-[38px] font-extrabold leading-none tracking-tight">{hide ? '••••••' : `≈ ${money(v.total, fiat)}`}</div>}
+        {v === null ? <Skeleton className="h-10 w-48" /> : <div className="num text-[38px] font-extrabold leading-none tracking-tight">{hide ? '••••••' : (v.total === '0.00' && !v.complete ? '—' : `≈ ${money(v.total, fiat)}`)}</div>}
       </div>
       <div className="relative mt-2 text-xs text-muted-foreground">{t('ui.indicativeNote')}{v && !v.complete ? ` · ${t('ui.partialValuation')}` : ''}</div>
       <div className="relative mt-4 space-y-2">

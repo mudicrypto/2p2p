@@ -1,3 +1,4 @@
+import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
 import { Stack, useLocalSearchParams } from 'expo-router';
@@ -28,6 +29,15 @@ export default function Order() {
   const [busy, setBusy] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [fb, setFb] = useState(false);
+  const [receipt, setReceipt] = useState<'idle' | 'busy' | 'done'>('idle');
+  const uploadReceipt = async () => {
+    const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], base64: true, quality: 0.7 });
+    const a = r.canceled ? null : r.assets[0];
+    if (!a?.base64) return;
+    setReceipt('busy');
+    try { const up = await api.uploadAttachment(id, a.mimeType ?? 'image/jpeg', a.base64); await api.sendMessage(id, '', up.key); setReceipt('done'); success(); void load(); }
+    catch (e) { setErr(errText(t, e)); setReceipt('idle'); }
+  };
   const scroll = useRef<{ scrollToEnd: () => void } | null>(null);
   const load = useCallback(async () => {
     const [x, m] = await Promise.all([api.order(id).catch(() => null), api.messages(id).catch(() => null)]);
@@ -38,7 +48,7 @@ export default function Order() {
   if (!o) return <View style={{ flex: 1, backgroundColor: c.bg, padding: 16, gap: 12 }}><Skeleton height={160} /><Skeleton height={220} /></View>;
   const buyer = o.role === 'buyer';
   const act = async (name: string, f: () => Promise<unknown>) => { setBusy(name); setErr(null); try { setO(await f()); success(); } catch (e) { setErr(errText(t, e)); } finally { setBusy(''); } };
-  const step = ['AWAITING_PAYMENT', 'CREATED'].includes(o.status) ? 0 : ['PAID', 'DISPUTED'].includes(o.status) ? 1 : o.status === 'COMPLETED' ? 3 : 0;
+  const step = ['AWAITING_PAYMENT', 'CREATED'].includes(o.status) ? 1 : ['PAID', 'DISPUTED'].includes(o.status) ? 2 : o.status === 'COMPLETED' ? 4 : 1;
   const headline = o.status === 'COMPLETED' || o.status === 'CANCELLED' || o.status === 'DISPUTED' ? t(`order.status.${o.status}`)
     : buyer ? (o.status === 'PAID' ? t('ui.waitSeller') : t('ui.payWithin')) : (o.status === 'PAID' ? t('ui.checkPayment') : t('ui.waitBuyer'));
   const cp = o.counterparty?.displayName ?? o.counterparty?.id?.slice(0, 8) ?? '';
@@ -61,7 +71,7 @@ export default function Order() {
             </View>
             {left && <View style={{ alignItems: 'center', backgroundColor: c.muted, borderRadius: radius.md, paddingHorizontal: 12, paddingVertical: 8 }}><Text size="tiny" tone="sub">{t('order.timeLeft')}</Text><Text size="h3" tone={left.s < 120 ? 'sell' : 'default'}>{left.text}</Text></View>}
           </Row>
-          <Steps steps={[buyer ? t('ui.stepPay') : t('ui.stepWaitPay'), buyer ? t('ui.stepWaitRelease') : t('ui.stepRelease'), t('order.status.COMPLETED')]} current={step} failed={['DISPUTED', 'CANCELLED'].includes(o.status)} />
+          <Steps steps={[t('ui.stepCreated'), t('ui.stepAwaiting'), t('ui.stepVerify'), t('ui.stepReleaseCrypto')]} current={step} failed={['DISPUTED', 'CANCELLED'].includes(o.status)} />
         </Card>
 
         <Card style={{ gap: space(3) }}>
@@ -90,6 +100,7 @@ export default function Order() {
           <Button size="lg" variant="buy" icon="checkmark-circle" title={t('order.markPaid')} loading={busy === 'paid'} onPress={() => act('paid', () => api.markPaid(id))} testID="mark-paid" />
           <Button variant="outline" title={t('order.cancel')} loading={busy === 'cancel'} onPress={() => act('cancel', () => api.cancel(id))} />
         </View>}
+        {buyer && ['AWAITING_PAYMENT', 'PAID'].includes(o.status) && <Button variant="outline" icon={receipt === 'done' ? 'checkmark-circle' : 'cloud-upload-outline'} title={receipt === 'done' ? t('ui.receiptSent') : t('ui.uploadReceipt')} loading={receipt === 'busy'} onPress={uploadReceipt} />}
         {!buyer && o.status === 'AWAITING_PAYMENT' && <Notice text={t('ui.sellerWaiting')} />}
         {buyer && o.status === 'PAID' && <Notice text={t('ui.buyerWaiting')} />}
         {!buyer && o.status === 'PAID' && <View style={{ gap: 10 }}>

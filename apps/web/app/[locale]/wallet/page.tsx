@@ -53,7 +53,7 @@ export default function Wallet() {
         <div className="relative flex flex-wrap items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">{t('ui.totalBalance')}<button aria-label="toggle" onClick={() => setHide(!hide)} className="hover:text-foreground">{hide ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
-            <div className="num mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl">{est ? mask(`≈ ${money(est.total, fiat)}`) : '—'}</div>
+            <div className="num mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl">{est && !(est.total === '0.00' && !est.complete) ? mask(`≈ ${money(est.total, fiat)}`) : '—'}</div>
             <div className="mt-1 text-sm text-muted-foreground">{mask(num(bal?.USDT?.available ?? '0'))} USDT {t('wallet.available').toLowerCase()} · {t('ui.indicativeNote')}</div>
           </div>
           <div className="flex flex-wrap gap-2">

@@ -26,7 +26,7 @@ import sw from '../../../packages/i18n/locales/sw.json';
 import ha from '../../../packages/i18n/locales/ha.json';
 import yo from '../../../packages/i18n/locales/yo.json';
 
-export const MESSAGES = { en, es, pt, ru, uk, tr, ar, fa, ur, hi, bn, id, ms, vi, th, fil, 'zh-Hant': zh_Hant, ko, ja, fr, de, it, pl, sw, ha, yo } as Record<string, typeof en>;
+export const MESSAGES = { en, es, pt, ru, uk, tr, ar, fa, ur, hi, bn, id, ms, vi, th, fil, 'zh-Hant': zh_Hant, ko, ja, fr, de, it, pl, sw, ha, yo } as unknown as Record<string, typeof en>;
 export const LOCALES = ['en', 'es', 'pt', 'ru', 'uk', 'tr', 'ar', 'fa', 'ur', 'hi', 'bn', 'id', 'ms', 'vi', 'th', 'fil', 'zh-Hant', 'ko', 'ja', 'fr', 'de', 'it', 'pl', 'sw', 'ha', 'yo'] as const;
 export const NATIVE_NAMES: Record<string, string> = { en: 'English', es: 'Español', pt: 'Português', ru: 'Русский', uk: 'Українська', tr: 'Türkçe', ar: 'العربية', fa: 'فارسی', ur: 'اردو', hi: 'हिन्दी', bn: 'বাংলা', id: 'Bahasa Indonesia', ms: 'Bahasa Melayu', vi: 'Tiếng Việt', th: 'ไทย', fil: 'Filipino', 'zh-Hant': '繁體中文', ko: '한국어', ja: '日本語', fr: 'Français', de: 'Deutsch', it: 'Italiano', pl: 'Polski', sw: 'Kiswahili', ha: 'Hausa', yo: 'Yorùbá' };
 export const RTL = new Set(['ar', 'fa', 'ur']);

@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { api, registerForPush } from '../src/native';
 import { useApp } from '../src/app';
 import { useI18n } from '../src/i18n';
-import { Button, Gradient, Input, Notice, Press, Row, Screen, Text, errText, success } from '../src/ui';
+import { Button, Input, Logo, Notice, Press, Row, Screen, Text, errText, success } from '../src/ui';
 
 export default function Login() {
   const { signIn } = useApp();
@@ -27,7 +27,7 @@ export default function Login() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen>
-        <Gradient style={{ width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="swap-horizontal" size={28} color="#fff" /></Gradient>
+        <Logo size={52} />
         <Text size="h1">{t('ui.welcome')}</Text>
         <Input label={t('auth.email')} autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={f.email} onChangeText={(email) => setF({ ...f, email })} />
         <Input label={t('auth.password')} secureTextEntry autoComplete="current-password" value={f.password} onChangeText={(password) => setF({ ...f, password })} />
