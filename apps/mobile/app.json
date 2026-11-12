@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "KRYPTA",
+    "name": "parley",
     "slug": "p2p-exchange",
     "scheme": "p2p",
     "version": "1.0.0",
@@ -46,7 +46,7 @@
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#07080a"
+        "backgroundColor": "#111214"
       },
       "versionCode": 1
     },
@@ -63,7 +63,7 @@
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",
-          "color": "#f5b50a"
+          "color": "#e2c38a"
         }
       ],
       [
@@ -85,8 +85,8 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#07080a"
+      "backgroundColor": "#111214"
     },
-    "backgroundColor": "#07080a"
+    "backgroundColor": "#111214"
   }
 }

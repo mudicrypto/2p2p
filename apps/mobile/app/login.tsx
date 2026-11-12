@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { api, registerForPush } from '../src/native';
 import { useApp } from '../src/app';
 import { useI18n } from '../src/i18n';
-import { Button, Input, Logo, Notice, Press, Row, Screen, Text, errText, success } from '../src/ui';
+import { Button, Input, Notice, Wordmark, Press, Row, Screen, Text, errText, success } from '../src/ui';
 
 export default function Login() {
   const { signIn } = useApp();
@@ -27,14 +27,14 @@ export default function Login() {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Screen>
-        <Logo size={52} />
+        <Wordmark size={30} />
         <Text size="h1">{t('ui.welcome')}</Text>
         <Input label={t('auth.email')} autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={f.email} onChangeText={(email) => setF({ ...f, email })} />
         <Input label={t('auth.password')} secureTextEntry autoComplete="current-password" value={f.password} onChangeText={(password) => setF({ ...f, password })} />
         {need2fa && <Input label={t('auth.totp')} keyboardType="number-pad" maxLength={6} autoFocus value={f.totp} onChangeText={(totp) => setF({ ...f, totp })} style={{ letterSpacing: 8, fontSize: 22, textAlign: 'center' }} />}
         {err && <Notice tone="error" text={err} />}
         <Button size="lg" title={t('auth.login')} loading={busy} disabled={!f.email || !f.password} onPress={submit} />
-        <Press onPress={() => router.replace('/signup')}><Row style={{ justifyContent: 'center' }}><Text tone="sub">{t('auth.noAccount')}</Text><Text tone="primary" weight="700">{t('nav.signup')}</Text></Row></Press>
+        <Press onPress={() => router.replace('/signup')}><Row style={{ justifyContent: 'center' }}><Text tone="sub">{t('auth.noAccount')}</Text><Text weight="700" style={{ textDecorationLine: 'underline' }}>{t('nav.signup')}</Text></Row></Press>
       </Screen>
     </KeyboardAvoidingView>
   );

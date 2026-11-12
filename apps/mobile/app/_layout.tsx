@@ -11,7 +11,7 @@ import { initialLock, onAppState, onUnlock } from '../src/lock';
 import { parseDeepLink, routeForNotification, routeToPath } from '../src/deeplink';
 import { AppProvider, useApp } from '../src/app';
 import { useI18n } from '../src/i18n';
-import { Button, Logo, Text } from '../src/ui';
+import { Button, Logo, Wordmark } from '../src/ui';
 
 function Shell() {
   const { colors: c, scheme, me, ready } = useApp();
@@ -44,7 +44,7 @@ function Shell() {
     <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', gap: 20, padding: 32 }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <Logo size={84} />
-      <Text size="h2">{t('app.name')}</Text>
+      <Wordmark size={34} />
       <Button title={t('ui.unlock')} icon="finger-print" onPress={unlock} style={{ alignSelf: 'stretch' }} />
     </View>
   );
@@ -71,7 +71,7 @@ function Shell() {
         <Stack.Screen name="payment-methods" options={{ headerShown: true, title: t('wallet.paymentMethods') }} />
         <Stack.Screen name="security" options={{ headerShown: true, title: t('ui.security') }} />
         <Stack.Screen name="transfer" options={{ ...modal, title: t('ui.transfer') }} />
-        <Stack.Screen name="profile/[id]" options={{ headerShown: true, title: t('profile.title') }} />
+        <Stack.Screen name="profile/[id]" options={{ headerShown: true, title: t('ui.traderPassport') }} />
       </Stack>
     </>
   );

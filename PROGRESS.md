@@ -343,3 +343,12 @@ are written down in `docs/design/`. **Backend unchanged.**
 | External auditors' sign-off | Lift the withdrawal launch gate |
 
 **Real-money decisions for you:** fee levels (default maker 0.1%, insurance 10% of fees), tier limits, merchant deposit minimum ($5,000), large-withdrawal threshold ($10,000), launch countries.
+
+## Post-M16 (3) — parley design (web, Telegram, iOS/Android) ✅
+Source: `P2P_Exchange_UI.pdf`. Brand renamed to **parley**. Backend untouched.
+- New design system (warm neutral dark/light, sand accent, huge numerals, solid pills): `docs/design/`.
+- Web/Telegram: three-destination shell (Trade · Orders · Wallet), Trade home ranked by what you get,
+  buyer/seller/dispute/completed order screen, Orders, Wallet, Trader passport, sign-up with steps.
+- Mobile: same screens, floating pill tab bar, top bar with light/dark toggle, new icon/splash.
+- Honest substitutes where the API has no data (no price chart, no bond amount, "New trader" when no history).
+- Tests: web E2E 56/56, Telegram E2E 1/1, mobile unit 11/11, i18n check 26 locales complete.

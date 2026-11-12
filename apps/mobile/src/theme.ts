@@ -1,19 +1,21 @@
-/** Design tokens shared with the web theme (packages/ui/src/theme.css) — KRYPTA gold on black. */
-export const BRAND = { name: 'KRYPTA' } as const;
+/** Design tokens shared with the web theme (packages/ui/src/theme.css): parley warm neutrals + sand accent. */
+export const BRAND = { name: 'parley', tagline: 'Trade with people. Protected by escrow.' } as const;
 export const palette = {
   dark: {
-    bg: '#07080a', card: '#101114', surface: '#15171b', muted: '#1a1c21', border: '#24262c',
-    text: '#f5f5f4', sub: '#8c8f98', primary: '#f5b50a', primary2: '#ffcf4a', primary3: '#e09a00', onPrimary: '#111111', info: '#3b82f6', buy: '#18c27a', sell: '#f6465d', warn: '#f0a020', onBuy: '#04130d',
+    bg: '#111214', card: '#1c1d20', surface: '#26272b', muted: '#2a2b2f', border: '#2e2f33',
+    text: '#f4f2ee', sub: '#a3a19c', primary: '#e2c38a', primary2: '#ecd4a6', primary3: '#d4b073', onPrimary: '#1a1714', info: '#a9bdf5', buy: '#9fd49a', sell: '#ec8670', warn: '#e2c38a', onBuy: '#16301a',
+    ink: '#f3f1ec', onInk: '#161513', glow: 'rgba(150,98,42,0.55)',
   },
   light: {
-    bg: '#f7f6f2', card: '#ffffff', surface: '#ffffff', muted: '#efede6', border: '#e4e1d8',
-    text: '#0b0b0c', sub: '#5d606a', primary: '#d99a00', primary2: '#f0b400', primary3: '#c58500', onPrimary: '#111111', info: '#2563eb', buy: '#0e9f62', sell: '#d83148', warn: '#c47f00', onBuy: '#ffffff',
+    bg: '#ebe9e4', card: '#ffffff', surface: '#ffffff', muted: '#ecebe8', border: '#e6e3dd',
+    text: '#1a1815', sub: '#6f6c66', primary: '#e2c38a', primary2: '#ecd4a6', primary3: '#d4b073', onPrimary: '#1a1714', info: '#3b5bc4', buy: '#1f6b33', sell: '#e0705a', warn: '#b38634', onBuy: '#ffffff',
+    ink: '#1a1815', onInk: '#ffffff', glow: 'rgba(250,214,186,0.85)',
   },
 };
 export type Colors = typeof palette.dark;
-export const radius = { sm: 10, md: 14, lg: 20, xl: 28, pill: 999 };
+export const radius = { sm: 12, md: 16, lg: 24, xl: 28, pill: 999 };
 export const space = (n: number) => n * 4;
-export const font = { h1: 30, h2: 22, h3: 18, body: 15, small: 13, tiny: 11 };
+export const font = { h1: 32, h2: 24, h3: 19, body: 16, small: 14, tiny: 12 };
 export const ASSET_COLORS: Record<string, string> = { USDT: '#26a17b', BTC: '#f7931a', ETH: '#627eea' };
 export const NETWORKS: Record<string, string[]> = { USDT: ['TRON', 'TON', 'BSC', 'ETHEREUM', 'POLYGON'], BTC: ['BITCOIN'], ETH: ['ETHEREUM'] };
 export const ASSETS = Object.keys(NETWORKS);

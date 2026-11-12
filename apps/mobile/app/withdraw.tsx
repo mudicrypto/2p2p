@@ -3,12 +3,14 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { router } from 'expo-router';
 import { api, biometricUnlock } from '../src/native';
 import { useI18n } from '../src/i18n';
+import { useColors } from '../src/app';
 import { cleanDecimal } from '../src/decimal';
 import { ASSETS, NETWORKS } from '../src/theme';
 import { AssetIcon, Badge, Button, Card, Chip, Input, Notice, Press, Row, Screen, Text, errText, success } from '../src/ui';
 
 export default function Withdraw() {
   const { t, num, date } = useI18n();
+  const c = useColors();
   const [asset, setAsset] = useState('USDT');
   const [network, setNetwork] = useState(NETWORKS.USDT[0]);
   const [list, setList] = useState<any[]>([]);
@@ -33,7 +35,7 @@ export default function Withdraw() {
         <Text size="small" tone="sub" weight="500">{t('ui.address')}</Text>
         {mine.map((x) => (
           <Press key={x.id} disabled={!ready(x)} onPress={() => setAddress(x.address)}>
-            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderColor: address === x.address ? '#7b61ff' : undefined, opacity: ready(x) ? 1 : 0.6 }}>
+            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1.5, borderColor: address === x.address ? c.primary : 'transparent', opacity: ready(x) ? 1 : 0.6 }}>
               <View style={{ flex: 1 }}><Text weight="700">{x.label || network}</Text><Text size="tiny" tone="sub" mono numberOfLines={1}>{x.address}</Text></View>
               {!ready(x) && <Badge label={date(x.activeAt)} tone="warning" />}
             </Card>

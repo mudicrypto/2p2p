@@ -1,105 +1,134 @@
-import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+/** parley Trade: type what you pay, see what you get, best match first, every offer ranked by what you get. */
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Platform, RefreshControl, ScrollView, TextInput, View } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { api } from '../../src/native';
 import { rememberAd } from '../../src/cache';
 import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
-import { getQuotes, valuate, type Quote } from '../../src/market';
-import { radius, space } from '../../src/theme';
-import { AssetIcon, Avatar, Button, Card, Globe, IconButton, Press, Row, Skeleton, Text, Wordmark, type IconName } from '../../src/ui';
+import { cleanDecimal, cryptoFor, fiatFor, inRange } from '../../src/decimal';
+import { cdp, releaseLabel } from '../../src/format';
+import { ASSETS, space } from '../../src/theme';
+import { Badge, Button, Card, Chip, Divider, Hero, PickerChip, Pill, Press, Row, Segmented, Skeleton, Text } from '../../src/ui';
 
-export default function Home() {
+const POPULAR = ['USD', 'EUR', 'GBP', 'NGN', 'BRL', 'INR', 'TRY', 'ARS', 'VND', 'IDR', 'PHP', 'KES', 'UAH', 'PLN', 'MXN', 'ZAR'];
+
+export default function Trade() {
+  const params = useLocalSearchParams<{ fiat?: string; asset?: string; side?: string }>();
   const { colors: c, me } = useApp();
-  const { t, money, num, pct } = useI18n();
-  const ins = useSafeAreaInsets();
-  const [fiat] = useState('USD');
-  const [quotes, setQuotes] = useState<Quote[] | null>(null);
-  const [bal, setBal] = useState<Record<string, Record<string, string>> | null>(null);
-  const [offers, setOffers] = useState<any[] | null>(null);
-  const [hide, setHide] = useState(false);
+  const { t, num, money } = useI18n();
+  const [side, setSide] = useState<'buy' | 'sell'>(params.side === 'sell' ? 'sell' : 'buy');
+  const [asset, setAsset] = useState(params.asset ?? 'USDT');
+  const [fiat, setFiat] = useState(params.fiat ?? 'USD');
+  const [amount, setAmount] = useState('');
+  const [pm, setPm] = useState('');
+  const [fiats, setFiats] = useState<string[]>(['USD', 'EUR']);
+  const [types, setTypes] = useState<Array<{ code: string; name: string }>>([]);
+  const [items, setItems] = useState<any[] | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const seq = useRef(0); // ignore out-of-order responses when filters change quickly
   const load = useCallback(async () => {
-    const [q, o, b] = await Promise.all([getQuotes(fiat), api.book({ side: 'buy', asset: 'USDT', fiat }).catch(() => ({ items: [] })), me ? api.balances().catch(() => ({})) : Promise.resolve(null)]);
-    setQuotes(q); setOffers(o.items.slice(0, 3)); setBal(b);
-  }, [fiat, me]);
-  useFocusEffect(useCallback(() => { void load(); }, [load]));
-  useEffect(() => { void load(); }, [load]);
-  const v = bal ? valuate(bal, quotes) : null;
-  const shortcut = (icon: IconName, label: string, to: string) => (
-    <Press onPress={() => router.push(to as never)} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
-      <View style={{ width: 52, height: 52, borderRadius: 26, backgroundColor: c.muted, alignItems: 'center', justifyContent: 'center' }}><Ionicons name={icon} size={22} color={c.primary} /></View>
-      <Text size="tiny" weight="600" style={{ textAlign: 'center' }} numberOfLines={2}>{label}</Text>
-    </Press>
-  );
+    const my = ++seq.current;
+    const r = await api.book({ side, asset, fiat, ...(pm ? { paymentType: pm } : {}) }).catch(() => ({ items: [] }));
+    if (my === seq.current) setItems(r.items);
+  }, [side, asset, fiat, pm]);
+  useEffect(() => { setItems(null); void load(); const i = setInterval(load, 15000); return () => clearInterval(i); }, [load]);
+  useEffect(() => { api.fiats().then((r) => r.length && setFiats(r.map((x) => x.code))).catch(() => null); }, []);
+  useEffect(() => { api.paymentMethodTypes(fiat).then(setTypes).catch(() => setTypes([])); }, [fiat]);
+
+  // Buy: pay fiat → get crypto. Sell: sell crypto → get fiat.
+  const rows = useMemo(() => (items ?? []).map((ad) => {
+    const fiatLeg = side === 'buy' ? amount : amount ? fiatFor(amount, ad.price) : '';
+    const get = !amount ? '' : side === 'buy' ? cryptoFor(amount, ad.price) : fiatFor(amount, ad.price);
+    return { ad, fiatLeg, get, fits: !fiatLeg || inRange(fiatLeg, ad.minAmount, ad.maxAmount) };
+  }), [items, amount, side]);
+  const usable = rows.filter((r) => r.fits);
+  const best = usable[0] ?? rows[0];
+  const offered = useMemo(() => { const s = new Set<string>(); for (const r of items ?? []) for (const p of r.paymentTypes ?? []) s.add(p); return types.filter((x) => s.has(x.code)).slice(0, 4); }, [items, types]);
+  const getUnit = side === 'buy' ? asset : fiat;
+  const fmtGet = (v: string) => (side === 'buy' ? num(v, cdp(asset)) : num(v, 2));
+  const open = (ad: any, fiatLeg: string) => { if (!me) return router.push('/login'); router.push({ pathname: '/trade', params: { adId: rememberAd(ad), side, amount: fiatLeg } }); };
+  const fiatOptions = [...POPULAR.filter((f) => fiats.includes(f)), ...fiats.filter((f) => !POPULAR.includes(f))].map((f) => ({ value: f, label: f }));
+  const cta = best?.get ? (side === 'buy' ? t('ui.buyAmount', { amount: fmtGet(best.get), asset }) : t('ui.sellFor', { amount: money(best.get, fiat) })) : t(side === 'buy' ? 'market.buyAction' : 'market.sellAction', { asset });
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ paddingTop: ins.top, paddingBottom: space(10) }}
+    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: space(4), paddingTop: space(1), gap: space(3), paddingBottom: 120 }} keyboardShouldPersistTaps="handled"
       refreshControl={<RefreshControl tintColor={c.primary} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}>
-      <Row style={{ justifyContent: 'space-between', paddingHorizontal: space(4), paddingVertical: space(2) }}>
-        <Wordmark size={26} />
-        <IconButton icon="notifications-outline" label={t('nav.notifications')} onPress={() => router.push(me ? '/notifications' : '/login')} />
+      <Row style={{ justifyContent: 'space-between', gap: space(3) }}>
+        <Text size="h1" style={{ flexShrink: 1 }} numberOfLines={1}>{t(side === 'buy' ? 'market.buyAction' : 'market.sellAction', { asset })}</Text>
+        <View style={{ width: 170 }}><Segmented value={side} onChange={(v) => { setSide(v); setAmount(''); }} options={[{ value: 'buy', label: t('market.buy') }, { value: 'sell', label: t('market.sell') }]} /></View>
       </Row>
-      <View style={{ paddingHorizontal: space(4), gap: space(4) }}>
-        {/* Hero / balance */}
-        <View style={{ borderRadius: radius.xl, overflow: 'hidden', borderWidth: 1, borderColor: `${c.primary}55`, backgroundColor: c.card }}>
-          <View style={{ position: 'absolute', right: -90, top: -60 }}><Globe size={280} opacity={0.55} /></View>
-          <View style={{ padding: space(5), gap: space(2) }}>
-            {me ? <>
-              <Row style={{ justifyContent: 'space-between' }}><Text size="small" tone="sub">{t('ui.totalBalance')}</Text><Press onPress={() => setHide(!hide)}><Ionicons name={hide ? 'eye-off' : 'eye'} size={18} color={c.sub} /></Press></Row>
-              {v === null ? <Skeleton height={40} style={{ width: 200 }} /> : <Text style={{ fontSize: 34, fontWeight: '800', letterSpacing: -1 }}>{hide ? '••••••' : (v.total === '0' && !v.complete ? '—' : `≈ ${money(v.total, fiat)}`)}</Text>}
-              <Text size="tiny" tone="sub">{t('ui.indicativeNote')}</Text>
-              <Row style={{ marginTop: space(3), gap: 8 }}>
-                <Button title={t('ui.deposit')} onPress={() => router.push('/deposit')} style={{ flex: 1 }} size="sm" />
-                <Button variant="outline" title={t('ui.withdraw')} onPress={() => router.push('/withdraw')} style={{ flex: 1 }} size="sm" />
-                <Button variant="outline" title={t('ui.trade')} onPress={() => router.navigate('/p2p')} style={{ flex: 1 }} size="sm" />
-              </Row>
-            </> : <>
-              <Text style={{ fontSize: 32, fontWeight: '800', letterSpacing: -0.8, lineHeight: 36 }}>{t('ui.heroA')}{'\n'}<Text tone="primary" style={{ fontSize: 32, fontWeight: '800' }}>{t('ui.heroB')}</Text></Text>
-              <Text size="small" tone="sub" style={{ maxWidth: 260 }}>{t('ui.fastSecureGlobal')}</Text>
-              <Row style={{ marginTop: space(3) }}><Button title={t('ui.getStarted')} icon="arrow-forward" onPress={() => router.push('/signup')} style={{ flex: 1 }} /><Button variant="outline" title={t('nav.login')} onPress={() => router.push('/login')} style={{ flex: 1 }} /></Row>
-            </>}
-          </View>
-        </View>
 
-        {/* Ticker */}
-        <Card style={{ flexDirection: 'row', paddingVertical: space(3) }}>
-          {(quotes ?? [{ asset: 'BTC' }, { asset: 'ETH' }, { asset: 'USDT' }] as Quote[]).map((q) => (
-            <Row key={q.asset} style={{ flex: 1, gap: 6 }}><AssetIcon asset={q.asset} size={24} /><View style={{ flexShrink: 1 }}><Text size="tiny" tone="sub" weight="600">{q.asset}</Text><Text size="small" weight="700" numberOfLines={1}>{q.price ? num(q.price, 8) : '—'}</Text></View></Row>
-          ))}
-        </Card>
-
-        {/* Shortcuts */}
-        <Row style={{ alignItems: 'flex-start' }}>
-          {shortcut('grid', t('ui.p2pTrade'), '/p2p')}
-          {shortcut('storefront', t('ui.merchantCentre'), me ? '/merchant' : '/login')}
-          {shortcut('gift', t('ui.rewards'), '/rewards')}
-          {shortcut('help-buoy', t('ui.help'), '/help')}
+      <Hero>
+        <Row style={{ gap: 6 }}>
+          <Text weight="500">{side === 'buy' ? t('ui.youPayIn') : t('ui.youSellIn')}</Text>
+          {side === 'buy'
+            ? <PickerChip fixed label={fiat} value={fiat} options={fiatOptions} onChange={(v) => { setFiat(v); setPm(''); }} title={t('market.fiat')} />
+            : <PickerChip fixed label={asset} value={asset} options={ASSETS.map((a) => ({ value: a, label: a }))} onChange={setAsset} title={t('market.asset')} />}
         </Row>
+        <TextInput testID="pay-amount" accessibilityLabel={t('market.amount')} value={amount} onChangeText={(v) => setAmount(cleanDecimal(v))} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={`${c.sub}66`}
+          style={{ ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}), color: c.text, fontSize: 84, fontWeight: '800', letterSpacing: -3.5, textAlign: 'center', minWidth: 120, alignSelf: 'stretch', fontVariant: ['tabular-nums'], paddingVertical: 0 }} />
+        <Row style={{ gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Pill label={`${t('ui.youGet')} ${best?.get ? `${fmtGet(best.get)} ${getUnit}` : '—'}`} />
+          {side === 'buy'
+            ? <PickerChip fixed label={asset} value={asset} options={ASSETS.map((a) => ({ value: a, label: a }))} onChange={setAsset} title={t('market.asset')} />
+            : <PickerChip fixed label={fiat} value={fiat} options={fiatOptions} onChange={(v) => { setFiat(v); setPm(''); }} title={t('market.fiat')} />}
+        </Row>
+        <Row style={{ flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: space(1) }}>
+          <Chip label={t('ui.anyMethod')} active={!pm} onPress={() => setPm('')} />
+          {offered.map((x) => <Chip key={x.code} label={x.name} active={pm === x.code} onPress={() => setPm(x.code)} />)}
+        </Row>
+        <Button size="lg" variant={side === 'buy' ? 'primary' : 'sell'} title={cta} disabled={!best} onPress={() => best && open(best.ad, best.fiatLeg)} style={{ alignSelf: 'stretch', marginTop: space(2) }} testID="best-cta" />
+      </Hero>
 
-        {/* Offers preview */}
-        <Row style={{ justifyContent: 'space-between' }}><Text size="h3">{t('ui.p2pOffers')}</Text><Press onPress={() => router.navigate('/p2p')}><Text tone="primary" weight="700" size="small">{t('ui.viewAll')} →</Text></Press></Row>
-        {offers === null ? <Skeleton height={120} /> : offers.length === 0 ? <Text tone="sub" size="small">{t('market.empty')}</Text> : offers.map((ad) => (
-          <Press key={ad.id} onPress={() => (me ? router.push({ pathname: '/trade', params: { adId: rememberAd(ad), side: 'buy' } }) : router.push('/login'))}>
-            <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <Avatar name={ad.advertiser.displayName} seed={ad.advertiser.id} size={36} />
-              <View style={{ flex: 1 }}>
-                <Text weight="700" numberOfLines={1}>{ad.advertiser.displayName}</Text>
-                <Text size="tiny" tone="sub">{pct(ad.advertiser.completionRateBps)} · {num(ad.remainingAmount, 2)} {ad.asset}</Text>
+      {best ? <>
+        <Press onPress={() => router.push(`/profile/${best.ad.advertiser.id}`)}>
+          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text size="small" tone="sub">{t('ui.bestMatchOf', { n: usable.length || rows.length })} · {t('ui.viewPassport')}</Text>
+              <Text size="h2" numberOfLines={1}>{best.ad.advertiser.displayName}</Text>
+            </View>
+            <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: c.muted, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="arrow-up-outline" size={18} color={c.text} style={{ transform: [{ rotate: '45deg' }] }} /></View>
+          </Card>
+        </Press>
+        <Row style={{ gap: space(2), alignItems: 'stretch' }}>
+          <Stat label={t('market.price')} value={`${num(best.ad.price, 8)} ${fiat}`} pill={<Badge label={t('ui.bestOfN', { n: rows.length })} tone="warning" />} />
+          <Stat label={t('ui.usualRelease')} value={releaseLabel(best.ad.advertiser.avgReleaseSec, t)} pill={best.ad.advertiser.avgReleaseSec && best.ad.advertiser.avgReleaseSec < 300 ? <Badge label={t('ui.fast')} tone="success" /> : null} />
+          <Stat label={t('ui.protection')} value={best.ad.advertiser.verifiedBadge ? t('ui.merchantBond') : t('ui.escrow')} pill={<Badge label={t('ui.escrowLocked')} tone="success" />} />
+        </Row>
+      </> : items === null ? <Skeleton height={160} /> : <Card><Text tone="sub" style={{ textAlign: 'center', paddingVertical: space(6) }}>{t('market.empty')}</Text></Card>}
+
+      <Card style={{ gap: 0 }} testID="book">
+        <Row style={{ justifyContent: 'space-between', alignItems: 'baseline', marginBottom: space(1) }}><Text size="h3">{t('ui.allOffers')}</Text><Text size="tiny" tone="sub">{t('ui.rankedByGet')}</Text></Row>
+        {items === null && <Skeleton height={60} />}
+        {rows.map(({ ad, get, fits, fiatLeg }, i) => (
+          <View key={ad.id} style={{ opacity: fits ? 1 : 0.5 }} testID="ad-row">
+            {i > 0 && <Divider />}
+            <Row style={{ paddingVertical: space(3), gap: 10 }}>
+              <View style={{ flex: 1, gap: 3 }}>
+                <Row style={{ gap: 6 }}><Text weight="600" numberOfLines={1} style={{ flexShrink: 1 }}>{ad.advertiser.displayName}</Text>{i === 0 && fits && <Badge label={t('ui.best')} tone="success" />}</Row>
+                <Text size="tiny" tone="sub" numberOfLines={1}>{num(ad.price, 8)} · {releaseLabel(ad.advertiser.avgReleaseSec, t)} · {ad.advertiser.verifiedBadge ? t('ui.merchantBond') : t('ui.escrow')}</Text>
               </View>
-              <View style={{ alignItems: 'flex-end' }}><Text weight="800" tone="buy">{num(ad.price, 8)}</Text><Text size="tiny" tone="sub">{ad.fiat}</Text></View>
-            </Card>
-          </Press>
+              <View style={{ alignItems: 'flex-end', gap: 3 }}>
+                <Text weight="700">{get ? `${fmtGet(get)} ${getUnit}` : `${num(ad.minAmount, 2)}–${num(ad.maxAmount, 2)}`}</Text>
+                {!get && <Text size="tiny" tone="sub">{ad.fiat}</Text>}
+              </View>
+              <Button size="sm" variant="soft" title={t(side === 'buy' ? 'market.buy' : 'market.sell')} onPress={() => open(ad, fiatLeg)} testID="trade" />
+            </Row>
+          </View>
         ))}
-
-        {/* Trust */}
-        <Row style={{ flexWrap: 'wrap', gap: 8 }}>
-          {([['shield-checkmark', 'ui.why1t'], ['checkmark-done-circle', 'ui.why2t'], ['hammer', 'ui.why3t'], ['earth', 'ui.globalCommunity']] as Array<[IconName, string]>).map(([icon, k]) => (
-            <Card key={k} style={{ flexBasis: '48%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', gap: 10, padding: space(3) }}><Ionicons name={icon} size={20} color={c.primary} /><Text size="small" weight="600" style={{ flex: 1 }}>{t(k)}</Text></Card>
-          ))}
-        </Row>
-      </View>
+      </Card>
+      {!me && <Text size="tiny" tone="sub" style={{ textAlign: 'center' }}>{t('ui.escrowNote')}</Text>}
     </ScrollView>
+  );
+}
+
+function Stat({ label, value, pill }: { label: string; value: string; pill: React.ReactNode }) {
+  return (
+    <Card style={{ flex: 1, padding: space(3.5), gap: space(2), justifyContent: 'space-between', minHeight: 112 }}>
+      <View style={{ gap: 6 }}><Text size="tiny" weight="600" numberOfLines={2}>{label}</Text>{pill}</View>
+      <Text weight="700" numberOfLines={2}>{value}</Text>
+    </Card>
   );
 }

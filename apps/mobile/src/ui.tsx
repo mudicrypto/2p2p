@@ -1,4 +1,4 @@
-/** Mobile UI kit: same visual language as the web design system (packages/ui). */
+/** Mobile UI kit: parley design language, same tokens as the web design system (packages/ui). */
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator, Animated, Modal, Platform, Pressable, ScrollView, Text as RNText, TextInput, View,
@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Defs, LinearGradient as SvgGradient, Path, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Defs, Path, RadialGradient, Stop } from 'react-native-svg';
 import { useColors } from './app';
 import { ASSET_COLORS, BRAND, font, radius, space } from './theme';
 
@@ -28,42 +28,39 @@ export function Screen({ children, scroll = true, padded = true, style, ...p }: 
 type Tone = 'default' | 'sub' | 'primary' | 'buy' | 'sell' | 'warn' | 'white' | 'onPrimary';
 export function Text({ size = 'body', weight, tone = 'default', mono, style, ...p }: TextProps & { size?: keyof typeof font; weight?: '400' | '500' | '600' | '700' | '800'; tone?: Tone; mono?: boolean }) {
   const c = useColors();
-  const color = { default: c.text, sub: c.sub, primary: c.primary, buy: c.buy, sell: c.sell, warn: c.warn, white: '#fff', onPrimary: c.onPrimary }[tone];
-  const w = weight ?? (size === 'h1' || size === 'h2' ? '800' : size === 'h3' ? '700' : '400');
-  return <RNText style={[{ color, fontSize: font[size], fontWeight: w, letterSpacing: size === 'h1' ? -0.8 : size === 'h2' ? -0.4 : 0, fontVariant: ['tabular-nums'], fontFamily: mono ? MONO : undefined }, style]} {...p} />;
+  const color = { default: c.text, sub: c.sub, primary: c.warn, buy: c.buy, sell: c.sell, warn: c.warn, white: '#fff', onPrimary: c.onPrimary }[tone];
+  const w = weight ?? (size === 'h1' || size === 'h2' ? '700' : size === 'h3' ? '600' : '400');
+  return <RNText style={[{ color, fontSize: font[size], fontWeight: w, letterSpacing: size === 'h1' ? -1.1 : size === 'h2' ? -0.6 : size === 'h3' ? -0.3 : 0, fontVariant: ['tabular-nums'], fontFamily: mono ? MONO : undefined }, style]} {...p} />;
 }
 
 export function Card({ style, children, ...p }: ViewProps) {
   const c = useColors();
-  return <View style={[{ backgroundColor: c.card, borderRadius: radius.lg, borderWidth: 1, borderColor: c.border, padding: space(4) }, style]} {...p}>{children}</View>;
+  return <View style={[{ backgroundColor: c.card, borderRadius: radius.xl, padding: space(5) }, style]} {...p}>{children}</View>;
 }
 export function Row({ style, ...p }: ViewProps) { return <View style={[{ flexDirection: 'row', alignItems: 'center', gap: space(2) }, style]} {...p} />; }
 export function Divider() { const c = useColors(); return <View style={{ height: 1, backgroundColor: c.border }} />; }
 
-type BtnVariant = 'primary' | 'buy' | 'sell' | 'outline' | 'soft' | 'ghost';
+type BtnVariant = 'primary' | 'ink' | 'buy' | 'sell' | 'outline' | 'soft' | 'ghost';
 export function Button({ title, onPress, variant = 'primary', icon, loading, disabled, size = 'md', style, testID }: { title: string; onPress?: () => void; variant?: BtnVariant; icon?: IconName; loading?: boolean; disabled?: boolean; size?: 'sm' | 'md' | 'lg'; style?: ViewStyle; testID?: string }) {
   const c = useColors();
-  const h = { sm: 36, md: 48, lg: 56 }[size];
-  const fg = { primary: c.onPrimary, buy: c.onBuy, sell: '#fff', outline: c.text, soft: c.primary, ghost: c.text }[variant];
-  const bg = { primary: 'transparent', buy: c.buy, sell: c.sell, outline: 'transparent', soft: `${c.primary}22`, ghost: 'transparent' }[variant];
-  const inner = (
-    <Row style={{ height: h, paddingHorizontal: space(size === 'sm' ? 3 : 5), justifyContent: 'center', gap: space(2) }}>
-      {loading ? <ActivityIndicator color={fg} /> : icon ? <Ionicons name={icon} size={size === 'sm' ? 15 : 18} color={fg} /> : null}
-      <RNText style={{ color: fg, fontWeight: '700', fontSize: size === 'sm' ? 13 : 16 }}>{title}</RNText>
-    </Row>
-  );
+  const h = { sm: 38, md: 50, lg: 58 }[size];
+  const fg = { primary: c.onPrimary, ink: c.onInk, buy: c.onPrimary, sell: '#1a1714', outline: c.text, soft: c.text, ghost: c.text }[variant];
+  const bg = { primary: c.primary, ink: c.ink, buy: c.primary, sell: c.sell, outline: 'transparent', soft: c.muted, ghost: 'transparent' }[variant];
   return (
     <Pressable testID={testID} accessibilityRole="button" disabled={disabled || loading} onPress={() => { tap(); onPress?.(); }}
-      style={({ pressed }) => [{ borderRadius: radius.md, overflow: 'hidden', backgroundColor: bg, opacity: disabled ? 0.45 : pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }], borderWidth: variant === 'outline' ? 1 : 0, borderColor: c.border }, style]}>
-      {variant === 'primary' ? <LinearGradient colors={[c.primary2, c.primary, c.primary3]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>{inner}</LinearGradient> : inner}
+      style={({ pressed }) => [{ borderRadius: radius.pill, backgroundColor: bg, opacity: disabled ? 0.45 : pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }], borderWidth: variant === 'outline' ? 1 : 0, borderColor: c.border }, style]}>
+      <Row style={{ height: h, paddingHorizontal: space(size === 'sm' ? 4 : 4), justifyContent: 'center', gap: space(2) }}>
+        {loading ? <ActivityIndicator color={fg} /> : icon ? <Ionicons name={icon} size={size === 'sm' ? 15 : 18} color={fg} /> : null}
+        <RNText numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ flexShrink: 1, color: fg, fontWeight: '600', fontSize: size === 'sm' ? 14 : size === 'lg' ? 17 : 16 }}>{title}</RNText>
+      </Row>
     </Pressable>
   );
 }
 export function IconButton({ icon, onPress, label, badge }: { icon: IconName; onPress?: () => void; label: string; badge?: number }) {
   const c = useColors();
   return (
-    <Pressable accessibilityLabel={label} onPress={() => { tap(); onPress?.(); }} hitSlop={8} style={({ pressed }) => ({ width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? c.muted : 'transparent' })}>
-      <Ionicons name={icon} size={22} color={c.text} />
+    <Pressable accessibilityLabel={label} onPress={() => { tap(); onPress?.(); }} hitSlop={8} style={({ pressed }) => ({ width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: pressed ? c.muted : c.card })}>
+      <Ionicons name={icon} size={20} color={c.text} />
       {!!badge && <View style={{ position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: c.sell, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 3 }}><RNText style={{ color: '#fff', fontSize: 10, fontWeight: '700' }}>{badge > 9 ? '9+' : badge}</RNText></View>}
     </Pressable>
   );
@@ -75,7 +72,7 @@ export function Input({ label, unit, hint, big, style, ...p }: TextInputProps & 
   return (
     <View style={{ gap: 6 }}>
       {label && <Text size="small" tone="sub" weight="500">{label}</Text>}
-      <Row style={{ backgroundColor: c.muted, borderRadius: radius.md, borderWidth: 1.5, borderColor: focus ? c.primary : 'transparent', paddingHorizontal: space(4), height: big ? 64 : 50 }}>
+      <Row style={{ backgroundColor: c.muted, borderRadius: radius.md, borderWidth: 1.5, borderColor: focus ? c.primary : 'transparent', paddingHorizontal: space(4), height: big ? 64 : 52 }}>
         <TextInput placeholderTextColor={c.sub} onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
           style={[{ flex: 1, color: c.text, ...(Platform.OS === 'web' ? { outlineStyle: 'none' } as object : {}), fontSize: big ? 26 : 16, fontWeight: big ? '700' : '400', fontVariant: ['tabular-nums'] }, style]} {...p} />
         {typeof unit === 'string' ? <Text weight="700" tone="sub">{unit}</Text> : unit}
@@ -85,16 +82,15 @@ export function Input({ label, unit, hint, big, style, ...p }: TextInputProps & 
   );
 }
 
-export function Segmented<T extends string>({ value, options, onChange, colors }: { value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void; colors?: Partial<Record<T, string>> }) {
+export function Segmented<T extends string>({ value, options, onChange }: { value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void; colors?: Partial<Record<T, string>> }) {
   const c = useColors();
   return (
-    <Row style={{ backgroundColor: c.muted, borderRadius: radius.md, padding: 4, gap: 4 }}>
+    <Row style={{ backgroundColor: c.muted, borderRadius: radius.pill, padding: 4, gap: 4 }}>
       {options.map((o) => {
         const on = o.value === value;
-        const bg = on ? colors?.[o.value] ?? c.card : 'transparent';
         return (
-          <Pressable key={o.value} onPress={() => { tap(); onChange(o.value); }} style={{ flex: 1, height: 40, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: bg }}>
-            <RNText style={{ fontWeight: '700', color: on ? (colors?.[o.value] ? (o.value === 'buy' ? c.onBuy : '#fff') : c.text) : c.sub }}>{o.label}</RNText>
+          <Pressable key={o.value} accessibilityRole="tab" accessibilityState={{ selected: on }} onPress={() => { tap(); onChange(o.value); }} style={{ flex: 1, height: 40, paddingHorizontal: 12, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.ink : 'transparent' }}>
+            <RNText numberOfLines={1} style={{ fontWeight: '600', fontSize: 15, color: on ? c.onInk : c.text }}>{o.label}</RNText>
           </Pressable>
         );
       })}
@@ -104,15 +100,45 @@ export function Segmented<T extends string>({ value, options, onChange, colors }
 export function Chip({ label, active, onPress, left }: { label: string; active?: boolean; onPress?: () => void; left?: React.ReactNode }) {
   const c = useColors();
   return (
-    <Pressable onPress={() => { tap(); onPress?.(); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, height: 36, borderRadius: radius.pill, backgroundColor: active ? `${c.primary}22` : c.muted, borderWidth: 1, borderColor: active ? c.primary : 'transparent' }}>
-      {left}<RNText style={{ color: active ? c.text : c.sub, fontWeight: '600', fontSize: 14 }}>{label}</RNText>
+    <Pressable onPress={() => { tap(); onPress?.(); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, height: 38, borderRadius: radius.pill, backgroundColor: active ? c.ink : c.muted }}>
+      {left}<RNText style={{ color: active ? c.onInk : c.text, fontWeight: '600', fontSize: 15 }}>{label}</RNText>
     </Pressable>
   );
 }
 export function Badge({ label, tone = 'default' }: { label: string; tone?: 'default' | 'success' | 'warning' | 'danger' | 'info' }) {
   const c = useColors();
-  const col = { default: c.sub, success: c.buy, warning: c.warn, danger: c.sell, info: c.primary }[tone];
-  return <View style={{ alignSelf: 'flex-start', backgroundColor: `${col}22`, borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 }}><RNText style={{ color: col, fontSize: 11, fontWeight: '700' }}>{label}</RNText></View>;
+  const [bg, fg] = { default: [c.muted, c.text], success: ['#a6d9a0', '#16301a'], warning: [c.primary, c.onPrimary], danger: [c.sell, '#2a110b'], info: ['#a9bdf5', '#121a33'] }[tone];
+  return <View style={{ alignSelf: 'flex-start', backgroundColor: bg, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 }}><RNText style={{ color: fg, fontSize: 12, fontWeight: '600' }}>{label}</RNText></View>;
+}
+/** Huge display numeral (parley's signature). */
+export function Big({ children, size = 76, tone, style, testID }: { children: React.ReactNode; size?: number; tone?: 'sell' | 'sub'; style?: object; testID?: string }) {
+  const c = useColors();
+  return <RNText testID={testID} adjustsFontSizeToFit numberOfLines={1} style={[{ color: tone === 'sell' ? c.sell : tone === 'sub' ? c.sub : c.text, fontSize: size, fontWeight: '800', letterSpacing: -size * 0.045, lineHeight: size * 1.05, fontVariant: ['tabular-nums'], textAlign: 'center' }, style]}>{children}</RNText>;
+}
+/** Outlined pill used under big numerals ("You get 498.60 USDT", "X USDT in escrow"). */
+export function Pill({ label, icon, tone }: { label: string; icon?: IconName; tone?: 'sell' | 'info' }) {
+  const c = useColors();
+  const col = tone === 'sell' ? c.sell : tone === 'info' ? c.info : c.primary;
+  return <Row style={{ alignSelf: 'center', borderWidth: 1, borderColor: col, borderRadius: radius.pill, paddingHorizontal: 14, paddingVertical: 7, gap: 6 }}>{icon && <Ionicons name={icon} size={14} color={c.text} />}<RNText style={{ color: c.text, fontWeight: '600', fontSize: 15 }}>{label}</RNText></Row>;
+}
+/** Hero card with the warm radial glow behind its content. */
+export function Hero({ children, tone, style }: { children: React.ReactNode; tone?: 'sell' | 'info'; style?: ViewStyle }) {
+  const c = useColors();
+  return (
+    <View style={[{ backgroundColor: c.card, borderRadius: radius.xl, overflow: 'hidden', paddingVertical: space(8), paddingHorizontal: space(5), alignItems: 'center', gap: space(3) }, style]}>
+      <Glow color={tone === 'sell' ? 'rgba(236,134,112,0.35)' : tone === 'info' ? 'rgba(169,189,245,0.35)' : c.glow} />
+      {children}
+    </View>
+  );
+}
+export function Glow({ color }: { color: string }) {
+  const id = useSvgId('glow');
+  return (
+    <Svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }} preserveAspectRatio="none" viewBox="0 0 100 100">
+      <Defs><RadialGradient id={id} cx="50%" cy="38%" rx="50%" ry="55%"><Stop offset="0" stopColor={color} /><Stop offset="1" stopColor={color} stopOpacity={0} /></RadialGradient></Defs>
+      <Path d="M0 0H100V100H0Z" fill={`url(#${id})`} />
+    </Svg>
+  );
 }
 export function AssetIcon({ asset, size = 32 }: { asset: string; size?: number }) {
   const sym = { USDT: '₮', BTC: '₿', ETH: 'Ξ' }[asset] ?? asset[0];
@@ -134,7 +160,7 @@ export function Avatar({ name, seed, size = 40, online }: { name: string; seed?:
 export function PayChip({ code }: { code: string }) {
   const c = useColors();
   const hue = [...code].reduce((a, ch) => a + ch.charCodeAt(0), 0) % 360;
-  return <Row style={{ gap: 6, backgroundColor: c.muted, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3 }}><View style={{ width: 3, height: 12, borderRadius: 2, backgroundColor: `hsl(${hue}, 85%, 60%)` }} /><RNText style={{ color: c.text, fontSize: 11, fontWeight: '600' }}>{code}</RNText></Row>;
+  return <Row style={{ gap: 6, backgroundColor: c.muted, borderRadius: radius.pill, paddingHorizontal: 10, paddingVertical: 4 }}><View style={{ width: 3, height: 12, borderRadius: 2, backgroundColor: `hsl(${hue}, 85%, 60%)` }} /><RNText style={{ color: c.text, fontSize: 11, fontWeight: '600' }}>{code}</RNText></Row>;
 }
 export function CopyRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   const c = useColors();
@@ -158,7 +184,7 @@ export function Steps({ steps, current, failed }: { steps: string[]; current: nu
             <Row style={{ width: '100%', gap: 0 }}>
               <View style={{ flex: 1, height: 2, backgroundColor: i === 0 ? 'transparent' : done || active ? c.primary : c.border }} />
               <View style={{ width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: col, backgroundColor: done ? c.primary : c.card, alignItems: 'center', justifyContent: 'center' }}>
-                {done ? <Ionicons name="checkmark" size={14} color="#fff" /> : <RNText style={{ color: col, fontWeight: '800', fontSize: 12 }}>{i + 1}</RNText>}
+                {done ? <Ionicons name="checkmark" size={14} color={c.onPrimary} /> : <RNText style={{ color: col, fontWeight: '800', fontSize: 12 }}>{i + 1}</RNText>}
               </View>
               <View style={{ flex: 1, height: 2, backgroundColor: i === steps.length - 1 ? 'transparent' : done ? c.primary : c.border }} />
             </Row>
@@ -181,8 +207,8 @@ export function Empty({ icon, text, action }: { icon: IconName; text: string; ac
 }
 export function Notice({ text, tone = 'info', icon }: { text: string; tone?: 'info' | 'warn' | 'error' | 'success'; icon?: IconName }) {
   const c = useColors();
-  const col = { info: c.primary, warn: c.warn, error: c.sell, success: c.buy }[tone];
-  return <Row style={{ alignItems: 'flex-start', backgroundColor: `${col}1a`, borderRadius: radius.md, padding: space(3) }}><Ionicons name={icon ?? (tone === 'error' ? 'alert-circle' : tone === 'success' ? 'checkmark-circle' : tone === 'warn' ? 'warning' : 'shield-checkmark')} size={16} color={col} /><Text size="small" style={{ flex: 1, color: tone === 'info' ? c.text : col }}>{text}</Text></Row>;
+  const col = { info: c.sub, warn: c.warn, error: c.sell, success: c.buy }[tone];
+  return <Row style={{ alignItems: 'flex-start', backgroundColor: tone === 'info' ? c.muted : `${col}22`, borderRadius: radius.md, padding: space(3) }}><Ionicons name={icon ?? (tone === 'error' ? 'alert-circle' : tone === 'success' ? 'checkmark-circle' : tone === 'warn' ? 'warning' : 'shield-checkmark')} size={16} color={col} /><Text size="small" style={{ flex: 1, color: tone === 'info' ? c.text : col }}>{text}</Text></Row>;
 }
 export function Gradient({ children, style }: { children?: React.ReactNode; style?: ViewStyle }) {
   const c = useColors();
@@ -212,58 +238,16 @@ export function errText(t: (k: string) => string, e: unknown) {
   return (e as Error)?.message || t('common.error');
 }
 
-/** Gold "K" monogram (same geometry as the web Logo). */
 let svgSeq = 0;
 const useSvgId = (p: string) => useRef(`${p}${++svgSeq}`).current;
+/** parley mark: lowercase "p" in a sand circle (same as the web Logo). */
 export function Logo({ size = 32 }: { size?: number }) {
-  const id = useSvgId('kg');
-  return (
-    <Svg width={size} height={size} viewBox="0 0 48 48">
-      <Defs><SvgGradient id={id} x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse"><Stop offset="0" stopColor="#ffd866" /><Stop offset="0.5" stopColor="#f5b50a" /><Stop offset="1" stopColor="#d98e00" /></SvgGradient></Defs>
-      <Path d="M9 5h9.5l-4.6 38H4.4L9 5Z" fill={`url(#${id})`} />
-      <Path d="M19.4 27.2 37.8 5H48L26.6 30.6l-7.2-3.4Z" fill={`url(#${id})`} />
-      <Path d="M27.8 32.4 35.6 43H46L33.6 26.2l-5.8 6.2Z" fill={`url(#${id})`} />
-    </Svg>
-  );
+  const c = useColors();
+  return <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: c.primary, alignItems: 'center', justifyContent: 'center' }}><RNText style={{ color: c.onPrimary, fontWeight: '800', fontSize: size * 0.6, marginTop: -size * 0.08, letterSpacing: -1 }}>p</RNText></View>;
 }
 export function Wordmark({ size = 28 }: { size?: number }) {
   const c = useColors();
-  return <Row style={{ gap: 8 }}><Logo size={size} /><RNText style={{ color: c.text, fontWeight: '800', letterSpacing: 2, fontSize: size * 0.62 }}>{BRAND.name}</RNText></Row>;
-}
-/** Dotted night globe (deterministic, react-native-svg). */
-export function Globe({ size = 320, opacity = 1 }: { size?: number; opacity?: number }) {
-  const dots = globeDots(size);
-  const id = useSvgId('atm');
-  return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ opacity }}>
-      <Defs><RadialGradient id={id} cx="45%" cy="40%" r="60%"><Stop offset="0" stopColor="#1a1408" /><Stop offset="0.7" stopColor="#0a0a0b" /><Stop offset="1" stopColor="#07080a" /></RadialGradient></Defs>
-      <Circle cx={size / 2} cy={size / 2} r={size / 2 - 2} fill={`url(#${id})`} stroke="rgba(245,181,10,0.35)" strokeWidth={1.5} />
-      {dots.map((d, i) => <Circle key={i} cx={d.x} cy={d.y} r={d.r} fill={d.city ? '#ffd866' : '#f5b50a'} opacity={d.o} />)}
-    </Svg>
-  );
-}
-const LAND: Array<[number, number, number, number]> = [
-  [20, 8, 19, 27], [12, 12, 14, 9], [40, 6, 6, 8], [25, -26, 9, 7], [12, 50, 18, 9], [25, 58, 14, 8], [45, 25, 10, 9], [78, 20, 9, 11],
-  [100, 15, 9, 8], [105, 35, 22, 13], [90, 55, 40, 11], [-60, -12, 15, 22], [-100, 40, 26, 14], [134, -25, 17, 11],
-];
-function globeDots(size: number) {
-  const out: Array<{ x: number; y: number; r: number; o: number; city: boolean }> = [];
-  const R = size / 2 - 4; let seed = 7;
-  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  for (let lat = -76; lat <= 78; lat += 4) {
-    const step = 4 / Math.max(0.3, Math.cos((lat * Math.PI) / 180));
-    for (let lon = -180; lon < 180; lon += step) {
-      const l = ((lon + 10 + 540) % 360) - 180;
-      if (Math.abs(l) > 86) continue;
-      let score = 0;
-      for (const [x, y, rx, ry] of LAND) score = Math.max(score, 1 - (((lon - x) / rx) ** 2 + ((lat - y) / ry) ** 2));
-      const land = score + (rnd() - 0.5) * 0.35 > 0.05;
-      if (!land && rnd() > 0.05) continue;
-      const phi = (lat * Math.PI) / 180; const lam = (l * Math.PI) / 180; const z = Math.cos(phi) * Math.cos(lam);
-      out.push({ x: size / 2 + R * Math.cos(phi) * Math.sin(lam), y: size / 2 - R * Math.sin(phi), r: (land ? 1.4 : 0.8) * (0.6 + z * 0.6), o: (land ? 0.65 : 0.12) * (0.35 + z * 0.75), city: land && rnd() > 0.9 });
-    }
-  }
-  return out;
+  return <RNText style={{ color: c.text, fontWeight: '700', letterSpacing: -size * 0.04, fontSize: size * 0.8 }}>{BRAND.name}</RNText>;
 }
 /** Dropdown-style chip that opens a bottom-sheet list. */
 export function PickerChip<T extends string>({ label, value, options, onChange, title, fixed }: { label: string; value: T; options: Array<{ value: T; label: string }>; onChange: (v: T) => void; title?: string; fixed?: boolean }) {
@@ -272,7 +256,7 @@ export function PickerChip<T extends string>({ label, value, options, onChange, 
   const ins = useSafeAreaInsets();
   return (
     <>
-      <Pressable onPress={() => { tap(); setOpen(true); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, height: 38, paddingHorizontal: 12, borderRadius: radius.sm, borderWidth: 1, borderColor: c.border, backgroundColor: c.card, flexShrink: fixed ? 0 : 1 }}>
+      <Pressable onPress={() => { tap(); setOpen(true); }} style={{ flexDirection: 'row', alignItems: 'center', gap: 4, height: 38, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: c.muted, flexShrink: fixed ? 0 : 1 }}>
         <RNText numberOfLines={1} style={{ color: c.text, fontWeight: '600', fontSize: 13, flexShrink: 1 }}>{label}</RNText>
         <Ionicons name="chevron-down" size={14} color={c.sub} />
       </Pressable>

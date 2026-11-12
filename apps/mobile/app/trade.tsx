@@ -11,12 +11,12 @@ import { space } from '../src/theme';
 import { AssetIcon, Avatar, Button, Card, Chip, Input, Notice, PayChip, Row, Screen, Skeleton, Text, errText, success } from '../src/ui';
 
 export default function Trade() {
-  const { adId, side } = useLocalSearchParams<{ adId: string; side: 'buy' | 'sell' }>();
+  const { adId, side, amount } = useLocalSearchParams<{ adId: string; side: 'buy' | 'sell'; amount?: string }>();
   const { colors: c } = useApp();
   const { t, money, pct } = useI18n();
   const [ad, setAd] = useState<any>(() => cachedAd(adId) ?? null);
-  const [fiatAmount, setFiat] = useState('');
-  const [crypto, setCrypto] = useState('');
+  const [fiatAmount, setFiat] = useState(amount ?? '');
+  const [crypto, setCrypto] = useState(() => { const a = cachedAd(adId); return amount && a ? cryptoFor(amount, a.price) : ''; });
   const [pms, setPms] = useState<any[]>([]);
   const [pm, setPm] = useState('');
   const [busy, setBusy] = useState(false);
@@ -43,7 +43,7 @@ export default function Trade() {
         <Input big label={isBuy ? t('trade.youPay') : t('trade.youReceive')} unit={ad.fiat} keyboardType="decimal-pad" placeholder="0.00" value={fiatAmount} testID="trade-amount"
           onChangeText={(v) => { const x = cleanDecimal(v); setFiat(x); setCrypto(cryptoFor(x, ad.price)); }}
           hint={<Text size="tiny" tone={fiatAmount && !inRange(fiatAmount, ad.minAmount, ad.maxAmount) ? 'sell' : 'sub'}>{t('market.limits')}: {money(ad.minAmount, ad.fiat)} – {money(ad.maxAmount, ad.fiat)}</Text>} />
-        <Row style={{ justifyContent: 'center', marginVertical: -8 }}><View style={{ backgroundColor: c.card, borderColor: c.border, borderWidth: 1, borderRadius: 20, padding: 6 }}><Ionicons name="swap-vertical" size={16} color={c.sub} /></View></Row>
+        <Row style={{ justifyContent: 'center', marginVertical: -8 }}><View style={{ backgroundColor: c.card, borderRadius: 20, padding: 6 }}><Ionicons name="swap-vertical" size={16} color={c.sub} /></View></Row>
         <Input big label={isBuy ? t('trade.youReceive') : t('trade.youSell')} unit={<Row style={{ gap: 6 }}><AssetIcon asset={ad.asset} size={18} /><Text weight="700">{ad.asset}</Text></Row>} keyboardType="decimal-pad" placeholder="0.00" value={crypto}
           onChangeText={(v) => { const x = cleanDecimal(v); setCrypto(x); setFiat(fiatFor(x, ad.price)); }} />
         <Row style={{ gap: 8 }}>{['25', '50', '100'].map((p) => <Chip key={p} label={p === '100' ? 'MAX' : `${p}%`} onPress={() => { const max = ad.maxAmount; const v = p === '100' ? max : fromScaled((toScaled(max) * BigInt(p)) / 100n, 2); setFiat(v); setCrypto(cryptoFor(v, ad.price)); }} />)}</Row>
