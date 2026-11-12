@@ -13,7 +13,7 @@ export default function Welcome() {
   const ins = useSafeAreaInsets();
   const steps = [t('ui.stepAccount'), t('ui.stepVerifyId'), t('ui.trade')];
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: ins.top, paddingBottom: ins.bottom + space(4) }}>
+    <View style={{ flex: 1, zIndex: 0, backgroundColor: c.bg, paddingTop: ins.top, paddingBottom: ins.bottom + space(4) }}>
       <Glow color={c.glow} />
       <Row style={{ justifyContent: 'space-between', paddingHorizontal: space(4), paddingVertical: space(2) }}>
         <View style={{ width: 44 }} /><Wordmark size={30} /><IconButton icon="close" label="Close" onPress={() => router.back()} />

@@ -125,7 +125,7 @@ export function Pill({ label, icon, tone }: { label: string; icon?: IconName; to
 export function Hero({ children, tone, style }: { children: React.ReactNode; tone?: 'sell' | 'info'; style?: ViewStyle }) {
   const c = useColors();
   return (
-    <View style={[{ backgroundColor: c.card, borderRadius: radius.xl, overflow: 'hidden', paddingVertical: space(8), paddingHorizontal: space(5), alignItems: 'center', gap: space(3) }, style]}>
+    <View style={[{ zIndex: 0, backgroundColor: c.card, borderRadius: radius.xl, overflow: 'hidden', paddingVertical: space(8), paddingHorizontal: space(5), alignItems: 'center', gap: space(3) }, style]}>
       <Glow color={tone === 'sell' ? 'rgba(236,134,112,0.35)' : tone === 'info' ? 'rgba(169,189,245,0.35)' : c.glow} />
       {children}
     </View>
@@ -134,10 +134,12 @@ export function Hero({ children, tone, style }: { children: React.ReactNode; ton
 export function Glow({ color }: { color: string }) {
   const id = useSvgId('glow');
   return (
-    <Svg width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0 }} preserveAspectRatio="none" viewBox="0 0 100 100">
-      <Defs><RadialGradient id={id} cx="50%" cy="38%" rx="50%" ry="55%"><Stop offset="0" stopColor={color} /><Stop offset="1" stopColor={color} stopOpacity={0} /></RadialGradient></Defs>
-      <Path d="M0 0H100V100H0Z" fill={`url(#${id})`} />
-    </Svg>
+    <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: -1 }}>
+      <Svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <Defs><RadialGradient id={id} cx="50%" cy="38%" rx="50%" ry="55%"><Stop offset="0" stopColor={color} /><Stop offset="1" stopColor={color} stopOpacity={0} /></RadialGradient></Defs>
+        <Path d="M0 0H100V100H0Z" fill={`url(#${id})`} />
+      </Svg>
+    </View>
   );
 }
 export function AssetIcon({ asset, size = 32 }: { asset: string; size?: number }) {
