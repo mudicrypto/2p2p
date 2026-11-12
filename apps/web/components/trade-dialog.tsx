@@ -22,13 +22,13 @@ export function fiatFor(crypto: string, price: string) {
   return fromScaled((toScaled(crypto) * toScaled(price)) / 10n ** DEC, DEC, 2);
 }
 
-export function TradeDialog({ ad, side, onClose }: { ad: any; side: 'buy' | 'sell'; onClose: () => void }) {
+export function TradeDialog({ ad, side, onClose, initial = '' }: { ad: any; side: 'buy' | 'sell'; onClose: () => void; initial?: string }) {
   const { t, money, pct } = useI18n();
   const { me } = useSession();
   const L = useL();
   const router = useRouter();
-  const [fiatAmount, setFiatAmount] = useState('');
-  const [cryptoAmount, setCryptoAmount] = useState('');
+  const [fiatAmount, setFiatAmount] = useState(initial);
+  const [cryptoAmount, setCryptoAmount] = useState(initial ? cryptoFor(initial, ad.price) : '');
   const [pm, setPm] = useState('');
   const [mine, setMine] = useState<any[]>([]);
   const [err, setErr] = useState<unknown>(null);

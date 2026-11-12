@@ -40,7 +40,7 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await buyer.getByTestId('place-order').click();
   await expect(buyer.getByTestId('order-status')).toHaveAttribute('data-status', 'AWAITING_PAYMENT');
   await expect(buyer.getByTestId('reference')).toHaveText(/^P2P[A-Z2-9]{8}$/);
-  await expect(buyer.getByText('iban: DE89370400440532013000')).toBeVisible();
+  await expect(buyer.getByText('DE89370400440532013000', { exact: true })).toBeVisible();
   const orderUrl = buyer.url();
 
   // chat + off-platform filter

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
 import { ArrowDownToLine, ArrowLeftRight, ArrowUpFromLine, Beaker, CreditCard, Eye, EyeOff, Plus, ShieldCheck } from 'lucide-react';
-import { Alert, AmountField, AssetIcon, Badge, Button, Card, CopyButton, Dialog, Input, Label, LineTabs, PayChip, Select, Skeleton, cn } from '@p2p/ui';
+import { Alert, AmountField, AssetIcon, Badge, Button, Card, CopyButton, Dialog, Input, Label, PayChip, Select, Skeleton, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
 import { api } from '../../../lib/api';
@@ -16,6 +16,8 @@ type Bal = Record<string, Record<string, string>>;
 const NETWORKS: Record<string, string[]> = { USDT: ['TRON', 'TON', 'BSC', 'ETHEREUM', 'POLYGON'], BTC: ['BITCOIN'], ETH: ['ETHEREUM'] };
 const ASSET_LIST = Object.keys(NETWORKS);
 const networks = (a: string) => NETWORKS[a] ?? [];
+/** Float-free decimal add for display. */
+function addDec(a: string, b: string) { const d = 8; const sc = (v: string) => { const [i, f = ''] = v.split('.'); return BigInt(i || '0') * 10n ** BigInt(d) + BigInt((f + '0'.repeat(d)).slice(0, d) || '0'); }; const v = (sc(a) + sc(b)).toString().padStart(d + 1, '0'); const f = v.slice(-d).replace(/0+$/, ''); return f ? `${v.slice(0, -d)}.${f}` : v.slice(0, -d); }
 
 export default function Wallet() {
   const { t, num, money } = useI18n();
@@ -29,8 +31,7 @@ export default function Wallet() {
   const quotes = useQuotes(fiat);
   const est = bal ? valuate(bal, quotes) : null;
   const [dlg, setDlg] = useState<null | { kind: 'deposit' | 'withdraw' | 'transfer'; asset: string }>(null);
-  const [hist, setHist] = useState<'deposits' | 'withdrawals'>('deposits');
-  const [rows, setRows] = useState<{ deposits: any[]; withdrawals: any[] }>({ deposits: [], withdrawals: [] });
+    const [rows, setRows] = useState<{ deposits: any[]; withdrawals: any[] }>({ deposits: [], withdrawals: [] });
   const [err, setErr] = useState<unknown>(null);
   const load = useCallback(async () => {
     const [b, l, d, w] = await Promise.all([api<Bal>('/me/balances').catch(() => ({})), api('/me/limits').catch(() => null), api<any[]>('/wallet/deposits').catch(() => []), api<any[]>('/wallet/withdrawals').catch(() => [])]);
@@ -45,36 +46,65 @@ export default function Wallet() {
   const mask = (v: string) => (hide ? '••••' : v);
   const usedPct = limits && limits.daily && limits.daily !== '0' ? Math.min(100, Math.round((Number(limits.usedToday) / Number(limits.daily)) * 100)) : 0;
 
+  const usdt = bal?.USDT ?? {};
+  const activity = [...rows.deposits.map((r) => ({ ...r, dir: 'in' as const })), ...rows.withdrawals.map((r) => ({ ...r, dir: 'out' as const }))]
+    .sort((x, y) => new Date(y.createdAt ?? 0).getTime() - new Date(x.createdAt ?? 0).getTime()).slice(0, 12);
+
   return (
-    <div className="space-y-6">
-      {/* Overview */}
-      <Card className="relative overflow-hidden p-6 sm:p-8">
-        <div className="pointer-events-none absolute -end-24 -top-24 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
-        <div className="relative flex flex-wrap items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">{t('ui.totalBalance')}<button aria-label="toggle" onClick={() => setHide(!hide)} className="hover:text-foreground">{hide ? <EyeOff size={15} /> : <Eye size={15} />}</button></div>
-            <div className="num mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl">{est && !(est.total === '0.00' && !est.complete) ? mask(`≈ ${money(est.total, fiat)}`) : '—'}</div>
-            <div className="mt-1 text-sm text-muted-foreground">{mask(num(bal?.USDT?.available ?? '0'))} USDT {t('wallet.available').toLowerCase()} · {t('ui.indicativeNote')}</div>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between pt-1">
+        <h1 className="text-[32px] font-bold tracking-[-0.03em] sm:text-[40px]">{t('ui.walletNav')}</h1>
+        <button type="button" aria-label="toggle" onClick={() => setHide(!hide)} className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground">{hide ? <EyeOff size={17} /> : <Eye size={17} />}</button>
+      </div>
+      <div className="grid gap-3 lg:grid-cols-[1.25fr_1fr]">
+        {/* Total balance */}
+        <Card className="relative overflow-hidden px-5 py-8 text-center sm:px-8">
+          <div className="hero-glow pointer-events-none absolute inset-0" />
+          <div className="relative">
+            <div className="text-[15px] font-medium">{t('ui.totalBalance')}</div>
+            <div className="num-xl mt-2 text-[64px] sm:text-[88px]">{bal === null ? '—' : mask(num(usdt.available && usdt.escrow ? addDec(usdt.available, usdt.escrow) : usdt.available ?? '0', 2))}</div>
+            <div className="mt-1 text-[17px] font-semibold">USDT</div>
+            <span className="mt-4 inline-flex rounded-full border border-primary/70 px-4 py-1.5 text-[15px] font-semibold">{mask(num(usdt.available ?? '0', 2))} {t('ui.availableLower')}{est && est.complete && est.total !== '0.00' ? ` · ≈ ${mask(money(est.total, fiat))}` : ''}</span>
+            <div className="mt-7 grid grid-cols-3 gap-2">
+              <Button size="lg" onClick={() => setDlg({ kind: 'deposit', asset: 'USDT' })} data-testid="open-deposit"><ArrowDownToLine size={17} />{t('ui.deposit')}</Button>
+              <Button size="lg" variant="soft" onClick={() => setDlg({ kind: 'withdraw', asset: 'USDT' })} data-testid="open-withdraw"><ArrowUpFromLine size={17} />{t('ui.withdraw')}</Button>
+              <Button size="lg" variant="soft" onClick={() => setDlg({ kind: 'transfer', asset: 'USDT' })} data-testid="open-transfer"><ArrowLeftRight size={17} />{t('ui.transfer')}</Button>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button onClick={() => setDlg({ kind: 'deposit', asset: 'USDT' })} data-testid="open-deposit"><ArrowDownToLine size={16} />{t('ui.deposit')}</Button>
-            <Button variant="soft" onClick={() => setDlg({ kind: 'withdraw', asset: 'USDT' })} data-testid="open-withdraw"><ArrowUpFromLine size={16} />{t('ui.withdraw')}</Button>
-            <Button variant="outline" onClick={() => setDlg({ kind: 'transfer', asset: 'USDT' })} data-testid="open-transfer"><ArrowLeftRight size={16} />{t('ui.transfer')}</Button>
+        </Card>
+        <div className="grid gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="p-6"><div className="text-sm text-muted-foreground">{t('wallet.available')}</div><div className="num mt-2 text-[30px] font-bold tracking-tight">{mask(num(usdt.available ?? '0', 2))}</div><div className="mt-1 text-sm text-muted-foreground">{t('ui.readyToTrade')}</div></Card>
+            <Card className="p-6"><div className="text-sm text-muted-foreground">{t('ui.inEscrowLabel')}</div><div className="num mt-2 text-[30px] font-bold tracking-tight">{mask(num(usdt.escrow ?? '0', 2))}</div><div className="mt-1 text-sm text-muted-foreground">{t('ui.lockedInTrades')}</div></Card>
           </div>
+          {/* Recent activity */}
+          <Card className="p-6">
+            <div className="text-[20px] font-semibold tracking-tight">{t('ui.recentActivity')}</div>
+            <div className="mt-2 divide-y divide-border">
+              {activity.length === 0 && <div className="py-8 text-center text-sm text-muted-foreground">{t('ui.noData')}</div>}
+              {activity.map((r) => (
+                <div key={r.dir + r.id} className="flex items-center gap-3 py-3">
+                  <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-full', r.dir === 'in' ? 'bg-buy/15 text-buy' : 'bg-muted')}>{r.dir === 'in' ? <ArrowDownToLine size={16} /> : <ArrowUpFromLine size={16} />}</span>
+                  <div className="min-w-0 flex-1"><div className="text-[15px] font-medium">{r.dir === 'in' ? t('ui.deposit') : t('ui.withdraw')} · {r.network}</div><div className="truncate font-mono text-xs text-muted-foreground">{r.txHash ?? r.address}</div></div>
+                  <div className="text-end"><div className={cn('num font-semibold', r.dir === 'in' && 'text-buy')}>{r.dir === 'in' ? '+' : '−'}{num(r.amount)} {r.asset}</div><div className="text-xs text-muted-foreground">{r.status}</div></div>
+                </div>
+              ))}
+            </div>
+          </Card>
         </div>
-        {testMode && (
-          <div className="relative mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-warn/40 bg-warn/5 px-4 py-3 text-sm">
-            <Beaker size={16} className="text-warn" /><span className="flex-1 text-muted-foreground">{t('ui.testMode')}</span>
-            <Button size="sm" variant="outline" data-testid="faucet" onClick={() => run(() => api('/dev/faucet', { body: { asset: 'USDT', amount: '1000' } }))}>{t('wallet.faucet')}</Button>
-          </div>
-        )}
-      </Card>
+      </div>
+      {testMode && (
+        <Card className="flex flex-wrap items-center gap-3 px-5 py-3 text-sm">
+          <Beaker size={16} className="text-warn" /><span className="flex-1 text-muted-foreground">{t('ui.testMode')}</span>
+          <Button size="sm" variant="soft" data-testid="faucet" onClick={() => run(() => api('/dev/faucet', { body: { asset: 'USDT', amount: '1000' } }))}>{t('wallet.faucet')}</Button>
+        </Card>
+      )}
       <ErrorText error={err} />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="grid gap-3 lg:grid-cols-[1fr_340px]">
         {/* Assets */}
-        <Card className="overflow-hidden">
-          <div className="hidden grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-4 border-b border-border px-5 py-3 text-xs font-medium text-muted-foreground sm:grid">
+        <Card className="overflow-hidden px-1">
+          <div className="hidden grid-cols-[1.4fr_1fr_1fr_1fr_auto] gap-4 border-b border-border px-5 py-3 text-[13px] text-muted-foreground sm:grid">
             <span>{t('market.asset')}</span><span>{t('wallet.available')}</span><span>{t('wallet.escrow')}</span><span>{t('wallet.hold')}</span><span className="w-[136px]" />
           </div>
           {bal === null ? <div className="space-y-2 p-4">{ASSET_LIST.map((a) => <Skeleton key={a} className="h-14" />)}</div> : ASSET_LIST.map((a) => {
@@ -95,37 +125,18 @@ export default function Wallet() {
         </Card>
 
         {/* Limits + KYC */}
-        <div className="space-y-4">
-          <Card className="p-5">
-            <div className="flex items-center justify-between"><div className="font-semibold">{t('wallet.limits')}</div><Badge variant="info">{t('profile.tier', { tier: me?.kycTier ?? 0 })}</Badge></div>
-            {limits ? <>
-              <div className="mt-4 flex justify-between text-xs text-muted-foreground"><span>{t('wallet.usedToday')}</span><span className="num">{money(limits.usedToday, 'USD')} / {money(limits.daily, 'USD')}</span></div>
-              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-brand" style={{ width: `${usedPct}%` }} /></div>
-              <div className="mt-2 text-xs text-muted-foreground">{t('wallet.dailyLimit')}: <span className="num">{money(limits.daily, 'USD')}</span></div>
-            </> : <Skeleton className="mt-4 h-10" />}
-            <Link href={L('/account')}><Button variant="outline" size="sm" className="mt-4 w-full"><ShieldCheck size={15} />{t('ui.verifyNow')}</Button></Link>
-          </Card>
-          <a href="#payment-methods" className="block"><Card className="p-5 transition-colors hover:border-primary/40"><div className="flex items-center gap-2 font-semibold"><CreditCard size={17} className="text-primary" />{t('wallet.paymentMethods')}</div><p className="mt-1 text-xs text-muted-foreground">{t('ui.pmHint')}</p></Card></a>
-        </div>
+        <Card className="p-6">
+          <div className="flex items-center justify-between"><div className="font-semibold">{t('wallet.limits')}</div><Badge variant="info">{t('profile.tier', { tier: me?.kycTier ?? 0 })}</Badge></div>
+          {limits ? <>
+            <div className="mt-4 flex justify-between text-xs text-muted-foreground"><span>{t('wallet.usedToday')}</span><span className="num">{money(limits.usedToday, 'USD')} / {money(limits.daily, 'USD')}</span></div>
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${usedPct}%` }} /></div>
+            <div className="mt-2 text-xs text-muted-foreground">{t('wallet.dailyLimit')}: <span className="num">{money(limits.daily, 'USD')}</span></div>
+          </> : <Skeleton className="mt-4 h-10" />}
+          <Link href={L('/account')}><Button variant="soft" size="sm" className="mt-4 w-full"><ShieldCheck size={15} />{t('ui.verifyNow')}</Button></Link>
+        </Card>
       </div>
 
       <PaymentMethods onError={setErr} />
-
-      {/* History */}
-      <Card className="overflow-hidden">
-        <div className="flex items-center justify-between px-5 pt-4"><div className="font-semibold">{t('ui.history')}</div></div>
-        <div className="px-5"><LineTabs value={hist} onChange={setHist} options={[{ value: 'deposits', label: t('ui.deposit') }, { value: 'withdrawals', label: t('ui.withdraw') }]} /></div>
-        <div className="divide-y divide-border">
-          {rows[hist].length === 0 && <div className="p-10 text-center text-sm text-muted-foreground">{t('ui.noData')}</div>}
-          {rows[hist].map((r) => (
-            <div key={r.id} className="flex flex-wrap items-center gap-3 px-5 py-3 text-sm">
-              <AssetIcon asset={r.asset} size={28} />
-              <div className="min-w-0 flex-1"><div className="num font-medium">{hist === 'deposits' ? '+' : '−'}{num(r.amount)} {r.asset}</div><div className="truncate font-mono text-xs text-muted-foreground">{r.network} · {r.txHash ?? r.address}</div></div>
-              <Badge variant={['credited', 'completed', 'broadcast'].includes(r.status) ? 'success' : ['rejected', 'failed'].includes(r.status) ? 'danger' : 'warning'}>{r.status}</Badge>
-            </div>
-          ))}
-        </div>
-      </Card>
 
       {dlg?.kind === 'deposit' && <DepositDialog asset={dlg.asset} testMode={testMode} onClose={() => { setDlg(null); void load(); }} />}
       {dlg?.kind === 'withdraw' && <WithdrawDialog asset={dlg.asset} available={bal?.[dlg.asset]?.available ?? '0'} onClose={() => { setDlg(null); void load(); }} />}

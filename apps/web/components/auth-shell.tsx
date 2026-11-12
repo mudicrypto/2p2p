@@ -1,37 +1,28 @@
 'use client';
-import { BadgeCheck, Lock, Zap } from 'lucide-react';
-import { Wordmark } from '@p2p/ui';
-import { Globe } from './globe';
+/** parley auth layout: hero card ("Trade with people. Protected by escrow." + steps) above the form card. */
+import { Wordmark, cn } from '@p2p/ui';
 import { useI18n } from '../lib/i18n';
 
-/** Split auth layout: brand panel (desktop) + form card. */
-export function AuthShell({ title, subtitle, children }: { title: React.ReactNode; subtitle?: React.ReactNode; children: React.ReactNode }) {
+export function AuthShell({ title, subtitle, children, step = 1, footer }: { title?: React.ReactNode; subtitle?: React.ReactNode; children: React.ReactNode; step?: 1 | 2 | 3; footer?: React.ReactNode }) {
   const { t } = useI18n();
+  const steps = [t('ui.stepAccount'), t('ui.stepVerifyId'), t('ui.trade')];
   return (
-    <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card lg:grid-cols-2">
-      <div className="relative hidden min-h-[600px] flex-col justify-between overflow-hidden bg-[#07080a] p-10 text-white lg:flex">
-        <div className="hero-glow pointer-events-none absolute inset-0 opacity-90" />
-        
-        <Globe className="pointer-events-none absolute -bottom-48 -end-40 h-[560px] w-[560px] opacity-80" />
-        <div className="relative"><Wordmark size={32} className="[&>span:last-child]:text-white" /></div>
-        <div className="relative space-y-5">
-          <h2 className="text-4xl font-extrabold leading-tight tracking-tight">{t('ui.heroA')}<br /><span className="text-gradient">{t('ui.heroB')}</span></h2>
-          <p className="text-sm text-white/70">{t('ui.authSub')}</p>
-          <ul className="space-y-3 text-sm">
-            <li className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><Lock size={15} /></span>{t('ui.why1t')}</li>
-            <li className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><BadgeCheck size={15} /></span>{t('ui.why2t')}</li>
-            <li className="flex items-center gap-3"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary"><Zap size={15} /></span>{t('ui.why3t')}</li>
-          </ul>
+    <div className="mx-auto w-full max-w-[440px] space-y-3 pt-2">
+      <section className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card p-7">
+        <div className="hero-glow pointer-events-none absolute inset-0" />
+        <div className="relative">
+          <Wordmark size={30} />
+          <h1 className="mt-5 text-[32px] font-bold leading-[1.05] sm:text-[40px] tracking-[-0.035em]">{title ?? t('ui.authHero')}</h1>
+          {subtitle && <p className="mt-3 text-[15px] text-muted-foreground">{subtitle}</p>}
+          <ol className="mt-6 flex flex-wrap gap-2">
+            {steps.map((s, i) => (
+              <li key={s} className={cn('rounded-full border px-3 py-1 text-[13px] font-semibold', i + 1 === step ? 'border-primary bg-primary text-primary-foreground' : 'border-border text-foreground')}>{i + 1} · {s}</li>
+            ))}
+          </ol>
         </div>
-        <div className="relative text-xs text-white/50">© {new Date().getFullYear()} {t('app.name')}</div>
-      </div>
-      <div className="p-6 sm:p-10">
-        <div className="mx-auto w-full max-w-sm">
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
-          <div className="mt-6">{children}</div>
-        </div>
-      </div>
+      </section>
+      <section className="rounded-[28px] border border-border/60 bg-card p-6">{children}</section>
+      {footer && <div className="px-2 pt-6 text-center text-[15px]">{footer}</div>}
     </div>
   );
 }

@@ -23,14 +23,14 @@ export default function Login() {
     e.preventDefault(); setErr(null); setBusy(true);
     try {
       const r = await api('/auth/login', { body: { email: f.email, password: f.password, totp: f.totp || undefined } });
-      setMe(r.user); router.push(L('/p2p'));
+      setMe(r.user); router.push(L(''));
     } catch (e) {
       if (e instanceof ApiError && e.code === 'TWO_FA_REQUIRED') setNeed2fa(true); else setErr(e);
       setBusy(false);
     }
   };
   return (
-    <AuthShell title={t('ui.welcome')} subtitle={<>{t('auth.noAccount')} <Link className="font-medium text-primary hover:underline" href={L('/signup')}>{t('nav.signup')}</Link></>}>
+    <AuthShell title={t('ui.welcome')} step={3} footer={<>{t('auth.noAccount')} <Link className="font-semibold underline underline-offset-4" href={L('/signup')}>{t('nav.signup')}</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         <div><Label htmlFor="email">{t('auth.email')}</Label><Input id="email" type="email" className="h-12" autoComplete="username" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required /></div>
         <div><Label htmlFor="password">{t('auth.password')}</Label><Input id="password" type="password" className="h-12" autoComplete="current-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} required /></div>

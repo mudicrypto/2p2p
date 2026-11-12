@@ -13,20 +13,21 @@ export const cn = (...c: ClassValue[]) => twMerge(clsx(c));
 
 // ------------------------------------------------------------------ Button
 const buttonVariants = cva(
-  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
+  'inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.98] disabled:pointer-events-none disabled:opacity-45',
   {
     variants: {
       variant: {
-        default: 'bg-brand font-bold text-primary-foreground shadow-[0_10px_30px_-12px_rgb(245_181_10/0.7)] hover:brightness-105',
-        buy: 'bg-buy text-[#04130d] hover:brightness-110 shadow-[0_8px_24px_-12px_rgb(31_203_139/0.9)]',
-        sell: 'bg-sell text-white hover:brightness-110 shadow-[0_8px_24px_-12px_rgb(255_77_106/0.9)]',
+        default: 'bg-primary font-semibold text-primary-foreground hover:brightness-105',
+        ink: 'bg-ink text-ink-foreground hover:opacity-90',
+        buy: 'bg-primary text-primary-foreground hover:brightness-105',
+        sell: 'bg-sell text-[#1a1714] hover:brightness-105',
         outline: 'border border-border bg-transparent text-foreground hover:bg-muted',
-        soft: 'bg-muted text-foreground hover:bg-surface',
+        soft: 'bg-muted text-foreground hover:brightness-110',
         ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
         destructive: 'bg-sell/15 text-sell hover:bg-sell/25',
         link: 'h-auto p-0 text-primary underline-offset-4 hover:underline',
       },
-      size: { default: 'h-11 px-5', sm: 'h-9 rounded-lg px-3.5 text-[13px]', lg: 'h-13 px-7 text-base', icon: 'h-10 w-10 rounded-lg' },
+      size: { default: 'h-11 px-6', sm: 'h-9 px-4 text-[13px]', lg: 'h-14 px-8 text-[17px]', icon: 'h-11 w-11' },
     },
     defaultVariants: { variant: 'default', size: 'default' },
   },
@@ -41,7 +42,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(({ classN
 Button.displayName = 'Button';
 
 // ------------------------------------------------------------------ Form controls
-const control = 'flex h-11 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-foreground placeholder:text-muted-foreground/70 transition-colors hover:border-muted-foreground/40 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 disabled:opacity-50';
+const control = 'flex h-12 w-full rounded-2xl border border-border bg-background/40 px-4 text-sm text-foreground placeholder:text-muted-foreground/70 transition-colors hover:border-muted-foreground/40 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 disabled:opacity-50';
 export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(({ className, ...p }, ref) => (
   <input ref={ref} className={cn(control, className)} {...p} />
 ));
@@ -72,19 +73,19 @@ export const AmountField = React.forwardRef<HTMLInputElement, React.InputHTMLAtt
 AmountField.displayName = 'AmountField';
 
 // ------------------------------------------------------------------ Surfaces
-export const Card = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => <div className={cn('rounded-2xl border border-border bg-card text-card-foreground', className)} {...p} />;
+export const Card = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => <div className={cn('rounded-[28px] border border-border/60 bg-card text-card-foreground', className)} {...p} />;
 export const CardHeader = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => <div className={cn('flex flex-col gap-1.5 p-5 sm:p-6', className)} {...p} />;
 export const CardTitle = ({ className, ...p }: React.HTMLAttributes<HTMLHeadingElement>) => <h3 className={cn('text-lg font-semibold leading-tight tracking-tight', className)} {...p} />;
 export const CardContent = ({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) => <div className={cn('p-5 pt-0 sm:p-6 sm:pt-0', className)} {...p} />;
 
-const badgeVariants = cva('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold leading-5', {
+const badgeVariants = cva('inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[12px] font-semibold leading-5', {
   variants: {
     variant: {
       default: 'bg-muted text-muted-foreground',
-      success: 'bg-buy/15 text-buy',
-      warning: 'bg-warn/15 text-warn',
-      danger: 'bg-sell/15 text-sell',
-      info: 'bg-primary/15 text-primary',
+      success: 'bg-[#a6d9a0] text-[#16301a]',
+      warning: 'bg-primary text-primary-foreground',
+      danger: 'bg-sell text-[#2a110b]',
+      info: 'bg-info text-[#121a33]',
       outline: 'border border-border text-muted-foreground',
     },
   },
@@ -104,11 +105,11 @@ export const Skeleton = ({ className }: { className?: string }) => <div classNam
 // ------------------------------------------------------------------ Navigation-ish
 export function Tabs<T extends string>({ value, onChange, options, className, size = 'default' }: { value: T; onChange: (v: T) => void; options: Array<{ value: T; label: React.ReactNode; className?: string; testId?: string }>; className?: string; size?: 'default' | 'lg' }) {
   return (
-    <div role="tablist" className={cn('inline-flex rounded-xl bg-muted p-1', className)}>
+    <div role="tablist" className={cn('inline-flex rounded-full bg-muted p-1', className)}>
       {options.map((o) => (
         <button key={o.value} type="button" role="tab" aria-selected={value === o.value} data-testid={o.testId} onClick={() => onChange(o.value)}
-          className={cn('rounded-lg font-semibold transition-all', size === 'lg' ? 'px-6 py-2.5 text-sm' : 'px-4 py-1.5 text-[13px]',
-            value === o.value ? cn('bg-card text-foreground shadow-sm', o.className) : 'text-muted-foreground hover:text-foreground')}>
+          className={cn('rounded-full font-semibold transition-all', size === 'lg' ? 'px-7 py-2.5 text-[15px]' : 'px-4 py-1.5 text-[13px]',
+            value === o.value ? cn('bg-ink text-ink-foreground shadow-sm', o.className) : 'text-muted-foreground hover:text-foreground')}>
           {o.label}
         </button>
       ))}
@@ -157,35 +158,18 @@ export function PayChip({ code, label, className }: { code: string; label?: stri
     </span>
   );
 }
-/** Brand configuration: the product name is temporary, change it here (and `app.name` in the locales). */
-export const BRAND = { name: 'KRYPTA', tagline: 'Trade Crypto Your Way' } as const;
+/** Brand configuration (name lives here, in apps/mobile/src/theme.ts and app.name in the locales). */
+export const BRAND = { name: 'parley', tagline: 'Trade with people. Protected by escrow.' } as const;
 
-/** Gold "K" monogram: a slanted stem, an upper arm and a detached lower leg. */
-export function Logo({ className, size = 30, mono }: { className?: string; size?: number; mono?: boolean }) {
-  const id = React.useId().replace(/:/g, '');
+/** parley wordmark: lowercase, tight, no symbol. `Logo` renders a compact "p" mark for icons and favicons. */
+export function Logo({ className, size = 30 }: { className?: string; size?: number; mono?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className} aria-hidden>
-      <defs>
-        <linearGradient id={`k${id}`} x1="6" y1="4" x2="42" y2="44" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#ffd866" /><stop offset="0.5" stopColor="#f5b50a" /><stop offset="1" stopColor="#d98e00" />
-        </linearGradient>
-      </defs>
-      <g fill={mono ? 'currentColor' : `url(#k${id})`}>
-        <path d="M9 5h9.5l-4.6 38H4.4L9 5Z" />
-        <path d="M19.4 27.2 37.8 5H48L26.6 30.6l-7.2-3.4Z" />
-        <path d="M27.8 32.4 35.6 43H46L33.6 26.2l-5.8 6.2Z" />
-      </g>
-    </svg>
+    <span aria-hidden className={cn('inline-flex shrink-0 items-center justify-center rounded-full bg-primary font-extrabold text-primary-foreground', className)}
+      style={{ width: size, height: size, fontSize: size * 0.62, letterSpacing: '-0.04em', lineHeight: 1 }}>p</span>
   );
 }
-/** Monogram + wordmark lockup. */
 export function Wordmark({ className, size = 30 }: { className?: string; size?: number }) {
-  return (
-    <span className={cn('inline-flex items-center gap-2.5', className)}>
-      <Logo size={size} />
-      <span className="font-bold tracking-[0.08em] text-foreground" style={{ fontSize: size * 0.62 }}>{BRAND.name}</span>
-    </span>
-  );
+  return <span className={cn('font-bold tracking-[-0.04em] text-foreground', className)} style={{ fontSize: size * 0.8, lineHeight: 1 }}>{BRAND.name}</span>;
 }
 
 // ------------------------------------------------------------------ Feedback / overlays
