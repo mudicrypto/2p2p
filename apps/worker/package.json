@@ -1,0 +1,11 @@
+{
+  "name": "@p2p/worker",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/main.js",
+  "scripts": { "build": "tsc -p tsconfig.build.json", "start": "node dist/main.js", "typecheck": "tsc --noEmit" },
+  "dependencies": {
+    "@p2p/core": "workspace:*", "@p2p/db": "workspace:*", "@p2p/providers": "workspace:*", "@p2p/shared": "workspace:*",
+    "bullmq": "^5.34.0", "ioredis": "^5.4.2"
+  }
+}

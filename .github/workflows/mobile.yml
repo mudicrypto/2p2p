@@ -1,0 +1,99 @@
+name: Mobile builds
+# Builds installable apps from the Expo project with Continuous Native Generation (expo prebuild).
+#  - Android: release APK (signed with the template debug key; store signing via EAS/Play App Signing)
+#  - iOS: unsigned simulator .app (device/App Store builds need an Apple team; see apps/mobile/README.md)
+on:
+  push:
+    paths: ['apps/mobile/**', 'packages/i18n/locales/**', '.github/workflows/mobile.yml', 'pnpm-lock.yaml']
+  pull_request:
+    paths: ['apps/mobile/**', 'packages/i18n/locales/**', '.github/workflows/mobile.yml', 'pnpm-lock.yaml']
+  workflow_dispatch:
+permissions: { contents: read }
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  EXPO_PUBLIC_API_URL: https://api.example.com
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @p2p/mobile typecheck
+      - run: pnpm --filter @p2p/mobile test
+      - run: pnpm --filter @p2p/mobile export:android && pnpm --filter @p2p/mobile export:ios
+  android:
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+      - name: Generate native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform android --no-install
+      - name: Build release APK
+        working-directory: apps/mobile/android
+        shell: bash
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,x86_64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p2p-exchange-android-apk
+          path: apps/mobile/android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+  ios:
+    needs: checks
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      # Expo SDK 58 native modules need Swift 6.2+ (Xcode 26)
+      - uses: maxim-lobanov/setup-xcode@v1
+        with: { xcode-version: latest-stable }
+      - run: xcodebuild -version && swift --version
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Generate native project
+        working-directory: apps/mobile
+        run: npx expo prebuild --platform ios --no-install
+      - name: Install pods
+        working-directory: apps/mobile/ios
+        run: pod install
+      - name: Build simulator app
+        working-directory: apps/mobile/ios
+        shell: bash
+        run: |
+          set -euo pipefail
+          WS=$(ls -d *.xcworkspace | head -1); SCHEME="${WS%.xcworkspace}"
+          echo "workspace=$WS scheme=$SCHEME"
+          if ! xcodebuild -workspace "$WS" -scheme "$SCHEME" -configuration Release -sdk iphonesimulator \
+               -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO > xcodebuild.log 2>&1; then
+            grep -nE "error:|fatal error|\*\* BUILD FAILED" -A4 xcodebuild.log | head -150 || true
+            tail -60 xcodebuild.log
+            exit 1
+          fi
+          grep -E "\*\* BUILD SUCCEEDED" xcodebuild.log
+          APP=$(ls -d build/Build/Products/Release-iphonesimulator/*.app | head -1)
+          test -n "$APP" && test -f "$APP/Info.plist"
+          du -sh "$APP"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" ../p2p-exchange-ios-simulator.zip
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: xcodebuild-log, path: apps/mobile/ios/xcodebuild.log }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p2p-exchange-ios-simulator
+          path: apps/mobile/p2p-exchange-ios-simulator.zip
+          if-no-files-found: error
