@@ -28,3 +28,8 @@
 Earlier milestones also fixed: real deadlock in limit-usage lock ordering (M2 fuzz), shared-zod-instance validation errors returning 500 (M7).
 
 **Status: 0 open high/critical findings.**
+
+## Accepted risks
+| ID | Advisory | Why accepted | Scope of the exception | Review |
+|---|---|---|---|---|
+| R-1 | GHSA-fc5q-39xc-vjpf, `picomatch` ≤ 4.0.7 ReDoS through single-branch repeated extglobs (high) | No patched release exists (4.0.7 is the latest). Reached only through Expo's build tooling (`apps/mobile > expo > @expo/cli`, Metro file map), which runs on build machines with glob patterns from this repository. It is not part of the shipped mobile app, the API, the worker or the web apps, so no user input reaches it. Accepted by the repository owner on 2026-11-18. | `pnpm.auditConfig.ignoreGhsas` in the root `package.json` ignores this single advisory only; every other advisory still fails CI. | Remove the ignore and pin the fixed version as soon as picomatch publishes one; re-review by 2026-12-18 at the latest. |
