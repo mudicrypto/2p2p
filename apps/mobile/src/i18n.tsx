@@ -39,13 +39,13 @@ export const pickLocale = (pref?: string | null) => {
   return base === 'tl' ? 'fil' : (LOCALES as readonly string[]).includes(base) ? base : 'en';
 };
 
-export interface I18n { locale: string; rtl: boolean; t: (k: string, p?: Record<string, string | number>) => string; num: (v: string, max?: number) => string; money: (v: string, c: string) => string; date: (d: string) => string; pct: (bps: number) => string }
+export interface I18n { locale: string; rtl: boolean; t: (k: string, p?: Record<string, string | number>) => string; num: (v: string, max?: number, min?: number) => string; money: (v: string, c: string) => string; date: (d: string) => string; pct: (bps: number) => string }
 const Ctx = createContext<I18n | null>(null);
 export function I18nProvider({ locale, children }: { locale: string; children: React.ReactNode }) {
   const v = useMemo<I18n>(() => ({
     locale, rtl: RTL.has(locale),
     t: (k, p) => translate(locale, k, p),
-    num: (val, max) => formatDecimal(locale, val, max),
+    num: (val, max, min) => formatDecimal(locale, val, max, min),
     money: (val, c) => formatMoney(locale, val, c),
     date: (d) => new Intl.DateTimeFormat(tag(locale), { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(d)),
     pct: (bps) => new Intl.NumberFormat(tag(locale), { style: 'percent', maximumFractionDigits: 2 }).format(bps / 10000),

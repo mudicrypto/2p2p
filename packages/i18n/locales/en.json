@@ -528,6 +528,7 @@
   "youSendHint": "By bank transfer, with the reference",
   "yourEscrowHint": "Your {amount} is locked",
   "sellerChecksHint": "They check their bank, then release",
-  "noTradesYet": "No completed trades yet"
+  "noTradesYet": "No completed trades yet",
+  "deleteAccount": "Delete account"
  }
 }

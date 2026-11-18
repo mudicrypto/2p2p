@@ -528,6 +528,7 @@
   "youSend": "Ви надсилаєте {amount}",
   "youSendHint": "Банківським переказом, з кодом",
   "yourEscrowHint": "Ваші {amount} заблоковано",
-  "noTradesYet": "Ще немає завершених угод"
+  "noTradesYet": "Ще немає завершених угод",
+  "deleteAccount": "Видалити акаунт"
  }
 }

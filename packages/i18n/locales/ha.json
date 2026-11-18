@@ -528,6 +528,7 @@
   "youSend": "Ka tura {amount}",
   "youSendHint": "Ta tura kuɗin banki, da lambar ciniki",
   "yourEscrowHint": "An kulle {amount} naka",
-  "noTradesYet": "Babu cinikin da aka kammala tukuna"
+  "noTradesYet": "Babu cinikin da aka kammala tukuna",
+  "deleteAccount": "Goge asusu"
  }
 }

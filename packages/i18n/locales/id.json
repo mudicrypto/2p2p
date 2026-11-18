@@ -528,6 +528,7 @@
   "youSend": "Anda kirim {amount}",
   "youSendHint": "Lewat transfer bank, dengan referensi",
   "yourEscrowHint": "{amount} Anda terkunci",
-  "noTradesYet": "Belum ada transaksi selesai"
+  "noTradesYet": "Belum ada transaksi selesai",
+  "deleteAccount": "Hapus akun"
  }
 }

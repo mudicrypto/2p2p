@@ -528,6 +528,7 @@
   "youSend": "Unatuma {amount}",
   "youSendHint": "Kwa uhamisho wa benki, na kumbukumbu",
   "yourEscrowHint": "{amount} zako zimefungwa",
-  "noTradesYet": "Bado hakuna biashara iliyokamilika"
+  "noTradesYet": "Bado hakuna biashara iliyokamilika",
+  "deleteAccount": "Futa akaunti"
  }
 }

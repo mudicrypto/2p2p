@@ -528,6 +528,7 @@
   "youSend": "คุณโอน {amount}",
   "youSendHint": "โอนผ่านธนาคาร พร้อมรหัสอ้างอิง",
   "yourEscrowHint": "{amount} ของคุณถูกล็อก",
-  "noTradesYet": "ยังไม่มีเทรดที่สำเร็จ"
+  "noTradesYet": "ยังไม่มีเทรดที่สำเร็จ",
+  "deleteAccount": "ลบบัญชี"
  }
 }

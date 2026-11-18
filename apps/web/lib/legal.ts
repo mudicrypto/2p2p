@@ -3,7 +3,7 @@
  * jurisdiction before launch (placeholders in [BRACKETS]). Country-specific disclosures come from country_rules.
  */
 export interface LegalDoc { title: string; updated: string; sections: Array<{ h: string; p: string[] }> }
-export const LEGAL: Record<'terms' | 'privacy' | 'risk', LegalDoc> = {
+export const LEGAL: Record<'terms' | 'privacy' | 'risk' | 'delete-account', LegalDoc> = {
   terms: {
     title: 'Terms of Service', updated: '2026-11-06',
     sections: [
@@ -37,6 +37,15 @@ export const LEGAL: Record<'terms' | 'privacy' | 'risk', LegalDoc> = {
       { h: 'Peer-to-peer risks', p: ['You deal with other users. Fiat payments can be reversed, frozen by banks, or come from third parties; reversible payment methods carry chargeback risk. Escrow protects the crypto side only if you follow the trading rules. The insurance fund may compensate approved bank-freeze claims within its limits but is not a guarantee.'] },
       { h: 'Operational risks', p: ['Blockchain networks, custodians and payment providers can fail or be delayed. Sending crypto to a wrong address or network is usually irreversible.'] },
       { h: 'Regulatory and tax', p: ['Rules differ by country and can change; services may be restricted in your country. You are responsible for your taxes.'] },
+    ],
+  },
+  'delete-account': {
+    title: 'Delete your account', updated: '2026-11-18',
+    sections: [
+      { h: 'How to ask', p: ['In the app or on the website, open Account and choose "Delete account", which brings you here. Email [SUPPORT EMAIL] from the email address on your account with the subject "Delete my account". We confirm we received it within 2 working days and may ask you to verify that the request is yours.'] },
+      { h: 'Before we delete', p: ['Finish or cancel your open orders and close your ads. Withdraw any crypto left in your wallet: we cannot delete an account that still holds funds or has an open order or dispute.'] },
+      { h: 'What we delete', p: ['Within 30 days we close your account and delete your profile, payment details, chat messages, attachments, push tokens and preferences, and you can no longer sign in.'] },
+      { h: 'What we must keep', p: ['Anti-money-laundering law requires us to keep identity verification results and transaction records for [5–10] years after the account is closed. We keep only these records, protected and access-controlled, and delete them when the legal period ends.'] },
     ],
   },
 };

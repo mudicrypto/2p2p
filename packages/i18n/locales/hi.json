@@ -528,6 +528,7 @@
   "youSend": "आप {amount} भेजें",
   "youSendHint": "बैंक ट्रांसफर से, संदर्भ के साथ",
   "yourEscrowHint": "आपके {amount} लॉक हैं",
-  "noTradesYet": "अभी कोई पूरा ट्रेड नहीं"
+  "noTradesYet": "अभी कोई पूरा ट्रेड नहीं",
+  "deleteAccount": "खाता हटाएं"
  }
 }

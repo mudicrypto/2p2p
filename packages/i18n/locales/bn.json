@@ -528,6 +528,7 @@
   "youSend": "আপনি {amount} পাঠান",
   "youSendHint": "ব্যাংক ট্রান্সফারে, রেফারেন্সসহ",
   "yourEscrowHint": "আপনার {amount} লক করা",
-  "noTradesYet": "এখনও কোনো সম্পন্ন ট্রেড নেই"
+  "noTradesYet": "এখনও কোনো সম্পন্ন ট্রেড নেই",
+  "deleteAccount": "অ্যাকাউন্ট মুছুন"
  }
 }

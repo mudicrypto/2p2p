@@ -50,7 +50,8 @@ export default function Account() {
               <span className="flex items-center gap-1 font-mono text-xs">{t('ui.userId')}: {me.id.slice(0, 8)}…<CopyButton value={me.id} /></span>
             </div>
           </div>
-          <Link href={L(`/profile/${me.id}`)}><Button variant="outline"><UserRound size={16} />{t('profile.title')}</Button></Link>
+          <div className="flex flex-wrap gap-2"><Link href={L(`/profile/${me.id}`)}><Button variant="outline"><UserRound size={16} />{t('profile.title')}</Button></Link>
+            <Link href={L('/legal/delete-account')} data-testid="delete-account"><Button variant="ghost" className="text-sell">{t('ui.deleteAccount')}</Button></Link></div>
         </div>
       </Card>
       <ErrorText error={err} />

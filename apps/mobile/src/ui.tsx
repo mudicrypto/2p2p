@@ -49,7 +49,7 @@ export function Button({ title, onPress, variant = 'primary', icon, loading, dis
   return (
     <Pressable testID={testID} accessibilityRole="button" disabled={disabled || loading} onPress={() => { tap(); onPress?.(); }}
       style={({ pressed }) => [{ borderRadius: radius.pill, backgroundColor: bg, opacity: disabled ? 0.45 : pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.98 : 1 }], borderWidth: variant === 'outline' ? 1 : 0, borderColor: c.border }, style]}>
-      <Row style={{ height: h, paddingHorizontal: space(size === 'sm' ? 4 : 4), justifyContent: 'center', gap: space(2) }}>
+      <Row style={{ height: h, paddingHorizontal: space(size === 'lg' ? 6 : 3), justifyContent: 'center', gap: space(2) }}>
         {loading ? <ActivityIndicator color={fg} /> : icon ? <Ionicons name={icon} size={size === 'sm' ? 15 : 18} color={fg} /> : null}
         <RNText numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75} style={{ flexShrink: 1, color: fg, fontWeight: '600', fontSize: size === 'sm' ? 14 : size === 'lg' ? 17 : 16 }}>{title}</RNText>
       </Row>
@@ -113,7 +113,10 @@ export function Badge({ label, tone = 'default' }: { label: string; tone?: 'defa
 /** Huge display numeral (parley's signature). */
 export function Big({ children, size = 76, tone, style, testID }: { children: React.ReactNode; size?: number; tone?: 'sell' | 'sub'; style?: object; testID?: string }) {
   const c = useColors();
-  return <RNText testID={testID} adjustsFontSizeToFit numberOfLines={1} style={[{ color: tone === 'sell' ? c.sell : tone === 'sub' ? c.sub : c.text, fontSize: size, fontWeight: '800', letterSpacing: -size * 0.045, lineHeight: size * 1.05, fontVariant: ['tabular-nums'], textAlign: 'center' }, style]}>{children}</RNText>;
+  // Shrink long numerals up front (adjustsFontSizeToFit only works natively, not on web).
+  const len = typeof children === 'string' ? children.length : 0;
+  const fs = len > 6 ? Math.round(size * 6 / len) : size;
+  return <RNText testID={testID} adjustsFontSizeToFit numberOfLines={1} style={[{ color: tone === 'sell' ? c.sell : tone === 'sub' ? c.sub : c.text, fontSize: fs, fontWeight: '800', letterSpacing: -fs * 0.045, lineHeight: fs * 1.05, fontVariant: ['tabular-nums'], textAlign: 'center' }, style]}>{children}</RNText>;
 }
 /** Outlined pill used under big numerals ("You get 498.60 USDT", "X USDT in escrow"). */
 export function Pill({ label, icon, tone }: { label: string; icon?: IconName; tone?: 'sell' | 'info' }) {

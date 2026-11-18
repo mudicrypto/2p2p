@@ -528,6 +528,7 @@
   "youSend": "Envías {amount}",
   "youSendHint": "Por transferencia, con la referencia",
   "yourEscrowHint": "Tus {amount} están bloqueados",
-  "noTradesYet": "Aún sin operaciones completadas"
+  "noTradesYet": "Aún sin operaciones completadas",
+  "deleteAccount": "Eliminar cuenta"
  }
 }

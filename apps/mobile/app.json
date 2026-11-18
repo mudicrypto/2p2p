@@ -72,7 +72,8 @@
           "photosPermission": "Choose a payment receipt to attach to your order.",
           "cameraPermission": false
         }
-      ]
+      ],
+      "./plugins/with-release-signing"
     ],
     "extra": {
       "apiUrl": "https://api.example.com"

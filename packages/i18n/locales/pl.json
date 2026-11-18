@@ -528,6 +528,7 @@
   "youSend": "Wysyłasz {amount}",
   "youSendHint": "Przelewem, z numerem referencyjnym",
   "yourEscrowHint": "Twoje {amount} jest zablokowane",
-  "noTradesYet": "Brak zakończonych transakcji"
+  "noTradesYet": "Brak zakończonych transakcji",
+  "deleteAccount": "Usuń konto"
  }
 }

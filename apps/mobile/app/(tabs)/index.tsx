@@ -47,7 +47,7 @@ export default function Trade() {
   const best = usable[0] ?? rows[0];
   const offered = useMemo(() => { const s = new Set<string>(); for (const r of items ?? []) for (const p of r.paymentTypes ?? []) s.add(p); return types.filter((x) => s.has(x.code)).slice(0, 4); }, [items, types]);
   const getUnit = side === 'buy' ? asset : fiat;
-  const fmtGet = (v: string) => (side === 'buy' ? num(v, cdp(asset)) : num(v, 2));
+  const fmtGet = (v: string) => (side === 'buy' ? num(v, cdp(asset), cdp(asset) === 2 ? 2 : 0) : num(v, 2));
   const open = (ad: any, fiatLeg: string) => { if (!me) return router.push('/login'); router.push({ pathname: '/trade', params: { adId: rememberAd(ad), side, amount: fiatLeg } }); };
   const fiatOptions = [...POPULAR.filter((f) => fiats.includes(f)), ...fiats.filter((f) => !POPULAR.includes(f))].map((f) => ({ value: f, label: f }));
   const cta = best?.get ? (side === 'buy' ? t('ui.buyAmount', { amount: fmtGet(best.get), asset }) : t('ui.sellFor', { amount: money(best.get, fiat) })) : t(side === 'buy' ? 'market.buyAction' : 'market.sellAction', { asset });

@@ -81,6 +81,7 @@ export default function Account() {
       </Card>
       {prefs}
       <Button variant="soft" icon="log-out-outline" title={t('nav.logout')} onPress={signOut} />
+      <Press onPress={() => void Linking.openURL(`${WEB_URL}/${locale}/legal/delete-account`)} testID="delete-account"><Text size="small" tone="sell" style={{ textAlign: 'center', paddingVertical: space(2) }}>{t('ui.deleteAccount')}</Text></Press>
     </ScrollView>
   );
 }

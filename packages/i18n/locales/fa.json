@@ -528,6 +528,7 @@
   "youSend": "{amount} می‌فرستید",
   "youSendHint": "با انتقال بانکی، همراه کد مرجع",
   "yourEscrowHint": "{amount} شما قفل شد",
-  "noTradesYet": "هنوز معامله‌ای کامل نشده"
+  "noTradesYet": "هنوز معامله‌ای کامل نشده",
+  "deleteAccount": "حذف حساب"
  }
 }

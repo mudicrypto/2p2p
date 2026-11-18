@@ -39,17 +39,56 @@ jobs:
         with: { distribution: temurin, java-version: 17 }
       - uses: gradle/actions/setup-gradle@v4
       - run: pnpm install --frozen-lockfile
+      - name: Set Android versionCode from the run number
+        working-directory: apps/mobile
+        run: node -e "const f='app.json',j=require('./'+f);j.expo.android.versionCode=Number(process.env.GITHUB_RUN_NUMBER);require('fs').writeFileSync(f,JSON.stringify(j,null,2)+'\\n')"
       - name: Generate native project
         working-directory: apps/mobile
         run: npx expo prebuild --platform android --no-install
       - name: Build release APK
         working-directory: apps/mobile/android
         shell: bash
+        env:
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_WEB_URL: ${{ vars.EXPO_PUBLIC_WEB_URL }}
         run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,x86_64
       - uses: actions/upload-artifact@v4
         with:
           name: p2p-exchange-android-apk
           path: apps/mobile/android/app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
+      # Google Play needs an App Bundle signed with your upload key. It is built only when the
+      # upload-key secrets exist (see apps/mobile/store/README.md); without them this step is skipped.
+      - name: Build signed Play Store bundle (AAB)
+        id: aab
+        working-directory: apps/mobile/android
+        shell: bash
+        env:
+          EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+          EXPO_PUBLIC_WEB_URL: ${{ vars.EXPO_PUBLIC_WEB_URL }}
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_UPLOAD_STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_STORE_PASSWORD }}
+          ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${UPLOAD_KEYSTORE_BASE64}" ]; then
+            echo "::notice::No upload key secrets set, skipping the Play Store bundle."
+            echo "built=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          export ANDROID_UPLOAD_STORE_FILE="$RUNNER_TEMP/upload.jks"
+          echo "$UPLOAD_KEYSTORE_BASE64" | base64 -d > "$ANDROID_UPLOAD_STORE_FILE"
+          ./gradlew bundleRelease --no-daemon
+          AAB=app/build/outputs/bundle/release/app-release.aab
+          jarsigner -verify -certs "$AAB" | tail -3
+          if jarsigner -verify -verbose -certs "$AAB" | grep -q "CN=Android Debug"; then echo "::error::Bundle is debug-signed"; exit 1; fi
+          rm -f "$ANDROID_UPLOAD_STORE_FILE"
+          echo "built=true" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        if: steps.aab.outputs.built == 'true'
+        with:
+          name: parley-android-play-bundle
+          path: apps/mobile/android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
   ios:
     needs: checks

@@ -528,6 +528,7 @@
   "youSend": "ترسل {amount}",
   "youSendHint": "بتحويل بنكي مع المرجع",
   "yourEscrowHint": "{amount} الخاصة بك مقفلة",
-  "noTradesYet": "لا صفقات مكتملة بعد"
+  "noTradesYet": "لا صفقات مكتملة بعد",
+  "deleteAccount": "حذف الحساب"
  }
 }

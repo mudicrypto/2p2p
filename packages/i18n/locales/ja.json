@@ -528,6 +528,7 @@
   "youSend": "{amount} を送金",
   "youSendHint": "取引番号付きの銀行振込で",
   "yourEscrowHint": "{amount} をロック済み",
-  "noTradesYet": "完了した取引はまだありません"
+  "noTradesYet": "完了した取引はまだありません",
+  "deleteAccount": "アカウントを削除"
  }
 }

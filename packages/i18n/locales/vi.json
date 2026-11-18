@@ -528,6 +528,7 @@
   "youSend": "Bạn gửi {amount}",
   "youSendHint": "Chuyển khoản, kèm mã tham chiếu",
   "yourEscrowHint": "{amount} của bạn đã khóa",
-  "noTradesYet": "Chưa có giao dịch hoàn tất"
+  "noTradesYet": "Chưa có giao dịch hoàn tất",
+  "deleteAccount": "Xóa tài khoản"
  }
 }

@@ -528,6 +528,7 @@
   "youSend": "{amount} gönderirsiniz",
   "youSendHint": "Banka havalesiyle, referansla",
   "yourEscrowHint": "{amount} kilitlendi",
-  "noTradesYet": "Henüz tamamlanan işlem yok"
+  "noTradesYet": "Henüz tamamlanan işlem yok",
+  "deleteAccount": "Hesabı sil"
  }
 }

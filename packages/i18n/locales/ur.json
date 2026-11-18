@@ -528,6 +528,7 @@
   "youSend": "آپ {amount} بھیجیں",
   "youSendHint": "بینک ٹرانسفر سے، حوالہ کے ساتھ",
   "yourEscrowHint": "آپ کے {amount} لاک ہیں",
-  "noTradesYet": "ابھی کوئی مکمل تجارت نہیں"
+  "noTradesYet": "ابھی کوئی مکمل تجارت نہیں",
+  "deleteAccount": "اکاؤنٹ حذف کریں"
  }
 }

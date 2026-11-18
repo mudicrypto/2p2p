@@ -528,6 +528,7 @@
   "youSend": "你匯出 {amount}",
   "youSendHint": "以銀行轉帳並附交易編號",
   "yourEscrowHint": "你的 {amount} 已鎖定",
-  "noTradesYet": "尚無完成的交易"
+  "noTradesYet": "尚無完成的交易",
+  "deleteAccount": "刪除帳戶"
  }
 }

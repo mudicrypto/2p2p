@@ -43,7 +43,7 @@ export default function Order() {
   const buyer = o.role === 'buyer';
   const cp = o.counterparty?.displayName ?? o.counterparty?.id?.slice(0, 8) ?? '—';
   const fiatAmt = money(o.fiatAmount, o.fiat);
-  const crypto = `${num(o.cryptoAmount, cdp(o.asset))} ${o.asset}`;
+  const crypto = `${num(o.cryptoAmount, cdp(o.asset), cdp(o.asset) === 2 ? 2 : 0)} ${o.asset}`;
   const awaiting = o.status === 'AWAITING_PAYMENT' || o.status === 'CREATED';
   const left = o.expiresAt ? Math.max(0, Math.floor((new Date(o.expiresAt).getTime() - now) / 1000)) : 0;
   const total = o.expiresAt ? Math.max(1, Math.floor((new Date(o.expiresAt).getTime() - new Date(o.createdAt).getTime()) / 1000)) : 1;
@@ -67,7 +67,7 @@ export default function Order() {
 
   let hero: React.ReactNode;
   if (showDispute) hero = <Hero tone="sell"><Text style={{ fontSize: 30, fontWeight: '700', letterSpacing: -1, textAlign: 'center', lineHeight: 34 }}>{t('ui.frozenNotLost')}</Text><Pill tone="sell" icon="lock-closed-outline" label={t('ui.heldInEscrow', { amount: crypto })} /></Hero>;
-  else if (o.status === 'COMPLETED') hero = <Hero><Ionicons name="checkmark-circle" size={44} color={c.buy} /><Text weight="500">{t(buyer ? 'ui.releasedToWallet' : 'ui.tradeComplete')}</Text><Big size={64}>{buyer ? num(o.cryptoAmount, cdp(o.asset)) : num(o.fiatAmount, 2)}</Big><Pill label={buyer ? o.asset : o.fiat} /></Hero>;
+  else if (o.status === 'COMPLETED') hero = <Hero><Ionicons name="checkmark-circle" size={44} color={c.buy} /><Text weight="500">{t(buyer ? 'ui.releasedToWallet' : 'ui.tradeComplete')}</Text><Big size={64}>{buyer ? num(o.cryptoAmount, cdp(o.asset), cdp(o.asset) === 2 ? 2 : 0) : num(o.fiatAmount, 2)}</Big><Pill label={buyer ? o.asset : o.fiat} /></Hero>;
   else if (o.status === 'CANCELLED') hero = <Hero><Text size="h2">{t('order.status.CANCELLED')}</Text><Text tone="sub" style={{ textAlign: 'center' }}>{t('ui.cancelledHint')}</Text></Hero>;
   else if (buyer && awaiting) hero = (
     <Hero>
@@ -80,7 +80,7 @@ export default function Order() {
       <Text size="tiny" tone="sub" style={{ textAlign: 'center' }}>{t('order.confirmPaid', { amount: fiatAmt })}</Text>
     </Hero>
   );
-  else if (buyer) hero = <Hero><Text weight="500">{t('ui.waitingFor', { name: cp })}</Text><Big size={72}>{num(o.cryptoAmount, cdp(o.asset))}</Big><Pill icon="lock-closed-outline" label={t('ui.inEscrow', { amount: crypto })} /><Text size="small" tone="sub" style={{ textAlign: 'center' }}>{t('ui.buyerWaiting')}</Text></Hero>;
+  else if (buyer) hero = <Hero><Text weight="500">{t('ui.waitingFor', { name: cp })}</Text><Big size={72}>{num(o.cryptoAmount, cdp(o.asset), cdp(o.asset) === 2 ? 2 : 0)}</Big><Pill icon="lock-closed-outline" label={t('ui.inEscrow', { amount: crypto })} /><Text size="small" tone="sub" style={{ textAlign: 'center' }}>{t('ui.buyerWaiting')}</Text></Hero>;
   else if (awaiting) hero = <Hero><Text weight="500">{t('ui.waitingFor', { name: cp })}</Text><Big size={92}>{mmss(left)}</Big><Pill icon="lock-closed-outline" label={t('ui.staysLocked', { amount: crypto })} /></Hero>;
   else hero = <Hero tone="info"><Text weight="500">{t('ui.checkBankFor')}</Text><Big size={84}>{num(o.fiatAmount, 2)}</Big><Pill tone="info" icon="lock-closed-outline" label={t('ui.staysLocked', { amount: crypto })} /></Hero>;
 
@@ -95,7 +95,7 @@ export default function Order() {
       <ScrollView ref={scroll as never} contentContainerStyle={{ padding: space(4), paddingTop: space(1), gap: space(3), paddingBottom: space(10) }} keyboardShouldPersistTaps="handled">
         <View style={{ gap: 4 }}>
           <Row style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <Text size="h2" style={{ flex: 1 }}>{showDispute ? t('order.dispute') : t(buyer ? 'ui.buyingX' : 'ui.sellingX', { amount: num(o.cryptoAmount, cdp(o.asset)), asset: o.asset })}</Text>
+            <Text size="h2" style={{ flex: 1 }}>{showDispute ? t('order.dispute') : t(buyer ? 'ui.buyingX' : 'ui.sellingX', { amount: num(o.cryptoAmount, cdp(o.asset), cdp(o.asset) === 2 ? 2 : 0), asset: o.asset })}</Text>
             <View testID="order-status"><Badge label={st.pill} tone={st.tone} /></View>
           </Row>
           <Text size="small" tone="sub">{t(buyer ? 'ui.fromX' : 'ui.toX', { name: cp })} · {t('ui.tradeRef')} {o.referenceCode}</Text>

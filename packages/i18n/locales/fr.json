@@ -528,6 +528,7 @@
   "youSend": "Vous envoyez {amount}",
   "youSendHint": "Par virement, avec la référence",
   "yourEscrowHint": "Vos {amount} sont bloqués",
-  "noTradesYet": "Aucun échange terminé pour l'instant"
+  "noTradesYet": "Aucun échange terminé pour l'instant",
+  "deleteAccount": "Supprimer le compte"
  }
 }

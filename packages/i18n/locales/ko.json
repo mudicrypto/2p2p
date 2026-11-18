@@ -528,6 +528,7 @@
   "youSend": "{amount} 송금",
   "youSendHint": "참조번호와 함께 계좌이체",
   "yourEscrowHint": "{amount} 잠김",
-  "noTradesYet": "아직 완료된 거래 없음"
+  "noTradesYet": "아직 완료된 거래 없음",
+  "deleteAccount": "계정 삭제"
  }
 }

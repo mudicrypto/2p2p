@@ -38,7 +38,7 @@ export default function Orders() {
             <Press onPress={() => router.push(`/orders/${o.id}`)} style={{ paddingVertical: space(4) }}>
               <Row style={{ gap: 12 }}>
                 <View style={{ flex: 1, gap: 3 }}>
-                  <Text weight="600" numberOfLines={1}>{t(o.role === 'buyer' ? 'ui.buyingX' : 'ui.sellingX', { amount: num(o.cryptoAmount, cdp(o.asset)), asset: o.asset })}</Text>
+                  <Text weight="600" numberOfLines={1}>{t(o.role === 'buyer' ? 'ui.buyingX' : 'ui.sellingX', { amount: num(o.cryptoAmount, cdp(o.asset), cdp(o.asset) === 2 ? 2 : 0), asset: o.asset })}</Text>
                   <Text size="tiny" tone="sub" numberOfLines={1}>{st.hint || date(o.createdAt)} · {cp} · {money(o.fiatAmount, o.fiat)}</Text>
                 </View>
                 <Badge label={st.pill} tone={st.tone} />

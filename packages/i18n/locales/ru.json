@@ -528,6 +528,7 @@
   "youSend": "Вы отправляете {amount}",
   "youSendHint": "Банковским переводом, с кодом",
   "yourEscrowHint": "Ваши {amount} заблокированы",
-  "noTradesYet": "Пока нет завершённых сделок"
+  "noTradesYet": "Пока нет завершённых сделок",
+  "deleteAccount": "Удалить аккаунт"
  }
 }

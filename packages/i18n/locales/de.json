@@ -528,6 +528,7 @@
   "youSend": "Du sendest {amount}",
   "youSendHint": "Per Überweisung, mit Referenz",
   "yourEscrowHint": "Deine {amount} sind gesperrt",
-  "noTradesYet": "Noch keine abgeschlossenen Trades"
+  "noTradesYet": "Noch keine abgeschlossenen Trades",
+  "deleteAccount": "Konto löschen"
  }
 }

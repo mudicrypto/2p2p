@@ -528,6 +528,7 @@
   "youSend": "Ipadala mo ang {amount}",
   "youSendHint": "Sa bank transfer, may reference",
   "yourEscrowHint": "Naka-lock ang {amount} mo",
-  "noTradesYet": "Wala pang natapos na trade"
+  "noTradesYet": "Wala pang natapos na trade",
+  "deleteAccount": "I-delete ang account"
  }
 }

@@ -528,6 +528,7 @@
   "youSend": "Anda hantar {amount}",
   "youSendHint": "Melalui pindahan bank, dengan rujukan",
   "yourEscrowHint": "{amount} anda dikunci",
-  "noTradesYet": "Belum ada dagangan selesai"
+  "noTradesYet": "Belum ada dagangan selesai",
+  "deleteAccount": "Padam akaun"
  }
 }
