@@ -4,6 +4,9 @@ RUN corepack enable && corepack prepare pnpm@10.28.0 --activate
 WORKDIR /repo
 
 FROM base AS build
+# Public URL the browser uses for live updates (Socket.IO); baked into the web build.
+ARG NEXT_PUBLIC_WS_URL=
+ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
 COPY . .
 RUN pnpm install --frozen-lockfile && pnpm turbo run build
 

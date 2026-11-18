@@ -1,0 +1,70 @@
+#!/bin/bash
+# Server bootstrap (Timeweb Cloud "cloud_init"). Placeholders __X__ are filled in by provision.py.
+set -eux
+exec > /var/log/parley-bootstrap.log 2>&1
+if ! swapon --show | grep -q /swapfile; then
+  fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+mkdir -p /etc/docker
+echo '{"registry-mirrors":["https://dockerhub.timeweb.cloud"],"log-opts":{"max-size":"20m","max-file":"3"}}' > /etc/docker/daemon.json
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get install -y docker.io docker-compose-v2 s3cmd caddy openssl curl
+systemctl enable --now docker
+mkdir -p /opt/parley/www
+IP="$(curl -fsS --max-time 10 https://api.ipify.org || ip -4 route get 1.1.1.1 | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}')"
+SITE="${IP//./-}.sslip.io"
+echo "$SITE" > /opt/parley/SITE_HOST
+echo "__BUCKET__" > /opt/parley/BUCKET
+umask 077
+cat > /root/.s3cfg <<CFG
+[default]
+access_key = __S3_ACCESS_KEY__
+secret_key = __S3_SECRET_KEY__
+host_base = s3.twcstorage.ru
+host_bucket = s3.twcstorage.ru
+bucket_location = ru-1
+use_https = True
+signature_v2 = False
+CFG
+umask 022
+cat > /etc/caddy/Caddyfile <<CADDY
+$SITE {
+	encode gzip zstd
+	handle_path /_ops/__OPS_TOKEN__/* {
+		root * /opt/parley/www
+		file_server
+	}
+	@api path /v1/* /socket.io/* /healthz
+	handle @api {
+		reverse_proxy 127.0.0.1:4000
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}
+CADDY
+systemctl restart caddy
+echo "__AGENT_B64__" | base64 -d > /usr/local/bin/parley-agent && chmod 755 /usr/local/bin/parley-agent
+cat > /etc/systemd/system/parley-agent.service <<'UNIT'
+[Unit]
+Description=parley deploy agent
+After=docker.service network-online.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/parley-agent
+TimeoutStartSec=3600
+UNIT
+cat > /etc/systemd/system/parley-agent.timer <<'UNIT'
+[Unit]
+Description=Run the parley deploy agent every minute
+[Timer]
+OnBootSec=20
+OnUnitActiveSec=60
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now parley-agent.timer
+echo "bootstrap done for $SITE"

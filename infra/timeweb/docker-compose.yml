@@ -1,0 +1,60 @@
+# Single-server test-mode deployment (see README.md). Caddy on the host serves everything on one HTTPS
+# origin, so the session cookie reaches the API and the live-update socket. Containers bind to localhost only.
+x-app-env: &app-env
+  NODE_ENV: staging            # not "production": keeps test-mode helpers (test funds) and the test banner on
+  PROVIDER_MODE: mock          # no real custody, KYC or payment providers: no real money can move
+  ALLOW_MOCK_PROVIDERS: "1"
+  DATABASE_URL: postgres://parley:${POSTGRES_PASSWORD}@postgres:5432/parley
+  REDIS_URL: redis://redis:6379
+  WEB_ORIGIN: https://${SITE_HOST}
+  TRUST_PROXY: "1"
+  DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY}
+  MOCK_WEBHOOK_SECRET: ${MOCK_WEBHOOK_SECRET}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   # random: disables the public dev token until a real bot exists
+  METRICS_TOKEN: ${METRICS_TOKEN}
+  TOTP_REPLAY_PROTECTION: "on"
+
+x-build: &build
+  context: ../..
+  args: { NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" }
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment: { POSTGRES_USER: parley, POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}", POSTGRES_DB: parley }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "parley"], interval: 5s, retries: 20 }
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redisdata:/data]
+  migrate:
+    build: { <<: *build, args: { APP: api, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" } }
+    image: parley-api
+    environment: *app-env
+    working_dir: /repo/apps/api
+    # Apply migrations, then load reference data (fiats, payment method types, limits). Both are idempotent.
+    command: ["sh", "-c", "node /repo/packages/db/dist/migrate.js && node --input-type=module -e \"import { createDb } from '@p2p/db'; import { seed } from '@p2p/core'; const h = createDb(process.env.DATABASE_URL); await seed(h.db); await h.close(); console.log('seeded');\""]
+    depends_on: { postgres: { condition: service_healthy } }
+  api:
+    image: parley-api
+    restart: unless-stopped
+    environment: *app-env
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
+  worker:
+    build: { <<: *build, args: { APP: worker, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" } }
+    image: parley-worker
+    restart: unless-stopped
+    environment: *app-env
+    depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
+  web:
+    build: { <<: *build, args: { APP: web, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" } }
+    image: parley-web
+    restart: unless-stopped
+    environment: { API_URL: "http://api:4000", PORT: "3000" }
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+volumes: { pgdata: {}, redisdata: {} }
