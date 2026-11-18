@@ -1,5 +1,9 @@
+#!/bin/sh
+# Server bootstrap (Timeweb Cloud "cloud_init" must start with #!/bin/sh). The bash script below is written
+# to a root-only file, run, then deleted. Placeholders __X__ are filled in at provisioning time.
+umask 077
+cat > /root/parley-bootstrap.sh <<'PARLEY_BOOT'
 #!/bin/bash
-# Server bootstrap (Timeweb Cloud "cloud_init"). Placeholders __X__ are filled in by provision.py.
 set -eux
 exec > /var/log/parley-bootstrap.log 2>&1
 if ! swapon --show | grep -q /swapfile; then
@@ -68,3 +72,8 @@ UNIT
 systemctl daemon-reload
 systemctl enable --now parley-agent.timer
 echo "bootstrap done for $SITE"
+PARLEY_BOOT
+bash /root/parley-bootstrap.sh
+rc=$?
+rm -f /root/parley-bootstrap.sh
+exit $rc
