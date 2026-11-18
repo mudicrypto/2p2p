@@ -5,6 +5,7 @@ umask 077
 cat > /root/parley-bootstrap.sh <<'PARLEY_BOOT'
 #!/bin/bash
 set -eux
+umask 022   # the sh wrapper used 077 to protect this file; files below must be readable by Caddy
 exec > /var/log/parley-bootstrap.log 2>&1
 if ! swapon --show | grep -q /swapfile; then
   fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile

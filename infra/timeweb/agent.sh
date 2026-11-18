@@ -4,7 +4,7 @@
 # status report that Caddy serves at https://<site>/_ops/<secret-token>/status.txt.
 set -uo pipefail
 B="s3://$(cat /opt/parley/BUCKET)"
-ROOT=/opt/parley; WWW="$ROOT/www"; mkdir -p "$ROOT/releases" "$WWW"
+ROOT=/opt/parley; WWW="$ROOT/www"; mkdir -p "$ROOT/releases" "$WWW"; chmod 755 "$ROOT" "$WWW"
 exec 9>"$ROOT/agent.lock"; flock -n 9 || exit 0
 s3() { s3cmd -c /root/.s3cfg --no-progress "$@"; }
 s3err="$(mktemp)"

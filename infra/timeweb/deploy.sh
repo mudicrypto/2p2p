@@ -2,6 +2,9 @@
 # Runs on the server from an extracted release: /opt/parley/releases/<id>/infra/timeweb/deploy.sh
 set -euo pipefail
 cd "$(dirname "$0")"
+# Caddy (user "caddy") must read the status folder; keep the agent in step with the release.
+chmod 755 /opt/parley /opt/parley/www 2>/dev/null || true
+install -m 755 ./agent.sh /usr/local/bin/parley-agent
 ENV=/opt/parley/.env
 # Secrets are generated once on the server and never leave it.
 if [ ! -f "$ENV" ]; then
