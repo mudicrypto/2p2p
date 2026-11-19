@@ -15,7 +15,7 @@ export type Ad = typeof ads.$inferSelect;
 
 export async function createAd(ctx: Ctx, user: User, input: CreateAdInput) {
   if (user.status !== 'active') throw new DomainError('ACCOUNT_FROZEN', 'account not active');
-  if (!tierCanCreateAds(user.kycTier)) throw new DomainError('TIER_REQUIRED', 'tier 1 required to create ads');
+  if (!tierCanCreateAds(user.kycTier)) throw new DomainError('TIER_REQUIRED', 'not allowed to create ads');
   await assertCountryAllowed(ctx.db, user.country);
   const asset = input.asset as Asset;
   const fiat = await getFiat(ctx.db, input.fiat);

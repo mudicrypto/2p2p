@@ -1,21 +1,26 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { authenticator } from 'otplib';
 import { adminUsers, addressAllowlist, users, withdrawals, eq } from '@p2p/db';
-import { ASSETS, toMinor, type Asset, type Network } from '@p2p/shared';
+import { ASSETS, DEFAULT_TIER_LIMITS_USD_CENTS, toMinor, type Asset, type Network } from '@p2p/shared';
 import { makeCtx, mkUser, ensureSeed, refresh, uniq, sepa } from './helpers';
 import {
   getDepositAddress, handleCustodyWebhook, requestWithdrawal, addAllowlistAddress, approveWithdrawal, submitWithdrawal, internalTransfer,
-  createAd, createOrder, markPaid, releaseOrder, balanceOf, userAcct, checkInvariants, totpSetup, totpConfirm, setConfig, reviewHeldDeposit, type User,
+  createAd, createOrder, markPaid, releaseOrder, balanceOf, userAcct, checkInvariants, totpSetup, totpConfirm, setConfig, reviewHeldDeposit, setLimits, type User,
 } from '../src';
 
 const ctx = makeCtx();
+// These tests exercise tier-limit mechanics with a low tier-0 cap ($500/day); the default restores afterwards.
+const T0_TEST = { dailyLimit: 50_000n, monthlyLimit: 500_000n, perOrderMax: 50_000n, withdrawDaily: 50_000n };
+const T0_DEFAULT = (() => { const d = DEFAULT_TIER_LIMITS_USD_CENTS[0]; return { dailyLimit: d.daily, monthlyLimit: d.monthly, perOrderMax: d.perOrder, withdrawDaily: d.withdrawDaily }; })();
+const LIMITS_ADMIN = '00000000-0000-0000-0000-000000000001';
 const custody = ctx.providers.mocks!.custody;
 beforeAll(async () => {
   await ensureSeed(ctx); await setConfig(ctx.db, 'withdrawals', { paused: false, auditGate: false });
+  await setLimits(ctx, LIMITS_ADMIN, 0, T0_TEST);
   // Other suites share this DB: start the mock custody at the current liabilities so the invariant is meaningful.
   for (const p of (await checkInvariants(ctx.db)).perAsset) custody.setBalance(p.asset as Asset, p.liabilities);
 });
-afterAll(() => ctx.close());
+afterAll(async () => { await setLimits(ctx, LIMITS_ADMIN, 0, T0_DEFAULT); await ctx.close(); });
 
 async function with2fa(u: User) {
   const { secret } = await totpSetup(ctx, u.id);

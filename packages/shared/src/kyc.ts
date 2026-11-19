@@ -10,11 +10,11 @@ export const TIER_REQUIREMENTS: Record<KycTier, string[]> = {
 
 /** Default limits in USD cents. Real values live in limits_config (admin editable). */
 export const DEFAULT_TIER_LIMITS_USD_CENTS: Record<KycTier, { daily: bigint; monthly: bigint; perOrder: bigint; withdrawDaily: bigint }> = {
-  0: { daily: 50_000n, monthly: 500_000n, perOrder: 50_000n, withdrawDaily: 50_000n },
+  0: { daily: 1_000_000n, monthly: 10_000_000n, perOrder: 1_000_000n, withdrawDaily: 1_000_000n }, // unverified: $10k/day trade + withdraw
   1: { daily: 1_000_000n, monthly: 10_000_000n, perOrder: 1_000_000n, withdrawDaily: 1_000_000n },
   2: { daily: 10_000_000n, monthly: 100_000_000n, perOrder: 10_000_000n, withdrawDaily: 10_000_000n },
   3: { daily: 100_000_000n, monthly: 1_000_000_000n, perOrder: 100_000_000n, withdrawDaily: 100_000_000n },
 };
 
-export const tierCanCreateAds = (t: number) => t >= 1;
+export const tierCanCreateAds = (t: number) => t >= 0; // anyone can post ads
 export const tierRequires2fa = (t: number) => t >= 1;

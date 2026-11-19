@@ -90,10 +90,10 @@ describe('M2 trading core', () => {
     expect((await orderBook(ctx, { side: 'buy', asset: 'USDT', fiat: 'EUR', limit: 100, merchantOnly: true })).items).toHaveLength(0);
   });
 
-  it('rules: tier 0 cannot create ads, no self trade, counterparty tier enforced', async () => {
+  it('rules: tier 0 can create ads, no self trade, counterparty tier enforced', async () => {
     const u0 = await mkUser(ctx, { tier: 0 });
     const pm = await sepa(ctx, u0);
-    await expect(createAd(ctx, u0, { side: 'buy', asset: 'USDT', fiat: 'EUR', priceType: 'fixed', price: '1', minAmount: '1', maxAmount: '2', totalAmount: '1', paymentMethodIds: [pm.id], paymentWindowMin: 15, terms: '', minCounterpartyTier: 0, acceptReversible: false })).rejects.toMatchObject({ code: 'TIER_REQUIRED' });
+    await expect(createAd(ctx, u0, { side: 'buy', asset: 'USDT', fiat: 'EUR', priceType: 'fixed', price: '1', minAmount: '1', maxAmount: '2', totalAmount: '1', paymentMethodIds: [pm.id], paymentWindowMin: 15, terms: '', minCounterpartyTier: 0, acceptReversible: false })).resolves.toMatchObject({ side: 'buy' });
     const { maker, ad } = await sellAd(ctx);
     await expect(createOrder(ctx, maker, { adId: ad.id, fiatAmount: '50' })).rejects.toMatchObject({ code: 'SELF_TRADE' });
     await ctx.db.execute(`update ads set min_counterparty_tier = 2 where id = '${ad.id}'` as any);

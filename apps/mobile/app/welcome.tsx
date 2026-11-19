@@ -11,7 +11,7 @@ export default function Welcome() {
   const { colors: c } = useApp();
   const { t } = useI18n();
   const ins = useSafeAreaInsets();
-  const steps = [t('ui.stepAccount'), t('ui.stepVerifyId'), t('ui.trade')];
+  const steps = [t('ui.stepAccount'), t('ui.trade')];
   return (
     <View style={{ flex: 1, zIndex: 0, backgroundColor: c.bg, paddingTop: ins.top, paddingBottom: ins.bottom + space(4) }}>
       <Glow color={c.glow} />

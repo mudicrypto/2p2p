@@ -3,9 +3,9 @@
 import { Wordmark, cn } from '@p2p/ui';
 import { useI18n } from '../lib/i18n';
 
-export function AuthShell({ title, subtitle, children, step = 1, footer }: { title?: React.ReactNode; subtitle?: React.ReactNode; children: React.ReactNode; step?: 1 | 2 | 3; footer?: React.ReactNode }) {
+export function AuthShell({ title, subtitle, children, step = 1, footer }: { title?: React.ReactNode; subtitle?: React.ReactNode; children: React.ReactNode; step?: 1 | 2; footer?: React.ReactNode }) {
   const { t } = useI18n();
-  const steps = [t('ui.stepAccount'), t('ui.stepVerifyId'), t('ui.trade')];
+  const steps = [t('ui.stepAccount'), t('ui.trade')];
   return (
     <div className="mx-auto w-full max-w-[440px] space-y-3 pt-2">
       <section className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card p-7">

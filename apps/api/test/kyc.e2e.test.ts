@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { seed } from '@p2p/core';
-import { users, orders, eq } from '@p2p/db';
+import { users, orders, limitsConfig, eq, and } from '@p2p/db';
 import { startApp, makeUser, idem, type TestApp, type TestUser } from './helpers';
 
 let t: TestApp;
@@ -31,6 +31,9 @@ async function sellAd() {
 
 describe('M4 KYC & limits (API)', () => {
   it('tier upgrade via KYC webhook raises limits; over-limit orders are rejected', async () => {
+    // Tier 0 defaults to $10k/day; use a lower tier-0 limit here to show that KYC raises it.
+    const t0 = and(eq(limitsConfig.tier, 0), eq(limitsConfig.asset, 'USD'));
+    await t.ctx.db.update(limitsConfig).set({ dailyLimit: 50_000n, monthlyLimit: 500_000n, perOrderMax: 50_000n, withdrawDaily: 50_000n }).where(t0);
     const { adId } = await sellAd();
     const u = await tier0Ready();
     const lim0 = (await t.http.get('/v1/me/limits').set(u.auth).expect(200)).body;
@@ -46,6 +49,7 @@ describe('M4 KYC & limits (API)', () => {
     const lim1 = (await t.http.get('/v1/me/limits').set(u.auth).expect(200)).body;
     expect(lim1).toMatchObject({ tier: 1, daily: '10000' });
     await post(u, '/v1/orders', { adId, fiatAmount: '600' }).expect(201);
+    await t.ctx.db.update(limitsConfig).set({ dailyLimit: 1_000_000n, monthlyLimit: 10_000_000n, perOrderMax: 1_000_000n, withdrawDaily: 1_000_000n }).where(t0);
   });
 
   it('webhook: signature verified, replay idempotent', async () => {

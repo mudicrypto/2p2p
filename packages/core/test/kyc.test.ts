@@ -1,13 +1,18 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { users, orders, ads, auditLog, countryRules, kycApplications, riskFlags, eq, and } from '@p2p/db';
 import { makeCtx, mkUser, sellAd, ensureSeed, refresh } from './helpers';
+import { DEFAULT_TIER_LIMITS_USD_CENTS } from '@p2p/shared';
 import {
   startKyc, handleKycWebhook, getKycName, getLimits, setLimits, createOrder, balanceOf, userAcct, kycStatus, type User,
 } from '../src';
 
 const ctx = makeCtx();
-beforeAll(() => ensureSeed(ctx));
-afterAll(() => ctx.close());
+// These tests exercise tier-limit mechanics with a low tier-0 cap ($500/day); the default restores afterwards.
+const T0_TEST = { dailyLimit: 50_000n, monthlyLimit: 500_000n, perOrderMax: 50_000n, withdrawDaily: 50_000n };
+const T0_DEFAULT = (() => { const d = DEFAULT_TIER_LIMITS_USD_CENTS[0]; return { dailyLimit: d.daily, monthlyLimit: d.monthly, perOrderMax: d.perOrder, withdrawDaily: d.withdrawDaily }; })();
+const LIMITS_ADMIN = '00000000-0000-0000-0000-000000000001';
+beforeAll(async () => { await ensureSeed(ctx); await setLimits(ctx, LIMITS_ADMIN, 0, T0_TEST); });
+afterAll(async () => { await setLimits(ctx, LIMITS_ADMIN, 0, T0_DEFAULT); await ctx.close(); });
 const mocks = () => ctx.providers.mocks!;
 
 async function verifiedTier0(country = 'DE'): Promise<User> {
@@ -109,7 +114,8 @@ describe('M4 KYC and limits', () => {
     await setLimits(ctx, adminId, 0, { ...orig, dailyLimit: 80_000n, perOrderMax: 80_000n });
     const u = await mkUser(ctx, { tier: 0 });
     expect((await getLimits(ctx, ctx.db, u)).daily).toBe(80_000n);
-    const [a] = await ctx.db.select().from(auditLog).where(and(eq(auditLog.action, 'limits.changed'), eq(auditLog.subjectId, '0:USD')));
+    const rows = await ctx.db.select().from(auditLog).where(and(eq(auditLog.action, 'limits.changed'), eq(auditLog.subjectId, '0:USD')));
+    const a = rows.find((r) => String((r.after as any)?.dailyLimit) === '80000')!; // this test's own edit
     expect((a.before as any).dailyLimit).toBe('50000');
     await setLimits(ctx, adminId, 0, orig);
   });

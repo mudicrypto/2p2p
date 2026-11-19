@@ -30,7 +30,7 @@ export default function Login() {
     }
   };
   return (
-    <AuthShell title={t('ui.welcome')} step={3} footer={<>{t('auth.noAccount')} <Link className="font-semibold underline underline-offset-4" href={L('/signup')}>{t('nav.signup')}</Link></>}>
+    <AuthShell title={t('ui.welcome')} step={2} footer={<>{t('auth.noAccount')} <Link className="font-semibold underline underline-offset-4" href={L('/signup')}>{t('nav.signup')}</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         <div><Label htmlFor="email">{t('auth.email')}</Label><Input id="email" type="email" className="h-12" autoComplete="username" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required /></div>
         <div><Label htmlFor="password">{t('auth.password')}</Label><Input id="password" type="password" className="h-12" autoComplete="current-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} required /></div>

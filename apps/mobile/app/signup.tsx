@@ -34,7 +34,7 @@ export default function Signup() {
         <Hero style={{ alignItems: 'flex-start', paddingVertical: space(6) }}>
           <Wordmark size={26} />
           <Text style={{ fontSize: 34, fontWeight: '700', letterSpacing: -1.2, lineHeight: 38 }}>{t('ui.authHero')}</Text>
-          <Row style={{ flexWrap: 'wrap', gap: 8 }}>{[t('ui.stepAccount'), t('ui.stepVerifyId'), t('ui.trade')].map((s, i) => (
+          <Row style={{ flexWrap: 'wrap', gap: 8 }}>{[t('ui.stepAccount'), t('ui.trade')].map((s, i) => (
             <View key={s} style={{ borderRadius: 999, paddingHorizontal: 12, paddingVertical: 5, borderWidth: 1, borderColor: i === 0 ? c.primary : c.border, backgroundColor: i === 0 ? c.primary : 'transparent' }}><Text size="tiny" weight="600" style={{ color: i === 0 ? c.onPrimary : c.text }}>{i + 1} · {s}</Text></View>
           ))}</Row>
         </Hero>
