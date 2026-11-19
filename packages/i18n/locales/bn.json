@@ -612,6 +612,7 @@
   "otcMine": "আপনার অনুরোধ",
   "otc_open": "অপেক্ষমাণ",
   "otc_contacted": "যোগাযোগ করা হয়েছে",
-  "otc_closed": "বন্ধ"
+  "otc_closed": "বন্ধ",
+  "inviteCodeOpt": "আমন্ত্রণ কোড (ঐচ্ছিক)"
  }
 }

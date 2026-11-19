@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../src/native';
 import { useApp } from '../src/app';
@@ -11,14 +11,15 @@ import { space } from '../src/theme';
 export default function Signup() {
   const { signIn, colors: c } = useApp();
   const { t, locale } = useI18n();
-  const [f, setF] = useState({ email: '', password: '', country: '' });
+  const params = useLocalSearchParams<{ ref?: string }>();
+  const [f, setF] = useState({ email: '', password: '', country: '', ref: (params.ref ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) });
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const submit = async () => {
     setBusy(true); setErr(null);
     try {
-      const r = await api.signup(f.email.trim(), f.password, f.country.toUpperCase(), locale);
+      const r = await api.signup(f.email.trim(), f.password, f.country.toUpperCase(), locale, f.ref || undefined);
       if (r.devEmailToken) { // mock mode: verify and sign in straight away
         await api.verifyEmail(r.devEmailToken);
         const l = await api.login(f.email.trim(), f.password);
@@ -41,6 +42,7 @@ export default function Signup() {
         <Input label={t('auth.email')} placeholder="you@example.com" autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={f.email} onChangeText={(email) => setF({ ...f, email })} />
         <Input label={t('auth.password')} secureTextEntry autoComplete="new-password" value={f.password} onChangeText={(password) => setF({ ...f, password })} hint={t('ui.passwordDesc')} />
         <Input label={t('auth.country')} autoCapitalize="characters" maxLength={2} placeholder="DE" value={f.country} onChangeText={(country) => setF({ ...f, country: country.toUpperCase() })} />
+        <Input label={t('ui.inviteCodeOpt')} autoCapitalize="characters" maxLength={12} value={f.ref} onChangeText={(ref) => setF({ ...f, ref: ref.toUpperCase().replace(/[^A-Z0-9]/g, '') })} testID="ref-code" />
         {err && <Notice tone="error" text={err} />}
         <Button size="lg" title={t('auth.signup')} loading={busy} disabled={!f.email || f.password.length < 10 || f.country.length !== 2} onPress={submit} />
         <Press onPress={() => router.replace('/login')}><Row style={{ justifyContent: 'center' }}><Text tone="sub">{t('auth.haveAccount')}</Text><Text weight="700" style={{ textDecorationLine: 'underline' }}>{t('nav.login')}</Text></Row></Press>

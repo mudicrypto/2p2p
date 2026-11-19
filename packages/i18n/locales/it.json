@@ -612,6 +612,7 @@
   "otcMine": "Le tue richieste",
   "otc_open": "In attesa",
   "otc_contacted": "Contattato",
-  "otc_closed": "Chiuso"
+  "otc_closed": "Chiuso",
+  "inviteCodeOpt": "Codice invito (facoltativo)"
  }
 }

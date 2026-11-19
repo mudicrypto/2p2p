@@ -612,6 +612,7 @@
   "otcMine": "درخواست‌های شما",
   "otc_open": "در انتظار",
   "otc_contacted": "تماس گرفته شد",
-  "otc_closed": "بسته شد"
+  "otc_closed": "بسته شد",
+  "inviteCodeOpt": "کد دعوت (اختیاری)"
  }
 }

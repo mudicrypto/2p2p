@@ -612,6 +612,7 @@
   "otcMine": "Iyong mga request",
   "otc_open": "Naghihintay",
   "otc_contacted": "Nakontak na",
-  "otc_closed": "Sarado"
+  "otc_closed": "Sarado",
+  "inviteCodeOpt": "Invite code (opsyonal)"
  }
 }

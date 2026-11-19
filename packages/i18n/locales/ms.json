@@ -612,6 +612,7 @@
   "otcMine": "Permintaan anda",
   "otc_open": "Menunggu",
   "otc_contacted": "Dihubungi",
-  "otc_closed": "Ditutup"
+  "otc_closed": "Ditutup",
+  "inviteCodeOpt": "Kod jemputan (pilihan)"
  }
 }

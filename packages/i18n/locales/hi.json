@@ -612,6 +612,7 @@
   "otcMine": "आपके अनुरोध",
   "otc_open": "प्रतीक्षा में",
   "otc_contacted": "संपर्क किया गया",
-  "otc_closed": "बंद"
+  "otc_closed": "बंद",
+  "inviteCodeOpt": "आमंत्रण कोड (वैकल्पिक)"
  }
 }

@@ -5,7 +5,7 @@ import { api, tokenStore } from './native';
 import { palette, type Colors } from './theme';
 import { I18nProvider, pickLocale } from './i18n';
 
-export interface Me { id: string; email?: string; displayName?: string; kycTier: number; totpEnabled: boolean; phoneVerified: boolean; country: string }
+export interface Me { id: string; email?: string; displayName?: string; kycTier: number; totpEnabled: boolean; phoneVerified: boolean; country: string; awayMode?: boolean; antiPhishingCode?: string | null }
 interface AppCtx {
   me: Me | null; ready: boolean; refresh: () => Promise<void>; signIn: (token: string, me: Me) => Promise<void>; signOut: () => Promise<void>;
   colors: Colors; scheme: 'dark' | 'light'; themePref: 'system' | 'dark' | 'light'; setThemePref: (t: 'system' | 'dark' | 'light') => void;

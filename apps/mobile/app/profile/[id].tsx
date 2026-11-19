@@ -7,15 +7,18 @@ import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { releaseLabel } from '../../src/format';
 import { space } from '../../src/theme';
-import { Avatar, Badge, Big, Card, Divider, Hero, Row, Screen, Skeleton, Text } from '../../src/ui';
+import { Avatar, Badge, Big, Button, Card, Divider, Hero, Row, Screen, Skeleton, Text, errText } from '../../src/ui';
 
 /** Trader passport: reputation from real trade history only. */
 export default function Passport() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors: c } = useApp();
+  const { colors: c, me } = useApp();
   const { t, pct, date, num } = useI18n();
   const [p, setP] = useState<any>(null);
-  useEffect(() => { api.profile(id).then(setP).catch(() => null); }, [id]);
+  const [rel, setRel] = useState<{ following: boolean; blocked: boolean } | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  useEffect(() => { api.profile(id).then(setP).catch(() => null); if (me && me.id !== id) api.relation(id).then(setRel).catch(() => null); }, [id, me]);
+  const act = async (f: () => Promise<{ following: boolean; blocked: boolean }>) => { setErr(null); try { setRel(await f()); } catch (e) { setErr(errText(t, e)); } };
   if (!p) return <Screen><Skeleton height={300} /><Skeleton height={200} /></Screen>;
   const trades = p.tradesTotal ?? p.trades30d;
   const total = p.positiveFeedback + p.negativeFeedback;
@@ -29,6 +32,15 @@ export default function Passport() {
         <Avatar name={p.displayName} seed={id} size={64} />
         <Row style={{ gap: 6 }}><Text size="h3">{p.displayName}</Text>{p.verifiedBadge && <Ionicons name="checkmark-circle" size={18} color={c.primary} />}</Row>
         <Text size="small" tone="sub">{t('profile.age', { days: p.accountAgeDays })}</Text>
+        {p.away ? <Text size="small" tone="warn" testID="presence">{t('ui.away')}</Text>
+          : p.online ? <Row style={{ gap: 6 }} testID="presence"><View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.buy }} /><Text size="small" tone="buy">{t('ui.online')}</Text></Row>
+          : p.lastSeenAt ? <Text size="small" tone="sub" testID="presence">{t('ui.lastSeen', { when: date(p.lastSeenAt) })}</Text> : null}
+        {rel && <Row style={{ gap: 8, marginTop: space(2) }}>
+          {!rel.blocked && <Button size="sm" variant={rel.following ? 'soft' : 'primary'} icon={rel.following ? 'checkmark' : 'person-add-outline'} title={rel.following ? t('ui.followingBtn') : t('ui.follow')} onPress={() => act(() => api.setFollow(id, !rel.following))} testID="follow" />}
+          <Button size="sm" variant="ghost" icon="ban-outline" title={rel.blocked ? t('ui.unblock') : t('ui.block')} onPress={() => act(() => api.setBlock(id, !rel.blocked))} testID="block" />
+        </Row>}
+        {rel?.blocked && <Text size="tiny" tone="sub" style={{ textAlign: 'center' }}>{t('ui.blockedNote')}</Text>}
+        {err && <Text size="small" tone="sell">{err}</Text>}
         <Big size={trades > 0 ? 84 : 40} style={{ marginTop: space(3) }}>{trades > 0 ? pct(p.completionRateBps) : t('ui.releaseNew')}</Big>
         <Text weight="500">{trades > 0 ? t('ui.completionRate') : t('ui.noTradesYet')}</Text>
         <Row style={{ flexWrap: 'wrap', justifyContent: 'center' }}>

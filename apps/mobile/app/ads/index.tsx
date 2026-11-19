@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { api } from '../../src/native';
@@ -8,7 +9,8 @@ import { space } from '../../src/theme';
 import { AssetIcon, Badge, Button, Card, Empty, PayChip, Row, Skeleton, Text, errText } from '../../src/ui';
 
 export default function MyAds() {
-  const { colors: c } = useApp();
+  const { colors: c, me, refresh } = useApp();
+  const away = !!me?.awayMode;
   const { t, num } = useI18n();
   const [ads, setAds] = useState<any[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -20,6 +22,11 @@ export default function MyAds() {
     <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: space(4), gap: space(3), paddingBottom: space(10) }}
       refreshControl={<RefreshControl tintColor={c.primary} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}>
       <Button icon="add" title={t('ui.createAd')} onPress={() => router.push('/ads/new')} />
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12, borderColor: away ? c.warn : undefined }} testID="away-card">
+        <Ionicons name="cafe-outline" size={22} color={c.primary} />
+        <View style={{ flex: 1 }}><Text weight="700">{t('ui.awayMode')}</Text><Text size="small" tone="sub">{away ? t('ui.awayOn') : t('ui.awayDesc')}</Text></View>
+        <Button size="sm" variant={away ? 'primary' : 'soft'} title={away ? t('ui.awayBack') : t('ui.awayStart')} onPress={async () => { setErr(null); try { await api.setAway(!away); await refresh(); } catch (e) { setErr(errText(t, e)); } }} testID="away-toggle" />
+      </Card>
       {err && <Text tone="sell">{err}</Text>}
       {ads === null && <Skeleton height={140} />}
       {ads?.length === 0 && <Empty icon="megaphone-outline" text={t('ui.noAds')} />}
@@ -38,7 +45,13 @@ export default function MyAds() {
             <View style={{ alignItems: 'flex-end' }}><Text size="tiny" tone="sub">{t('market.limits')}</Text><Text size="small">{num(a.minAmount, 2)} – {num(a.maxAmount, 2)}</Text></View>
           </Row>
           <Row style={{ flexWrap: 'wrap', gap: 6 }}>{a.paymentTypes.map((p: string) => <PayChip key={p} code={p} />)}</Row>
+          {(a.minAccountAgeDays > 0 || a.minCompletedTrades > 0 || !!a.autoReply) && <Row style={{ flexWrap: 'wrap', gap: 6 }}>
+            {a.minAccountAgeDays > 0 && <Badge label={t('ui.reqAge', { n: a.minAccountAgeDays })} />}
+            {a.minCompletedTrades > 0 && <Badge label={t('ui.reqTrades', { n: a.minCompletedTrades })} />}
+            {!!a.autoReply && <Badge label={`${t('ui.autoReply')} ✓`} />}
+          </Row>}
           <Row>
+            <Button size="sm" variant="soft" icon="create-outline" title={t('ui.editAd')} onPress={() => router.push({ pathname: '/ads/edit', params: { id: a.id } })} style={{ flex: 1 }} testID="edit-ad-open" />
             {a.status === 'active'
               ? <Button size="sm" variant="soft" icon="pause" title={t('ad.pause')} onPress={() => setStatus(a.id, 'paused')} style={{ flex: 1 }} />
               : <Button size="sm" variant="soft" icon="play" title={t('ad.resume')} onPress={() => setStatus(a.id, 'active')} style={{ flex: 1 }} />}

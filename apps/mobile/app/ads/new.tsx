@@ -7,6 +7,7 @@ import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { cleanDecimal, marginToBps } from '../../src/decimal';
 import { ASSETS, space } from '../../src/theme';
+import { ConditionsFields, conditionsBody, emptyConditions, type Conditions } from '../../src/conditions';
 import { AssetIcon, Button, Card, Chip, Input, Notice, PayChip, PickerChip, Press, Row, Screen, Segmented, Text, errText, success } from '../../src/ui';
 
 export default function NewAd() {
@@ -16,6 +17,7 @@ export default function NewAd() {
   const [fiats, setFiats] = useState<string[]>(['USD', 'EUR']);
   const [methods, setMethods] = useState<any[]>([]);
   const [sel, setSel] = useState<string[]>([]);
+  const [cond, setCond] = useState<Conditions>(emptyConditions);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function NewAd() {
         side: f.side, asset: f.asset, fiat: f.fiat, priceType: f.priceType,
         price: f.priceType === 'fixed' ? f.price : undefined, marginBps: f.priceType === 'floating' ? marginToBps(f.margin) : undefined,
         totalAmount: f.totalAmount, minAmount: f.minAmount, maxAmount: f.maxAmount, paymentMethodIds: sel,
-        paymentWindowMin: Number(f.paymentWindowMin), terms: f.terms, minCounterpartyTier: 0,
+        paymentWindowMin: Number(f.paymentWindowMin), terms: f.terms, minCounterpartyTier: 0, ...conditionsBody(cond),
       });
       success(); router.replace('/ads');
     } catch (e) { setErr(errText(t, e)); } finally { setBusy(false); }
@@ -79,6 +81,7 @@ export default function NewAd() {
           <PickerChip fixed label={`${t('ad.window')}: ${f.paymentWindowMin}`} value={f.paymentWindowMin} options={['15', '30', '45', '60', '120'].map((n) => ({ value: n, label: t('common.minutes', { n }) }))} onChange={(v) => set({ paymentWindowMin: v })} title={t('ad.window')} />
           <Input label={t('ad.terms')} value={f.terms} onChangeText={(v) => set({ terms: v })} multiline maxLength={2000} style={{ height: 80, textAlignVertical: 'top', paddingTop: 12 }} />
         </Card>
+        <ConditionsFields value={cond} onChange={setCond} />
         {err && <Notice tone="error" text={err} />}
         <Button size="lg" title={t('ad.submit')} disabled={!ok} loading={busy} onPress={submit} testID="publish-ad" />
       </Screen>

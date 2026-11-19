@@ -612,6 +612,7 @@
   "otcMine": "طلباتك",
   "otc_open": "قيد الانتظار",
   "otc_contacted": "تم التواصل",
-  "otc_closed": "مغلق"
+  "otc_closed": "مغلق",
+  "inviteCodeOpt": "رمز الدعوة (اختياري)"
  }
 }

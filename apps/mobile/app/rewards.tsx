@@ -1,23 +1,39 @@
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Share, View } from 'react-native';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { api, WEB_URL } from '../src/native';
 import { useApp } from '../src/app';
 import { useI18n } from '../src/i18n';
 import { space } from '../src/theme';
-import { Badge, Card, Screen, Text } from '../src/ui';
+import { Button, Card, CopyRow, Row, Screen, Skeleton, Text } from '../src/ui';
 
-/** No referral API exists yet: honest "coming soon" with no invented rewards. */
+/** Invite friends: the user's real invite code and counts. Rewards are not live yet, and the screen says so. */
 export default function Rewards() {
-  const { colors: c } = useApp();
-  const { t } = useI18n();
+  const { colors: c, me, locale } = useApp();
+  const { t, num } = useI18n();
+  const [info, setInfo] = useState<{ code: string; invited: number; traded: number } | null>(null);
+  useEffect(() => { if (me) api.referral().then(setInfo).catch(() => null); }, [me]);
+  const link = info ? `${WEB_URL}/${locale}/signup?ref=${info.code}` : '';
   return (
-    <Screen>
-      <Card style={{ alignItems: 'center', gap: space(3), paddingVertical: space(8), borderColor: `${c.primary}55` }}>
+    <Screen style={{ gap: space(3) }}>
+      <Card style={{ alignItems: 'center', gap: space(3), paddingVertical: space(6), borderColor: `${c.primary}55` }}>
         <View style={{ width: 76, height: 76, borderRadius: 24, backgroundColor: c.primary, alignItems: 'center', justifyContent: 'center' }}><Ionicons name="gift" size={36} color={c.onPrimary} /></View>
-        <Badge label={t('ui.comingSoon')} tone="warning" />
-        <Text size="h2" style={{ textAlign: 'center' }}>{t('ui.rewardsTitle')}</Text>
-        <Text tone="sub" style={{ textAlign: 'center' }}>{t('ui.rewardsDesc')}</Text>
+        <Text size="h2" style={{ textAlign: 'center' }}>{t('ui.inviteTitle')}</Text>
+        <Text tone="sub" style={{ textAlign: 'center' }}>{t('ui.referralHow')}</Text>
       </Card>
-      <Card style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}><Ionicons name="people" size={22} color={c.primary} /><View style={{ flex: 1 }}><Text weight="700">{t('ui.inviteTitle')}</Text><Text size="small" tone="sub">{t('ui.inviteSub')}</Text></View></Card>
+      {!me ? <Button title={t('nav.signup')} onPress={() => router.push('/signup')} /> : !info ? <Skeleton height={160} /> : <>
+        <Card style={{ gap: 10 }}>
+          <CopyRow label={t('ui.referralCode')} value={info.code} mono />
+          <CopyRow label={t('ui.inviteLink')} value={link} />
+          <Button icon="share-outline" title={t('ui.inviteLink')} onPress={() => void Share.share({ message: link }).catch(() => null)} />
+        </Card>
+        <Row style={{ gap: space(3) }}>
+          <Card style={{ flex: 1, gap: 4 }}><Ionicons name="person-add-outline" size={20} color={c.primary} /><Text size="h2" testID="ref-invited">{num(String(info.invited))}</Text><Text size="small" tone="sub">{t('ui.refInvited')}</Text></Card>
+          <Card style={{ flex: 1, gap: 4 }}><Ionicons name="people-outline" size={20} color={c.primary} /><Text size="h2">{num(String(info.traded))}</Text><Text size="small" tone="sub">{t('ui.refTraded')}</Text></Card>
+        </Row>
+        <Text size="small" tone="sub" style={{ textAlign: 'center' }}>{t('ui.referralRewardsSoon')}</Text>
+      </>}
     </Screen>
   );
 }

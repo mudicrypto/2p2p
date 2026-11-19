@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { FlatList, RefreshControl, View } from 'react-native';
+import { FlatList, RefreshControl, Share, View } from 'react-native';
+import { ordersCsv } from '../../src/csv';
 import { router, useFocusEffect } from 'expo-router';
 import { api } from '../../src/native';
 import { useApp } from '../../src/app';
@@ -24,7 +25,10 @@ export default function Orders() {
       contentContainerStyle={{ padding: space(4), paddingTop: space(1), paddingBottom: 120 }}
       refreshControl={<RefreshControl tintColor={c.primary} refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
       ListHeaderComponent={<View style={{ gap: space(3), paddingBottom: space(3) }}>
-        <Text size="h1">{t('ui.ordersNav')}</Text>
+        <Row style={{ justifyContent: 'space-between' }}>
+          <Text size="h1">{t('ui.ordersNav')}</Text>
+          <Button size="sm" variant="soft" icon="download-outline" title={t('ui.exportCsv')} disabled={!rows?.length} onPress={() => void Share.share({ title: 'parley-orders.csv', message: ordersCsv(rows ?? []) }).catch(() => null)} testID="export-csv" />
+        </Row>
         <Segmented value={tab} onChange={setTab} options={[{ value: 'active', label: t('ui.activeN', { n: active.length }) }, { value: 'done', label: t('order.status.COMPLETED') }]} />
       </View>}
       ListEmptyComponent={rows === null ? <Skeleton height={90} /> : <Card><Empty icon="receipt-outline" text={t('ui.noData')} action={<Button variant="soft" title={t('ui.trade')} onPress={() => router.navigate('/')} />} /></Card>}

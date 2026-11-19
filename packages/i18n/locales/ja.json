@@ -612,6 +612,7 @@
   "otcMine": "あなたのリクエスト",
   "otc_open": "待機中",
   "otc_contacted": "連絡済み",
-  "otc_closed": "クローズ"
+  "otc_closed": "クローズ",
+  "inviteCodeOpt": "招待コード（任意）"
  }
 }

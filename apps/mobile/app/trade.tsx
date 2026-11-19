@@ -9,6 +9,7 @@ import { useI18n } from '../src/i18n';
 import { cleanDecimal, cryptoFor, fiatFor, fromScaled, inRange, toScaled } from '../src/decimal';
 import { space } from '../src/theme';
 import { AssetIcon, Avatar, Button, Card, Chip, Input, Notice, PayChip, Row, Screen, Skeleton, Text, errText, success } from '../src/ui';
+import { Requirements } from '../src/conditions';
 
 export default function Trade() {
   const { adId, side, amount } = useLocalSearchParams<{ adId: string; side: 'buy' | 'sell'; amount?: string }>();
@@ -50,6 +51,7 @@ export default function Trade() {
         {!isBuy && <View style={{ gap: 8 }}><Text size="small" tone="sub" weight="500">{t('trade.receivingAccount')}</Text>
           {pms.length === 0 ? <Notice tone="warn" text={t('ui.pmHint')} /> : <Row style={{ flexWrap: 'wrap' }}>{pms.map((m) => <Chip key={m.id} label={`${m.type} · ${m.holderName}`} active={pm === m.id} onPress={() => setPm(m.id)} />)}</Row>}</View>}
         <Row style={{ flexWrap: 'wrap', gap: 6 }}>{ad.paymentTypes.map((p: string) => <PayChip key={p} code={p} />)}</Row>
+        <Requirements ad={ad} />
         {!!ad.terms && <Card style={{ gap: 4 }}><Text size="small" weight="700">{t('trade.terms')}</Text><Text size="small" tone="sub">{ad.terms}</Text></Card>}
         <Notice text={`${t('ui.how1d')} ${t('trade.window', { minutes: ad.paymentWindowMin })}`} />
         {err && <Notice tone="error" text={err} />}

@@ -612,6 +612,7 @@
   "otcMine": "Talepleriniz",
   "otc_open": "Bekliyor",
   "otc_contacted": "İletişime geçildi",
-  "otc_closed": "Kapandı"
+  "otc_closed": "Kapandı",
+  "inviteCodeOpt": "Davet kodu (isteğe bağlı)"
  }
 }

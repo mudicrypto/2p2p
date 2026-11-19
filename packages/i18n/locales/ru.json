@@ -612,6 +612,7 @@
   "otcMine": "Ваши запросы",
   "otc_open": "Ожидает",
   "otc_contacted": "Связались",
-  "otc_closed": "Закрыт"
+  "otc_closed": "Закрыт",
+  "inviteCodeOpt": "Код приглашения (необязательно)"
  }
 }

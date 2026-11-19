@@ -73,6 +73,12 @@ export default function Account() {
         <Divider />
         {item('megaphone', t('ad.mine'), undefined, () => router.push('/ads'))}
         <Divider />
+        {item('at', t('ui.tradingProfile'), undefined, () => router.push('/trading-profile'))}
+        <Divider />
+        {item('gift', t('ui.inviteTitle'), undefined, () => router.push('/rewards'))}
+        <Divider />
+        {item('briefcase', t('ui.otcTitle'), undefined, () => router.push('/otc'))}
+        <Divider />
         {item('storefront', t('ui.merchantCentre'), undefined, () => router.push('/merchant'))}
         <Divider />
         {item('shield-checkmark', t('ui.security'), undefined, () => router.push('/security'))}

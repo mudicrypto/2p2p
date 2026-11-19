@@ -612,6 +612,7 @@
   "otcMine": "آپ کی درخواستیں",
   "otc_open": "زیر التواء",
   "otc_contacted": "رابطہ ہو گیا",
-  "otc_closed": "بند"
+  "otc_closed": "بند",
+  "inviteCodeOpt": "دعوتی کوڈ (اختیاری)"
  }
 }

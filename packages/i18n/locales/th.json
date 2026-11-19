@@ -612,6 +612,7 @@
   "otcMine": "คำขอของคุณ",
   "otc_open": "รอดำเนินการ",
   "otc_contacted": "ติดต่อแล้ว",
-  "otc_closed": "ปิดแล้ว"
+  "otc_closed": "ปิดแล้ว",
+  "inviteCodeOpt": "รหัสเชิญ (ไม่บังคับ)"
  }
 }

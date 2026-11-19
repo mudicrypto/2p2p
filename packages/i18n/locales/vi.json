@@ -612,6 +612,7 @@
   "otcMine": "Yêu cầu của bạn",
   "otc_open": "Đang chờ",
   "otc_contacted": "Đã liên hệ",
-  "otc_closed": "Đã đóng"
+  "otc_closed": "Đã đóng",
+  "inviteCodeOpt": "Mã mời (tùy chọn)"
  }
 }

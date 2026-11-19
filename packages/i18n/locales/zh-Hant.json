@@ -612,6 +612,7 @@
   "otcMine": "你的申請",
   "otc_open": "等待中",
   "otc_contacted": "已聯繫",
-  "otc_closed": "已關閉"
+  "otc_closed": "已關閉",
+  "inviteCodeOpt": "邀請碼（選填）"
  }
 }

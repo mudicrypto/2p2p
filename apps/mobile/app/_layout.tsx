@@ -68,6 +68,9 @@ function Shell() {
         <Stack.Screen name="help" options={{ headerShown: true, title: t('ui.help') }} />
         <Stack.Screen name="ads/index" options={{ headerShown: true, title: t('ad.mine') }} />
         <Stack.Screen name="ads/new" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="ads/edit" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="trading-profile" options={{ headerShown: true, title: t('ui.tradingProfile') }} />
+        <Stack.Screen name="otc" options={{ headerShown: true, title: t('ui.otcTitle') }} />
         <Stack.Screen name="payment-methods" options={{ headerShown: true, title: t('wallet.paymentMethods') }} />
         <Stack.Screen name="security" options={{ headerShown: true, title: t('ui.security') }} />
         <Stack.Screen name="transfer" options={{ ...modal, title: t('ui.transfer') }} />
