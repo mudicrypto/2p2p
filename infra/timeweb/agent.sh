@@ -24,6 +24,7 @@ fi
   echo; docker compose -p parley ps 2>&1; echo
   for s in api worker web migrate; do echo "== $s"; docker compose -p parley logs --tail 40 "$s" 2>&1 | cut -c1-400; done
   echo "== caddy"; journalctl -u caddy -n 20 --no-pager 2>&1 | cut -c1-300
+  echo "== bootstrap (tail)"; tail -n 25 /var/log/parley-bootstrap.log 2>&1 | cut -c1-300
   echo; free -m; df -h / | tail -1
 } > "$WWW/status.tmp" 2>&1 && mv "$WWW/status.tmp" "$WWW/status.txt"
 rm -f "$s3err"; exit 0
