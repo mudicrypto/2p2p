@@ -529,6 +529,16 @@
   "youSendHint": "Nípa ìfiránṣẹ́ báńkì, pẹ̀lú ìtọ́kasí",
   "yourEscrowHint": "A ti tì {amount} rẹ pa",
   "noTradesYet": "Kò sí ìṣòwò tó parí síbẹ̀",
-  "deleteAccount": "Pa àkáǹtì rẹ́"
+  "deleteAccount": "Pa àkáǹtì rẹ́",
+  "filters": "Àwọn àlẹ̀mọ́",
+  "merchantsOnly": "Àwọn oníṣòwò tí a fìdí múlẹ̀ nìkan",
+  "verifiedOnly": "Àwọn tí a fìdí ìdánimọ̀ múlẹ̀ nìkan",
+  "sortBy": "Tò ó gẹ́gẹ́ bí",
+  "clearFilters": "Pa àwọn àlẹ̀mọ́ rẹ́",
+  "showMore": "Fi ìfilọ̀ míràn hàn",
+  "sort_price": "Iye tó dára jù",
+  "sort_release": "Ìtúsílẹ̀ tó yára jù",
+  "sort_completion": "Àṣeyọrí tó ga jù",
+  "sort_trades": "Ìṣòwò tó pọ̀ jù"
  }
 }

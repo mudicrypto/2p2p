@@ -529,6 +529,16 @@
   "youSendHint": "Ta tura kuɗin banki, da lambar ciniki",
   "yourEscrowHint": "An kulle {amount} naka",
   "noTradesYet": "Babu cinikin da aka kammala tukuna",
-  "deleteAccount": "Goge asusu"
+  "deleteAccount": "Goge asusu",
+  "filters": "Matattara",
+  "merchantsOnly": "Ƴan kasuwa da aka tabbatar kawai",
+  "verifiedOnly": "Waɗanda aka tabbatar da ID kawai",
+  "sortBy": "Jera ta",
+  "clearFilters": "Share matattara",
+  "showMore": "Nuna ƙarin tayi",
+  "sort_price": "Mafi kyawun farashi",
+  "sort_release": "Saki mafi sauri",
+  "sort_completion": "Mafi yawan kammalawa",
+  "sort_trades": "Mafi yawan ciniki"
  }
 }

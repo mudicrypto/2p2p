@@ -529,6 +529,16 @@
   "youSendHint": "Con bonifico, con il riferimento",
   "yourEscrowHint": "I tuoi {amount} sono bloccati",
   "noTradesYet": "Nessuno scambio completato",
-  "deleteAccount": "Elimina account"
+  "deleteAccount": "Elimina account",
+  "filters": "Filtri",
+  "merchantsOnly": "Solo merchant verificati",
+  "verifiedOnly": "Solo utenti con ID verificato",
+  "sortBy": "Ordina per",
+  "clearFilters": "Cancella filtri",
+  "showMore": "Mostra altre offerte",
+  "sort_price": "Prezzo migliore",
+  "sort_release": "Rilascio più veloce",
+  "sort_completion": "Completamento più alto",
+  "sort_trades": "Più scambi"
  }
 }

@@ -529,6 +529,16 @@
   "youSendHint": "โอนผ่านธนาคาร พร้อมรหัสอ้างอิง",
   "yourEscrowHint": "{amount} ของคุณถูกล็อก",
   "noTradesYet": "ยังไม่มีเทรดที่สำเร็จ",
-  "deleteAccount": "ลบบัญชี"
+  "deleteAccount": "ลบบัญชี",
+  "filters": "ตัวกรอง",
+  "merchantsOnly": "เฉพาะร้านค้าที่ยืนยันแล้ว",
+  "verifiedOnly": "เฉพาะผู้ที่ยืนยันตัวตนแล้ว",
+  "sortBy": "เรียงตาม",
+  "clearFilters": "ล้างตัวกรอง",
+  "showMore": "แสดงข้อเสนอเพิ่มเติม",
+  "sort_price": "ราคาดีที่สุด",
+  "sort_release": "ปล่อยเร็วที่สุด",
+  "sort_completion": "อัตราสำเร็จสูงสุด",
+  "sort_trades": "เทรดมากที่สุด"
  }
 }

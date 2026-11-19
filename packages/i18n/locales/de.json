@@ -529,6 +529,16 @@
   "youSendHint": "Per Überweisung, mit Referenz",
   "yourEscrowHint": "Deine {amount} sind gesperrt",
   "noTradesYet": "Noch keine abgeschlossenen Trades",
-  "deleteAccount": "Konto löschen"
+  "deleteAccount": "Konto löschen",
+  "filters": "Filter",
+  "merchantsOnly": "Nur verifizierte Händler",
+  "verifiedOnly": "Nur mit verifizierter ID",
+  "sortBy": "Sortieren nach",
+  "clearFilters": "Filter zurücksetzen",
+  "showMore": "Mehr Angebote",
+  "sort_price": "Bester Preis",
+  "sort_release": "Schnellste Freigabe",
+  "sort_completion": "Höchste Abschlussquote",
+  "sort_trades": "Meiste Trades"
  }
 }

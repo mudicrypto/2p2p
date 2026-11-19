@@ -529,6 +529,16 @@
   "youSendHint": "Sa bank transfer, may reference",
   "yourEscrowHint": "Naka-lock ang {amount} mo",
   "noTradesYet": "Wala pang natapos na trade",
-  "deleteAccount": "I-delete ang account"
+  "deleteAccount": "I-delete ang account",
+  "filters": "Mga filter",
+  "merchantsOnly": "Mga verified merchant lang",
+  "verifiedOnly": "Mga verified ID lang",
+  "sortBy": "Ayusin ayon sa",
+  "clearFilters": "I-clear ang mga filter",
+  "showMore": "Ipakita ang higit pa",
+  "sort_price": "Pinakamagandang presyo",
+  "sort_release": "Pinakamabilis mag-release",
+  "sort_completion": "Pinakamataas na completion",
+  "sort_trades": "Pinakamaraming trade"
  }
 }

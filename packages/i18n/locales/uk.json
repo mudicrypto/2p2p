@@ -529,6 +529,16 @@
   "youSendHint": "Банківським переказом, з кодом",
   "yourEscrowHint": "Ваші {amount} заблоковано",
   "noTradesYet": "Ще немає завершених угод",
-  "deleteAccount": "Видалити акаунт"
+  "deleteAccount": "Видалити акаунт",
+  "filters": "Фільтри",
+  "merchantsOnly": "Лише перевірені мерчанти",
+  "verifiedOnly": "Лише з підтвердженою особою",
+  "sortBy": "Сортування",
+  "clearFilters": "Скинути фільтри",
+  "showMore": "Показати ще",
+  "sort_price": "Найкраща ціна",
+  "sort_release": "Найшвидше відпускають",
+  "sort_completion": "Найкращий відсоток угод",
+  "sort_trades": "Найбільше угод"
  }
 }

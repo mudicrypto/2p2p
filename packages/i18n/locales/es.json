@@ -529,6 +529,16 @@
   "youSendHint": "Por transferencia, con la referencia",
   "yourEscrowHint": "Tus {amount} están bloqueados",
   "noTradesYet": "Aún sin operaciones completadas",
-  "deleteAccount": "Eliminar cuenta"
+  "deleteAccount": "Eliminar cuenta",
+  "filters": "Filtros",
+  "merchantsOnly": "Solo comerciantes verificados",
+  "verifiedOnly": "Solo usuarios con ID verificada",
+  "sortBy": "Ordenar por",
+  "clearFilters": "Borrar filtros",
+  "showMore": "Mostrar más ofertas",
+  "sort_price": "Mejor precio",
+  "sort_release": "Liberación más rápida",
+  "sort_completion": "Mayor tasa de finalización",
+  "sort_trades": "Más operaciones"
  }
 }

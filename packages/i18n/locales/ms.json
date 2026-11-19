@@ -529,6 +529,16 @@
   "youSendHint": "Melalui pindahan bank, dengan rujukan",
   "yourEscrowHint": "{amount} anda dikunci",
   "noTradesYet": "Belum ada dagangan selesai",
-  "deleteAccount": "Padam akaun"
+  "deleteAccount": "Padam akaun",
+  "filters": "Penapis",
+  "merchantsOnly": "Peniaga disahkan sahaja",
+  "verifiedOnly": "Pedagang ID disahkan sahaja",
+  "sortBy": "Isih mengikut",
+  "clearFilters": "Kosongkan penapis",
+  "showMore": "Tunjuk lebih banyak",
+  "sort_price": "Harga terbaik",
+  "sort_release": "Pelepasan terpantas",
+  "sort_completion": "Penyelesaian tertinggi",
+  "sort_trades": "Dagangan terbanyak"
  }
 }

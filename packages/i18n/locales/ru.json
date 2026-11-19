@@ -529,6 +529,16 @@
   "youSendHint": "Банковским переводом, с кодом",
   "yourEscrowHint": "Ваши {amount} заблокированы",
   "noTradesYet": "Пока нет завершённых сделок",
-  "deleteAccount": "Удалить аккаунт"
+  "deleteAccount": "Удалить аккаунт",
+  "filters": "Фильтры",
+  "merchantsOnly": "Только проверенные мерчанты",
+  "verifiedOnly": "Только с подтверждённой личностью",
+  "sortBy": "Сортировка",
+  "clearFilters": "Сбросить фильтры",
+  "showMore": "Показать ещё",
+  "sort_price": "Лучшая цена",
+  "sort_release": "Быстрее всех отпускают",
+  "sort_completion": "Лучший процент сделок",
+  "sort_trades": "Больше всего сделок"
  }
 }

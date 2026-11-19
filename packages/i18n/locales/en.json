@@ -529,6 +529,16 @@
   "yourEscrowHint": "Your {amount} is locked",
   "sellerChecksHint": "They check their bank, then release",
   "noTradesYet": "No completed trades yet",
-  "deleteAccount": "Delete account"
+  "deleteAccount": "Delete account",
+  "filters": "Filters",
+  "merchantsOnly": "Verified merchants only",
+  "verifiedOnly": "ID-verified traders only",
+  "sortBy": "Sort by",
+  "clearFilters": "Clear filters",
+  "showMore": "Show more offers",
+  "sort_price": "Best price",
+  "sort_release": "Fastest release",
+  "sort_completion": "Highest completion",
+  "sort_trades": "Most trades"
  }
 }

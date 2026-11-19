@@ -529,6 +529,16 @@
   "youSendHint": "以銀行轉帳並附交易編號",
   "yourEscrowHint": "你的 {amount} 已鎖定",
   "noTradesYet": "尚無完成的交易",
-  "deleteAccount": "刪除帳戶"
+  "deleteAccount": "刪除帳戶",
+  "filters": "篩選",
+  "merchantsOnly": "僅限認證商家",
+  "verifiedOnly": "僅限已驗證身分者",
+  "sortBy": "排序方式",
+  "clearFilters": "清除篩選",
+  "showMore": "顯示更多報價",
+  "sort_price": "最佳價格",
+  "sort_release": "放行最快",
+  "sort_completion": "完成率最高",
+  "sort_trades": "交易最多"
  }
 }

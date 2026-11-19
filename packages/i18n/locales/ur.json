@@ -529,6 +529,16 @@
   "youSendHint": "بینک ٹرانسفر سے، حوالہ کے ساتھ",
   "yourEscrowHint": "آپ کے {amount} لاک ہیں",
   "noTradesYet": "ابھی کوئی مکمل تجارت نہیں",
-  "deleteAccount": "اکاؤنٹ حذف کریں"
+  "deleteAccount": "اکاؤنٹ حذف کریں",
+  "filters": "فلٹرز",
+  "merchantsOnly": "صرف تصدیق شدہ مرچنٹس",
+  "verifiedOnly": "صرف شناخت تصدیق شدہ ٹریڈرز",
+  "sortBy": "ترتیب",
+  "clearFilters": "فلٹرز صاف کریں",
+  "showMore": "مزید پیشکشیں",
+  "sort_price": "بہترین قیمت",
+  "sort_release": "تیز ترین ریلیز",
+  "sort_completion": "سب سے زیادہ تکمیل",
+  "sort_trades": "سب سے زیادہ تجارتیں"
  }
 }

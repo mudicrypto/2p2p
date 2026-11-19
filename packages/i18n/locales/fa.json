@@ -529,6 +529,16 @@
   "youSendHint": "با انتقال بانکی، همراه کد مرجع",
   "yourEscrowHint": "{amount} شما قفل شد",
   "noTradesYet": "هنوز معامله‌ای کامل نشده",
-  "deleteAccount": "حذف حساب"
+  "deleteAccount": "حذف حساب",
+  "filters": "فیلترها",
+  "merchantsOnly": "فقط بازرگانان تأییدشده",
+  "verifiedOnly": "فقط کاربران با هویت تأییدشده",
+  "sortBy": "مرتب‌سازی",
+  "clearFilters": "پاک کردن فیلترها",
+  "showMore": "پیشنهادهای بیشتر",
+  "sort_price": "بهترین قیمت",
+  "sort_release": "سریع‌ترین آزادسازی",
+  "sort_completion": "بیشترین نرخ تکمیل",
+  "sort_trades": "بیشترین معامله"
  }
 }

@@ -529,6 +529,16 @@
   "youSendHint": "Przelewem, z numerem referencyjnym",
   "yourEscrowHint": "Twoje {amount} jest zablokowane",
   "noTradesYet": "Brak zakończonych transakcji",
-  "deleteAccount": "Usuń konto"
+  "deleteAccount": "Usuń konto",
+  "filters": "Filtry",
+  "merchantsOnly": "Tylko zweryfikowani sprzedawcy",
+  "verifiedOnly": "Tylko ze zweryfikowaną tożsamością",
+  "sortBy": "Sortuj według",
+  "clearFilters": "Wyczyść filtry",
+  "showMore": "Pokaż więcej ofert",
+  "sort_price": "Najlepsza cena",
+  "sort_release": "Najszybsze zwolnienie",
+  "sort_completion": "Najwyższy wskaźnik realizacji",
+  "sort_trades": "Najwięcej transakcji"
  }
 }

@@ -529,6 +529,16 @@
   "youSendHint": "Par virement, avec la référence",
   "yourEscrowHint": "Vos {amount} sont bloqués",
   "noTradesYet": "Aucun échange terminé pour l'instant",
-  "deleteAccount": "Supprimer le compte"
+  "deleteAccount": "Supprimer le compte",
+  "filters": "Filtres",
+  "merchantsOnly": "Marchands vérifiés uniquement",
+  "verifiedOnly": "Identité vérifiée uniquement",
+  "sortBy": "Trier par",
+  "clearFilters": "Effacer les filtres",
+  "showMore": "Plus d'offres",
+  "sort_price": "Meilleur prix",
+  "sort_release": "Libération la plus rapide",
+  "sort_completion": "Meilleur taux de réussite",
+  "sort_trades": "Le plus d'échanges"
  }
 }

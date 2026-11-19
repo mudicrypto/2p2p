@@ -529,6 +529,16 @@
   "youSendHint": "بتحويل بنكي مع المرجع",
   "yourEscrowHint": "{amount} الخاصة بك مقفلة",
   "noTradesYet": "لا صفقات مكتملة بعد",
-  "deleteAccount": "حذف الحساب"
+  "deleteAccount": "حذف الحساب",
+  "filters": "الفلاتر",
+  "merchantsOnly": "التجار الموثّقون فقط",
+  "verifiedOnly": "المتداولون الموثّقة هويتهم فقط",
+  "sortBy": "ترتيب حسب",
+  "clearFilters": "مسح الفلاتر",
+  "showMore": "عرض المزيد من العروض",
+  "sort_price": "أفضل سعر",
+  "sort_release": "الأسرع في الإفراج",
+  "sort_completion": "أعلى نسبة إتمام",
+  "sort_trades": "الأكثر صفقات"
  }
 }

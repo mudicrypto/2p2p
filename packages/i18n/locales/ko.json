@@ -529,6 +529,16 @@
   "youSendHint": "참조번호와 함께 계좌이체",
   "yourEscrowHint": "{amount} 잠김",
   "noTradesYet": "아직 완료된 거래 없음",
-  "deleteAccount": "계정 삭제"
+  "deleteAccount": "계정 삭제",
+  "filters": "필터",
+  "merchantsOnly": "인증 머천트만",
+  "verifiedOnly": "신원 인증된 트레이더만",
+  "sortBy": "정렬",
+  "clearFilters": "필터 초기화",
+  "showMore": "오퍼 더 보기",
+  "sort_price": "최적 가격",
+  "sort_release": "해제 가장 빠름",
+  "sort_completion": "완료율 높은 순",
+  "sort_trades": "거래 많은 순"
  }
 }

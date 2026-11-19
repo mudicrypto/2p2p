@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowUpRight, ChevronDown } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { Badge, Button, Card, Skeleton, cn } from '@p2p/ui';
 import { useI18n } from '../lib/i18n';
 import { useSession } from '../lib/session';
@@ -12,8 +12,22 @@ import { socket } from '../lib/socket';
 import { useL } from './nav';
 import { TradeDialog, cryptoFor, fiatFor } from './trade-dialog';
 import { cdp } from './order-state';
+import { REGION_KEYS, typesForRegion } from '../lib/regions';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
+type SortKey = 'price' | 'release' | 'completion' | 'trades';
+const SORTS: SortKey[] = ['price', 'release', 'completion', 'trades'];
+/** Client-side ordering of the loaded offers. 'price' keeps the API order (best price first). */
+export function sortRows<T extends { ad: any }>(rows: T[], sort: SortKey): T[] {
+  if (sort === 'price') return rows;
+  const key = (r: T) => {
+    const a = r.ad.advertiser ?? {};
+    if (sort === 'release') return a.avgReleaseSec ? a.avgReleaseSec : Number.MAX_SAFE_INTEGER; // no history last
+    if (sort === 'completion') return -(a.trades30d ? a.completionRateBps : -1);
+    return -(a.trades30d ?? 0);
+  };
+  return [...rows].sort((x, y) => key(x) - key(y));
+}
 const D = 10n ** 8n;
 const sc = (v: string) => { const [i, f = ''] = (v || '0').split('.'); return BigInt(i || '0') * D + BigInt((f + '00000000').slice(0, 8) || '0'); };
 const inLimits = (fiat: string, ad: any) => !fiat || (sc(fiat) >= sc(ad.minAmount) && sc(fiat) <= sc(ad.maxAmount));
@@ -34,6 +48,14 @@ function TradeInner() {
   const [fiat, setFiat] = useState(sp.get('fiat') ?? 'USD');
   const [amount, setAmount] = useState(''); // buy: fiat to pay · sell: crypto to sell
   const [pm, setPm] = useState(sp.get('pm') ?? '');
+  // Filters (Filters panel above the offer list)
+  const [region, setRegion] = useState(sp.get('region') ?? '');
+  const [merchantOnly, setMerchantOnly] = useState(sp.get('merchant') === '1');
+  const [verifiedOnly, setVerifiedOnly] = useState(sp.get('verified') === '1');
+  const [sort, setSort] = useState<SortKey>((sp.get('sort') as SortKey) || 'price');
+  const [showFilters, setShowFilters] = useState(false);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [fiats, setFiats] = useState<string[]>(['USD', 'EUR']);
   const [types, setTypes] = useState<Array<{ code: string; name: string }>>([]);
   const [items, setItems] = useState<any[] | null>(null);
@@ -43,11 +65,23 @@ function TradeInner() {
   useEffect(() => { api<any[]>(`/payment-method-types?fiat=${fiat}`).then(setTypes).catch(() => setTypes([])); }, [fiat]);
   const load = useCallback(async () => {
     const my = ++seq.current;
+    const r = await api<{ items: any[]; nextCursor?: string | null }>(`/ads?${bookQuery()}`).catch(() => ({ items: [], nextCursor: null }));
+    if (my === seq.current) { setItems(r.items); setCursor(r.nextCursor ?? null); }
+  }, [side, asset, fiat, pm, merchantOnly, verifiedOnly]); // eslint-disable-line react-hooks/exhaustive-deps
+  function bookQuery(after?: string) {
     const q = new URLSearchParams({ side, asset, fiat, limit: '30' });
     if (pm) q.set('paymentType', pm);
-    const r = await api<{ items: any[] }>(`/ads?${q}`).catch(() => ({ items: [] }));
-    if (my === seq.current) setItems(r.items);
-  }, [side, asset, fiat, pm]);
+    if (merchantOnly) q.set('merchantOnly', 'true');
+    if (verifiedOnly) q.set('minTier', '1');
+    if (after) q.set('cursor', after);
+    return q;
+  }
+  const loadMore = async () => {
+    if (!cursor) return;
+    setLoadingMore(true);
+    const r = await api<{ items: any[]; nextCursor?: string | null }>(`/ads?${bookQuery(cursor)}`).catch(() => ({ items: [], nextCursor: null }));
+    setItems((cur) => [...(cur ?? []), ...r.items.filter((x) => !(cur ?? []).some((y) => y.id === x.id))]); setCursor(r.nextCursor ?? null); setLoadingMore(false);
+  };
   useEffect(() => { setItems(null); void load(); }, [load]);
   useEffect(() => {
     const s = socket(); s.emit('join', `ads:${asset}:${fiat}`);
@@ -56,11 +90,17 @@ function TradeInner() {
   }, [asset, fiat, load]);
 
   // Per offer: the fiat leg and what the user gets. Buy: pay fiat → get crypto. Sell: sell crypto → get fiat.
-  const rows = useMemo(() => (items ?? []).map((ad) => {
-    const fiatLeg = side === 'buy' ? amount : amount ? fiatFor(amount, ad.price) : '';
-    const get = !amount ? '' : side === 'buy' ? cryptoFor(amount, ad.price) : fiatFor(amount, ad.price);
-    return { ad, fiatLeg, get, fits: inLimits(fiatLeg, ad) };
-  }), [items, amount, side]);
+  const regionTypes = useMemo(() => typesForRegion(types, region), [types, region]);
+  const rows = useMemo(() => {
+    const r = (items ?? []).filter((ad) => !regionTypes || ad.paymentTypes.some((p: string) => regionTypes.has(p))).map((ad) => {
+      const fiatLeg = side === 'buy' ? amount : amount ? fiatFor(amount, ad.price) : '';
+      const get = !amount ? '' : side === 'buy' ? cryptoFor(amount, ad.price) : fiatFor(amount, ad.price);
+      return { ad, fiatLeg, get, fits: inLimits(fiatLeg, ad) };
+    });
+    return sortRows(r, sort); // 'price' keeps the server order (best price first)
+  }, [items, amount, side, regionTypes, sort]);
+  const activeFilters = [pm, region, merchantOnly, verifiedOnly, sort !== 'price'].filter(Boolean).length;
+  const clearFilters = () => { setPm(''); setRegion(''); setMerchantOnly(false); setVerifiedOnly(false); setSort('price'); };
   const usable = rows.filter((r) => r.fits);
   const best = usable[0] ?? rows[0];
   const offeredTypes = useMemo(() => {
@@ -145,12 +185,38 @@ function TradeInner() {
 
       {/* All offers */}
       <Card className="p-4 sm:p-6" data-testid="book">
-        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2"><h2 className="text-[22px] font-semibold tracking-tight">{t('ui.allOffers')}</h2><span className="text-sm text-muted-foreground">{t('ui.rankedByGet')}</span></div>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-baseline gap-3"><h2 className="text-[22px] font-semibold tracking-tight">{t('ui.allOffers')}</h2><span className="hidden text-sm text-muted-foreground sm:inline">{sort === 'price' ? t('ui.rankedByGet') : t(`ui.sort_${sort}`)}</span></div>
+          <div className="flex items-center gap-2">
+            {activeFilters > 0 && <button type="button" onClick={clearFilters} className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground" data-testid="filter-clear">{t('ui.clearFilters')}</button>}
+            <Button variant={showFilters ? 'ink' : 'soft'} size="sm" onClick={() => setShowFilters((v) => !v)} data-testid="filter-toggle" aria-expanded={showFilters}><SlidersHorizontal size={15} />{t('ui.filters')}{activeFilters > 0 && <span className="ms-1 rounded-full bg-primary px-1.5 text-[11px] text-primary-foreground">{activeFilters}</span>}</Button>
+          </div>
+        </div>
+        {showFilters && (
+          <div className="mb-3 grid gap-3 rounded-2xl bg-muted/50 p-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="filters">
+            <label className="space-y-1 text-[13px] text-muted-foreground">{t('market.paymentMethod')}
+              <select data-testid="filter-pm" value={pm} onChange={(e) => setPm(e.target.value)} className="h-11 w-full rounded-2xl border border-border bg-card px-3 text-[15px] text-foreground focus:outline-none">
+                <option value="">{t('ui.allMethods')}</option>{types.map((x) => <option key={x.code} value={x.code}>{x.name}</option>)}
+              </select></label>
+            <label className="space-y-1 text-[13px] text-muted-foreground">{t('ui.regions')}
+              <select data-testid="filter-region" value={region} onChange={(e) => setRegion(e.target.value)} className="h-11 w-full rounded-2xl border border-border bg-card px-3 text-[15px] text-foreground focus:outline-none">
+                <option value="">{t('ui.allRegions')}</option>{REGION_KEYS.map((r) => <option key={r} value={r}>{t(`ui.region_${r}`)}</option>)}
+              </select></label>
+            <label className="space-y-1 text-[13px] text-muted-foreground">{t('ui.sortBy')}
+              <select data-testid="filter-sort" value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="h-11 w-full rounded-2xl border border-border bg-card px-3 text-[15px] text-foreground focus:outline-none">
+                {SORTS.map((k) => <option key={k} value={k}>{t(`ui.sort_${k}`)}</option>)}
+              </select></label>
+            <div className="flex flex-col justify-end gap-2 text-[15px]">
+              <label className="flex cursor-pointer items-center gap-2"><input type="checkbox" data-testid="filter-merchant" checked={merchantOnly} onChange={(e) => setMerchantOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.merchantsOnly')}</label>
+              <label className="flex cursor-pointer items-center gap-2"><input type="checkbox" data-testid="filter-verified" checked={verifiedOnly} onChange={(e) => setVerifiedOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.verifiedOnly')}</label>
+            </div>
+          </div>
+        )}
         <div className="hidden grid-cols-[1.6fr_1fr_1fr_1.1fr_1.2fr_auto] gap-4 border-b border-border py-3 text-[13px] text-muted-foreground md:grid">
           <span>{t('ui.trader')}</span><span>{t('market.price')}</span><span>{t('ui.usualRelease')}</span><span>{t('ui.protection')}</span><span>{t('ui.youGet')}</span><span className="w-20" />
         </div>
         {items === null && <div className="space-y-2 pt-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>}
-        {items?.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{t('market.empty')}</p>}
+        {items !== null && rows.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{t('market.empty')}</p>}
         {rows.map(({ ad, get, fits }, i) => (
           <div key={ad.id} data-testid="ad-row" className={cn('grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b border-border py-3.5 last:border-0 md:grid-cols-[1.6fr_1fr_1fr_1.1fr_1.2fr_auto]', !fits && 'opacity-50')}>
             <div className="flex min-w-0 items-center gap-2">
@@ -167,6 +233,7 @@ function TradeInner() {
             </div>
           </div>
         ))}
+        {cursor && <div className="pt-3 text-center"><Button variant="soft" loading={loadingMore} onClick={loadMore} data-testid="load-more">{t('ui.showMore')}</Button></div>}
       </Card>
       {selected && <TradeDialog ad={selected} side={side} initial={side === 'buy' ? amount : amount ? fiatFor(amount, selected.price) : ''} onClose={() => setSelected(null)} />}
       {!me && <p className="px-2 text-center text-xs text-muted-foreground">{t('ui.escrowNote')}</p>}

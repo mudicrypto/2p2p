@@ -529,6 +529,16 @@
   "youSendHint": "ব্যাংক ট্রান্সফারে, রেফারেন্সসহ",
   "yourEscrowHint": "আপনার {amount} লক করা",
   "noTradesYet": "এখনও কোনো সম্পন্ন ট্রেড নেই",
-  "deleteAccount": "অ্যাকাউন্ট মুছুন"
+  "deleteAccount": "অ্যাকাউন্ট মুছুন",
+  "filters": "ফিল্টার",
+  "merchantsOnly": "শুধু যাচাইকৃত মার্চেন্ট",
+  "verifiedOnly": "শুধু আইডি-যাচাইকৃত ট্রেডার",
+  "sortBy": "সাজান",
+  "clearFilters": "ফিল্টার মুছুন",
+  "showMore": "আরও অফার দেখুন",
+  "sort_price": "সেরা দাম",
+  "sort_release": "দ্রুততম রিলিজ",
+  "sort_completion": "সর্বোচ্চ সম্পন্নের হার",
+  "sort_trades": "সবচেয়ে বেশি ট্রেড"
  }
 }

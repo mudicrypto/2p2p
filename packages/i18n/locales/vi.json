@@ -529,6 +529,16 @@
   "youSendHint": "Chuyển khoản, kèm mã tham chiếu",
   "yourEscrowHint": "{amount} của bạn đã khóa",
   "noTradesYet": "Chưa có giao dịch hoàn tất",
-  "deleteAccount": "Xóa tài khoản"
+  "deleteAccount": "Xóa tài khoản",
+  "filters": "Bộ lọc",
+  "merchantsOnly": "Chỉ thương nhân đã xác minh",
+  "verifiedOnly": "Chỉ người dùng đã xác minh ID",
+  "sortBy": "Sắp xếp theo",
+  "clearFilters": "Xóa bộ lọc",
+  "showMore": "Xem thêm ưu đãi",
+  "sort_price": "Giá tốt nhất",
+  "sort_release": "Giải phóng nhanh nhất",
+  "sort_completion": "Tỷ lệ hoàn thành cao nhất",
+  "sort_trades": "Nhiều giao dịch nhất"
  }
 }

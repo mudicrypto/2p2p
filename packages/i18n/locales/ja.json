@@ -529,6 +529,16 @@
   "youSendHint": "取引番号付きの銀行振込で",
   "yourEscrowHint": "{amount} をロック済み",
   "noTradesYet": "完了した取引はまだありません",
-  "deleteAccount": "アカウントを削除"
+  "deleteAccount": "アカウントを削除",
+  "filters": "フィルター",
+  "merchantsOnly": "認証済みマーチャントのみ",
+  "verifiedOnly": "本人確認済みのみ",
+  "sortBy": "並び替え",
+  "clearFilters": "フィルターをクリア",
+  "showMore": "さらに表示",
+  "sort_price": "最安値",
+  "sort_release": "解放が速い順",
+  "sort_completion": "完了率が高い順",
+  "sort_trades": "取引数が多い順"
  }
 }

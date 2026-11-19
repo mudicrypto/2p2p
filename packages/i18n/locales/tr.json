@@ -529,6 +529,16 @@
   "youSendHint": "Banka havalesiyle, referansla",
   "yourEscrowHint": "{amount} kilitlendi",
   "noTradesYet": "Henüz tamamlanan işlem yok",
-  "deleteAccount": "Hesabı sil"
+  "deleteAccount": "Hesabı sil",
+  "filters": "Filtreler",
+  "merchantsOnly": "Yalnızca doğrulanmış tüccarlar",
+  "verifiedOnly": "Yalnızca kimliği doğrulanmış",
+  "sortBy": "Sırala",
+  "clearFilters": "Filtreleri temizle",
+  "showMore": "Daha fazla teklif",
+  "sort_price": "En iyi fiyat",
+  "sort_release": "En hızlı serbest bırakma",
+  "sort_completion": "En yüksek tamamlama",
+  "sort_trades": "En çok işlem"
  }
 }

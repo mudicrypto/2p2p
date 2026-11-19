@@ -529,6 +529,16 @@
   "youSendHint": "बैंक ट्रांसफर से, संदर्भ के साथ",
   "yourEscrowHint": "आपके {amount} लॉक हैं",
   "noTradesYet": "अभी कोई पूरा ट्रेड नहीं",
-  "deleteAccount": "खाता हटाएं"
+  "deleteAccount": "खाता हटाएं",
+  "filters": "फ़िल्टर",
+  "merchantsOnly": "केवल सत्यापित मर्चेंट",
+  "verifiedOnly": "केवल आईडी-सत्यापित ट्रेडर",
+  "sortBy": "क्रमबद्ध करें",
+  "clearFilters": "फ़िल्टर हटाएं",
+  "showMore": "और ऑफ़र दिखाएं",
+  "sort_price": "सर्वश्रेष्ठ मूल्य",
+  "sort_release": "सबसे तेज़ रिलीज़",
+  "sort_completion": "सर्वाधिक पूर्णता",
+  "sort_trades": "सबसे ज़्यादा ट्रेड"
  }
 }

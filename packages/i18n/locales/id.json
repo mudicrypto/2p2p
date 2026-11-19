@@ -529,6 +529,16 @@
   "youSendHint": "Lewat transfer bank, dengan referensi",
   "yourEscrowHint": "{amount} Anda terkunci",
   "noTradesYet": "Belum ada transaksi selesai",
-  "deleteAccount": "Hapus akun"
+  "deleteAccount": "Hapus akun",
+  "filters": "Filter",
+  "merchantsOnly": "Hanya merchant terverifikasi",
+  "verifiedOnly": "Hanya pedagang ID terverifikasi",
+  "sortBy": "Urutkan",
+  "clearFilters": "Hapus filter",
+  "showMore": "Tampilkan lebih banyak",
+  "sort_price": "Harga terbaik",
+  "sort_release": "Rilis tercepat",
+  "sort_completion": "Penyelesaian tertinggi",
+  "sort_trades": "Transaksi terbanyak"
  }
 }

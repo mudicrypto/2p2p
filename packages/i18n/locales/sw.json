@@ -529,6 +529,16 @@
   "youSendHint": "Kwa uhamisho wa benki, na kumbukumbu",
   "yourEscrowHint": "{amount} zako zimefungwa",
   "noTradesYet": "Bado hakuna biashara iliyokamilika",
-  "deleteAccount": "Futa akaunti"
+  "deleteAccount": "Futa akaunti",
+  "filters": "Vichujio",
+  "merchantsOnly": "Wafanyabiashara waliothibitishwa tu",
+  "verifiedOnly": "Waliothibitisha kitambulisho tu",
+  "sortBy": "Panga kwa",
+  "clearFilters": "Futa vichujio",
+  "showMore": "Onyesha ofa zaidi",
+  "sort_price": "Bei bora",
+  "sort_release": "Huachilia haraka zaidi",
+  "sort_completion": "Ukamilishaji wa juu zaidi",
+  "sort_trades": "Biashara nyingi zaidi"
  }
 }
