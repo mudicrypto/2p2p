@@ -1,5 +1,5 @@
 /** Ads (fixed and floating) and the order book. */
-import { ads, users, reputation, merchantProfiles, and, eq, sql, desc, asc, gte, lte, inArray } from '@p2p/db';
+import { ads, users, reputation, merchantProfiles, and, eq, sql, desc, asc, gte, lte, inArray, notInArray, ilike } from '@p2p/db';
 import { DomainError, toMinor, parsePrice, assetDecimals, formatPrice, fromMinor, tierCanCreateAds, cryptoToFiat, type Asset, type CreateAdInput } from '@p2p/shared';
 import type { Ctx } from './context';
 import { runTx } from './context';
@@ -10,6 +10,8 @@ import { fiatDecimals, getFiat } from './fiat';
 import { getReferencePrice, floatingPrice } from './rates';
 import { balanceOf, userAcct } from './ledger';
 import type { User } from './auth';
+import { filterChat } from './chat-filter';
+import { isOnline, viewerSets } from './community';
 
 export type Ad = typeof ads.$inferSelect;
 
@@ -47,6 +49,8 @@ export async function createAd(ctx: Ctx, user: User, input: CreateAdInput) {
     price = floatingPrice(ref, input.marginBps!);
   }
   if (price <= 0n) throw new DomainError('VALIDATION', 'price must be positive');
+  const autoReply = (input.autoReply ?? '').trim();
+  if (autoReply && filterChat(autoReply).blocked) throw new DomainError('VALIDATION', 'auto-reply: keep communication and payment on-platform');
   if (input.side === 'sell') {
     const bal = await balanceOf(ctx.db, userAcct(user.id, asset));
     if (bal < totalAmount) throw new DomainError('INSUFFICIENT_FUNDS', 'balance below ad total');
@@ -56,6 +60,7 @@ export async function createAd(ctx: Ctx, user: User, input: CreateAdInput) {
       userId: user.id, side: input.side, asset, fiat: input.fiat, priceType: input.priceType, price, marginBps: input.marginBps ?? null,
       minAmount, maxAmount, totalAmount, remainingAmount: totalAmount, paymentMethodIds: input.paymentMethodIds, paymentTypes: [...new Set(methods.map((m) => m.type))],
       paymentWindowMin: input.paymentWindowMin, terms: input.terms, minCounterpartyTier: input.minCounterpartyTier,
+      minAccountAgeDays: input.minAccountAgeDays ?? 0, minCompletedTrades: input.minCompletedTrades ?? 0, autoReply,
     }).returning();
     await audit(t.tx, { actorType: 'user', actorId: user.id, action: 'ad.created', subjectType: 'ad', subjectId: ad.id, after: ad });
     t.emit({ type: 'book.updated', room: `ads:${asset}:${input.fiat}`, payload: { adId: ad.id } });
@@ -73,6 +78,41 @@ export async function setAdStatus(ctx: Ctx, user: User, adId: string, status: 'a
     t.emit({ type: 'book.updated', room: `ads:${ad.asset}:${ad.fiat}`, payload: { adId } });
     return ad;
   });
+}
+
+export interface AdPatch { price?: string; marginBps?: number; minAmount?: string; maxAmount?: string; terms?: string; autoReply?: string; paymentWindowMin?: number; minCounterpartyTier?: number; minAccountAgeDays?: number; minCompletedTrades?: number }
+/** Edit an ad in place: price/margin, limits, terms, auto-reply, payment window and counterparty conditions. */
+export async function updateAd(ctx: Ctx, user: User, adId: string, patch: AdPatch) {
+  const [ad] = await ctx.db.select().from(ads).where(and(eq(ads.id, adId), eq(ads.userId, user.id)));
+  if (!ad || ad.status === 'closed') throw new DomainError('NOT_FOUND', 'ad not found');
+  const fd = await fiatDecimals(ctx.db, ad.fiat);
+  const set: Partial<Ad> = { updatedAt: ctx.now() };
+  if (patch.minAmount !== undefined) set.minAmount = toMinor(patch.minAmount, fd);
+  if (patch.maxAmount !== undefined) set.maxAmount = toMinor(patch.maxAmount, fd);
+  const min = set.minAmount ?? ad.minAmount; const max = set.maxAmount ?? ad.maxAmount;
+  if (min <= 0n || max < min) throw new DomainError('VALIDATION', 'invalid amounts');
+  if (patch.terms !== undefined) set.terms = patch.terms.slice(0, 2000);
+  if (patch.autoReply !== undefined) {
+    const r = patch.autoReply.trim().slice(0, 500);
+    if (r && filterChat(r).blocked) throw new DomainError('VALIDATION', 'auto-reply: keep communication and payment on-platform');
+    set.autoReply = r;
+  }
+  if (patch.paymentWindowMin !== undefined) set.paymentWindowMin = patch.paymentWindowMin;
+  if (patch.minCounterpartyTier !== undefined) set.minCounterpartyTier = patch.minCounterpartyTier;
+  if (patch.minAccountAgeDays !== undefined) set.minAccountAgeDays = patch.minAccountAgeDays;
+  if (patch.minCompletedTrades !== undefined) set.minCompletedTrades = patch.minCompletedTrades;
+  const changed = Object.keys(set).length > 1;
+  let out = ad;
+  if (changed) {
+    out = await runTx(ctx, async (t) => {
+      const [u] = await t.tx.update(ads).set(set).where(eq(ads.id, adId)).returning();
+      await audit(t.tx, { actorType: 'user', actorId: user.id, action: 'ad.updated', subjectType: 'ad', subjectId: adId, after: { ...patch } });
+      t.emit({ type: 'book.updated', room: `ads:${u.asset}:${u.fiat}`, payload: { adId } });
+      return u;
+    });
+  }
+  if (patch.price || patch.marginBps !== undefined) out = await updateAdPricing(ctx, user, adId, { price: patch.price, marginBps: patch.marginBps });
+  return out;
 }
 
 export async function updateAdPricing(ctx: Ctx, user: User, adId: string, patch: { price?: string; marginBps?: number }) {
@@ -94,16 +134,21 @@ export async function updateAdPricing(ctx: Ctx, user: User, adId: string, patch:
   });
 }
 
-export interface BookQuery { side: 'buy' | 'sell'; asset: string; fiat: string; paymentType?: string; amount?: string; minTier?: number; merchantOnly?: boolean; limit: number; cursor?: string }
+export interface BookQuery { side: 'buy' | 'sell'; asset: string; fiat: string; paymentType?: string; amount?: string; minTier?: number; merchantOnly?: boolean; onlineOnly?: boolean; followingOnly?: boolean; q?: string; limit: number; cursor?: string }
 
 /**
  * Order book from the taker's perspective: side='buy' means the taker wants to buy => list SELL ads (cheapest first).
  * Uses the read replica.
  */
-export async function orderBook(ctx: Ctx, q: BookQuery) {
+export async function orderBook(ctx: Ctx, q: BookQuery, viewerId?: string) {
   const adSide = q.side === 'buy' ? 'sell' : 'buy';
   const fd = await fiatDecimals(ctx.read, q.fiat);
-  const conds = [eq(ads.asset, q.asset), eq(ads.fiat, q.fiat), eq(ads.side, adSide), eq(ads.status, 'active'), sql`${ads.remainingAmount} > 0`, eq(users.status, 'active')];
+  const conds = [eq(ads.asset, q.asset), eq(ads.fiat, q.fiat), eq(ads.side, adSide), eq(ads.status, 'active'), sql`${ads.remainingAmount} > 0`, eq(users.status, 'active'), eq(users.awayMode, false)];
+  const rel = viewerId ? await viewerSets(ctx.read, viewerId) : null;
+  if (rel?.hidden.size) conds.push(notInArray(ads.userId, [...rel.hidden]));
+  if (q.followingOnly) conds.push(rel?.following.size ? inArray(ads.userId, [...rel.following]) : sql`false`);
+  if (q.onlineOnly) conds.push(sql`${users.lastSeenAt} > now() - interval '5 minutes'`);
+  if (q.q) conds.push(ilike(users.displayName, `%${q.q.replace(/[%_\\]/g, (c) => '\\' + c)}%`));
   if (q.paymentType) conds.push(sql`${ads.paymentTypes} @> ${JSON.stringify([q.paymentType])}::jsonb`);
   if (q.amount) {
     const amt = toMinor(q.amount, fd);
@@ -113,12 +158,12 @@ export async function orderBook(ctx: Ctx, q: BookQuery) {
   if (q.minTier !== undefined) conds.push(gte(users.kycTier, q.minTier));
   if (q.merchantOnly) conds.push(eq(users.isMerchant, true));
   const offset = q.cursor ? Number(Buffer.from(q.cursor, 'base64url').toString()) || 0 : 0;
-  const rows = await ctx.read.select({ ad: ads, u: { id: users.id, displayName: users.displayName, kycTier: users.kycTier, isMerchant: users.isMerchant, createdAt: users.createdAt }, rep: reputation, m: { badge: merchantProfiles.verifiedBadge, level: merchantProfiles.level } })
+  const rows = await ctx.read.select({ ad: ads, u: { id: users.id, displayName: users.displayName, kycTier: users.kycTier, isMerchant: users.isMerchant, createdAt: users.createdAt, lastSeenAt: users.lastSeenAt }, rep: reputation, m: { badge: merchantProfiles.verifiedBadge, level: merchantProfiles.level } })
     .from(ads).innerJoin(users, eq(users.id, ads.userId)).leftJoin(reputation, eq(reputation.userId, ads.userId)).leftJoin(merchantProfiles, eq(merchantProfiles.userId, ads.userId))
     .where(and(...conds))
     .orderBy(adSide === 'sell' ? asc(ads.price) : desc(ads.price), desc(reputation.completionRateBps), asc(ads.createdAt))
     .limit(q.limit + 1).offset(offset);
-  const items = rows.slice(0, q.limit).map((r) => presentAd(r.ad, fd, r.u, r.rep, r.m));
+  const items = rows.slice(0, q.limit).map((r) => ({ ...presentAd(r.ad, fd, r.u, r.rep, r.m), following: !!rel?.following.has(r.ad.userId) }));
   return { items, nextCursor: rows.length > q.limit ? Buffer.from(String(offset + q.limit)).toString('base64url') : null };
 }
 const assetDecimalsSql = (a: string) => sql.raw(String(assetDecimals(a as Asset)));
@@ -131,9 +176,11 @@ export function presentAd(ad: Ad, fd: number, u?: any, rep?: any, m?: any) {
     price: formatPrice(ad.price!, fd), minAmount: fromMinor(ad.minAmount, fd), maxAmount: fromMinor(ad.maxAmount < maxByRemaining ? ad.maxAmount : maxByRemaining, fd),
     totalAmount: fromMinor(ad.totalAmount, ad_), remainingAmount: fromMinor(ad.remainingAmount, ad_), paymentTypes: ad.paymentTypes,
     paymentWindowMin: ad.paymentWindowMin, terms: ad.terms, minCounterpartyTier: ad.minCounterpartyTier, status: ad.status, createdAt: ad.createdAt,
+    minAccountAgeDays: ad.minAccountAgeDays, minCompletedTrades: ad.minCompletedTrades, autoReply: ad.autoReply,
     advertiser: u ? {
       id: u.id, displayName: u.displayName ?? `user-${String(u.id).slice(0, 6)}`, kycTier: u.kycTier, isMerchant: u.isMerchant, verifiedBadge: !!m?.badge, merchantLevel: m?.level ?? 0,
-      trades30d: rep?.trades30d ?? 0, completionRateBps: rep?.completionRateBps ?? 10000, avgReleaseSec: rep?.avgReleaseSec ?? 0,
+      trades30d: rep?.trades30d ?? 0, tradesTotal: rep?.tradesTotal ?? 0, completionRateBps: rep?.completionRateBps ?? 10000, avgReleaseSec: rep?.avgReleaseSec ?? 0,
+      online: isOnline(u.lastSeenAt), lastSeenAt: u.lastSeenAt ?? null,
     } : undefined,
   };
 }

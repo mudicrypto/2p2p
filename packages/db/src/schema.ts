@@ -35,9 +35,16 @@ export const users = pgTable('users', {
   displayName: text('display_name'),
   isMerchant: boolean('is_merchant').notNull().default(false),
   sanctionsHit: boolean('sanctions_hit').notNull().default(false),
+  lastSeenAt: ts('last_seen_at'),
+  awayMode: boolean('away_mode').notNull().default(false), // "take a break": hides all of the user's ads
+  antiPhishingCode: text('anti_phishing_code'), // shown in every email we send
+  referralCode: text('referral_code'),
+  referredBy: uuid('referred_by'),
   createdAt: createdAt(),
 }, (t) => [
   uniqueIndex('users_email_uq').on(sql`lower(${t.email})`),
+  uniqueIndex('users_display_name_uq').on(sql`lower(${t.displayName})`),
+  uniqueIndex('users_referral_code_uq').on(t.referralCode),
   uniqueIndex('users_phone_uq').on(t.phone),
   uniqueIndex('users_tg_uq').on(t.tgId),
   check('users_status_ck', sql`${t.status} in ('active','frozen','banned')`),
@@ -265,6 +272,9 @@ export const ads = pgTable('ads', {
   paymentWindowMin: integer('payment_window_min').notNull().default(15),
   terms: text('terms').notNull().default(''),
   minCounterpartyTier: smallint('min_counterparty_tier').notNull().default(0),
+  minAccountAgeDays: integer('min_account_age_days').notNull().default(0), // counterparty conditions
+  minCompletedTrades: integer('min_completed_trades').notNull().default(0),
+  autoReply: text('auto_reply').notNull().default(''), // sent to the counterparty when an order opens
   status: text('status').notNull().default('active'), // active | paused | closed
   createdAt: createdAt(),
   updatedAt: ts('updated_at').notNull().defaultNow(),
@@ -578,3 +588,42 @@ export const auditLog = pgTable('audit_log', {
   ip: text('ip'),
   createdAt: createdAt(),
 }, (t) => [index('audit_subject_idx').on(t.subjectType, t.subjectId), index('audit_action_idx').on(t.action, t.createdAt)]);
+
+// ---------------------------------------------------------------- P2P community features
+export const userFollows = pgTable('user_follows', {
+  followerId: uuid('follower_id').notNull().references(() => users.id),
+  followeeId: uuid('followee_id').notNull().references(() => users.id),
+  createdAt: createdAt(),
+}, (t) => [primaryKey({ columns: [t.followerId, t.followeeId] }), index('user_follows_followee_idx').on(t.followeeId)]);
+
+export const userBlocks = pgTable('user_blocks', {
+  blockerId: uuid('blocker_id').notNull().references(() => users.id),
+  blockedId: uuid('blocked_id').notNull().references(() => users.id),
+  createdAt: createdAt(),
+}, (t) => [primaryKey({ columns: [t.blockerId, t.blockedId] }), index('user_blocks_blocked_idx').on(t.blockedId)]);
+
+export const priceAlerts = pgTable('price_alerts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  side: text('side').notNull(), // buy | sell (what the user wants to do)
+  asset: text('asset').notNull(),
+  fiat: text('fiat').notNull(),
+  targetPrice: amount('target_price').notNull(), // scaled price (same scale as ads.price)
+  active: boolean('active').notNull().default(true),
+  triggeredAt: ts('triggered_at'),
+  triggeredPrice: amount('triggered_price'),
+  createdAt: createdAt(),
+}, (t) => [index('price_alerts_active_idx').on(t.active, t.asset, t.fiat), index('price_alerts_user_idx').on(t.userId)]);
+
+export const otcRequests = pgTable('otc_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  side: text('side').notNull(), // buy | sell
+  asset: text('asset').notNull(),
+  fiat: text('fiat').notNull(),
+  fiatAmount: text('fiat_amount').notNull(), // decimal string, informational
+  note: text('note').notNull().default(''),
+  status: text('status').notNull().default('open'), // open | contacted | closed
+  createdAt: createdAt(),
+  updatedAt: ts('updated_at').notNull().defaultNow(),
+}, (t) => [index('otc_requests_status_idx').on(t.status)]);

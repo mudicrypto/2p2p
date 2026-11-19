@@ -5,6 +5,7 @@ import type { Ctx } from './context';
 import { runTx } from './context';
 import { audit } from './audit';
 import type { User } from './auth';
+import { isOnline } from './community';
 
 export async function recomputeReputation(ctx: Ctx, userId: string) {
   const since = new Date(ctx.now().getTime() - 30 * 86400_000);
@@ -57,7 +58,7 @@ export async function leaveFeedback(ctx: Ctx, user: User, orderId: string, posit
 }
 
 export async function publicProfile(ctx: Ctx, userId: string) {
-  const [u] = await ctx.read.select({ id: users.id, displayName: users.displayName, kycTier: users.kycTier, createdAt: users.createdAt, isMerchant: users.isMerchant, status: users.status, country: users.country })
+  const [u] = await ctx.read.select({ id: users.id, displayName: users.displayName, kycTier: users.kycTier, createdAt: users.createdAt, isMerchant: users.isMerchant, status: users.status, country: users.country, lastSeenAt: users.lastSeenAt, awayMode: users.awayMode })
     .from(users).where(eq(users.id, userId));
   if (!u || u.status === 'banned') throw new DomainError('NOT_FOUND', 'user not found');
   const [rep] = await ctx.read.select().from(reputation).where(eq(reputation.userId, userId));
@@ -70,5 +71,6 @@ export async function publicProfile(ctx: Ctx, userId: string) {
     trades30d: rep?.trades30d ?? 0, tradesTotal: rep?.tradesTotal ?? 0, completionRateBps: rep?.completionRateBps ?? 10000, avgReleaseSec: rep?.avgReleaseSec ?? 0,
     disputeRateBps: rep?.disputeRateBps ?? 0, freezeReports: rep?.freezeReports ?? 0, positiveFeedback: rep?.positiveFeedback ?? 0, negativeFeedback: rep?.negativeFeedback ?? 0,
     recentFeedback: recent,
+    online: isOnline(u.lastSeenAt), lastSeenAt: u.lastSeenAt ?? null, away: u.awayMode,
   };
 }

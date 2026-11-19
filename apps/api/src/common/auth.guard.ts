@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, SetMetadata, createParamDecorator } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { authenticate, safeEqual } from '@p2p/core';
+import { authenticate, safeEqual, touchLastSeen } from '@p2p/core';
 import { DomainError } from '@p2p/shared';
 import { CTX, type Ctx } from './ctx';
 
@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
     const { token, viaCookie } = tokenFrom(req);
     if (token) {
       const a = await authenticate(this.ctx, token);
-      if (a) { req.user = a.user; req.session = a.session; }
+      if (a) { req.user = a.user; req.session = a.session; void touchLastSeen(this.ctx.db, a.user.id).catch(() => null); }
     }
     if (isPublic) return true;
     if (!req.user) throw new DomainError('UNAUTHORIZED', 'login required');

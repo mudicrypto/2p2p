@@ -3,7 +3,7 @@
  * DB transaction as its ledger movement, plus order_events + audit_log rows.
  */
 import { randomBytes } from 'node:crypto';
-import { ads, orders, orderEvents, paymentMethods, paymentMethodTypes, users, merchantProfiles, and, eq, sql, lt, inArray, desc, or } from '@p2p/db';
+import { ads, orders, orderEvents, paymentMethods, paymentMethodTypes, users, merchantProfiles, reputation, chatMessages, and, eq, sql, lt, inArray, desc, or } from '@p2p/db';
 import {
   DomainError, nextStatus, escrowEffect, toMinor, fiatToCrypto, cryptoToFiat, assetDecimals, fromMinor, formatPrice, applyBps,
   type Asset, type OrderStatus, type OrderEvent, type OrderActor,
@@ -23,6 +23,8 @@ import { scoreOrder, flag } from './risk';
 import { assertTierAllowed } from './kyc';
 import { decryptJson } from './crypto';
 import { notify } from './notifications';
+import { isBlockedBetween } from './community';
+import { presentMessage } from './chat';
 import { recomputeReputation } from './reputation';
 import { onCorridorLegSettled } from './corridors';
 
@@ -50,7 +52,15 @@ export async function createOrderInTx(ctx: Ctx, t: TxCtx, takerIn: User, input: 
     if (taker.status !== 'active') throw new DomainError('ACCOUNT_FROZEN', 'account not active');
     if (taker.kycTier < ad.minCounterpartyTier) throw new DomainError('TIER_REQUIRED', `advertiser requires tier ${ad.minCounterpartyTier}+`);
     const maker = await reloadUser(t.tx, ad.userId);
-    if (maker.status !== 'active') throw new DomainError('AD_UNAVAILABLE', 'advertiser unavailable');
+    if (maker.status !== 'active' || maker.awayMode) throw new DomainError('AD_UNAVAILABLE', 'advertiser unavailable');
+    if (await isBlockedBetween(t.tx, taker.id, maker.id)) throw new DomainError('FORBIDDEN', 'you cannot trade with this user');
+    if (ad.minAccountAgeDays > 0 && ctx.now().getTime() - taker.createdAt.getTime() < ad.minAccountAgeDays * 86400_000) {
+      throw new DomainError('FORBIDDEN', `advertiser requires an account at least ${ad.minAccountAgeDays} days old`);
+    }
+    if (ad.minCompletedTrades > 0) {
+      const [rep] = await t.tx.select({ n: reputation.tradesTotal }).from(reputation).where(eq(reputation.userId, taker.id));
+      if ((rep?.n ?? 0) < ad.minCompletedTrades) throw new DomainError('FORBIDDEN', `advertiser requires at least ${ad.minCompletedTrades} completed trades`);
+    }
     const trading = await getConfig(t.tx, 'trading');
     const [{ open }] = await t.tx.select({ open: sql<number>`count(*)::int` }).from(orders)
       .where(and(or(eq(orders.buyerId, taker.id), eq(orders.sellerId, taker.id)), inArray(orders.status, ['AWAITING_PAYMENT', 'PAID', 'DISPUTED'])));
@@ -125,6 +135,10 @@ export async function createOrderInTx(ctx: Ctx, t: TxCtx, takerIn: User, input: 
     ] });
     const o = await transition(t, created, 'ESCROW_LOCKED', 'system', null);
     for (const f of risk.flags) await flag(t.tx, 'order', o.id, f.code, f.severity, f.details);
+    if (ad.autoReply) { // advertiser's auto-reply opens the chat
+      const [m] = await t.tx.insert(chatMessages).values({ orderId: o.id, senderId: maker.id, body: ad.autoReply }).returning();
+      t.emit({ type: 'chat.message', orderId: o.id, payload: presentMessage(m) });
+    }
     t.afterCommit(() => ctx.jobs?.enqueue('order.expire', { orderId: o.id }, { delayMs: ad.paymentWindowMin * 60_000 + 1000, jobId: `expire-${o.id}` }));
     t.emit({ type: 'order.created', orderId: o.id, userIds: [maker.id], payload: { orderId: o.id, status: o.status } });
     t.emit({ type: 'book.updated', room: `ads:${asset}:${ad.fiat}`, payload: { adId: ad.id } });

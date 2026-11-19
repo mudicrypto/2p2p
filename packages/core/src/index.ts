@@ -32,3 +32,4 @@ export * from './payment-match';
 export * from './corridors';
 export * from './merchants';
 export * from './merchant-api';
+export * from './community';

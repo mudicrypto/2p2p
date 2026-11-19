@@ -6,18 +6,19 @@ export async function notify(t: TxCtx | Ctx, db: DbOrTx, userId: string, type: s
   const [n] = await db.insert(notifications).values({ userId, type, payload }).returning({ id: notifications.id });
   const deliver = async () => {
     t.events.publish({ type: 'notification', userIds: [userId], payload: { id: n.id.toString(), kind: type, ...payload } });
-    const [u] = await t.db.select({ tgId: users.tgId, email: users.email, emailOk: users.emailVerifiedAt, locale: users.locale }).from(users).where(eq(users.id, userId));
+    const [u] = await t.db.select({ tgId: users.tgId, email: users.email, emailOk: users.emailVerifiedAt, locale: users.locale, antiPhishingCode: users.antiPhishingCode }).from(users).where(eq(users.id, userId));
     if (!u) return;
     const msg = { template: type, params: payload, locale: u.locale };
     // External channels are best-effort; failures never affect the trade.
     if (u.tgId) await t.providers.notifier.send({ channel: 'telegram', to: u.tgId, ...msg }).catch(() => null);
     const tokens = await t.db.select({ token: pushTokens.token }).from(pushTokens).where(eq(pushTokens.userId, userId));
     for (const tk of tokens) await t.providers.notifier.send({ channel: 'push', to: tk.token, ...msg }).catch(() => null);
-    if (u.email && u.emailOk && EMAIL_TYPES.has(type)) await t.providers.notifier.send({ channel: 'email', to: u.email, ...msg }).catch(() => null);
+    // Emails carry the user's anti-phishing code so they can tell real mail from phishing.
+    if (u.email && u.emailOk && EMAIL_TYPES.has(type)) await t.providers.notifier.send({ channel: 'email', to: u.email, ...msg, params: { ...msg.params, antiPhishingCode: u.antiPhishingCode ?? undefined } }).catch(() => null);
   };
   if ('afterCommit' in t) t.afterCommit(deliver); else await deliver();
 }
-const EMAIL_TYPES = new Set(['order_completed', 'order_disputed', 'dispute_resolved', 'withdrawal_status', 'deposit_credited', 'security_alert']);
+const EMAIL_TYPES = new Set(['order_completed', 'order_disputed', 'dispute_resolved', 'withdrawal_status', 'deposit_credited', 'security_alert', 'price_alert', 'otc_update']);
 
 export async function listNotifications(db: DbOrTx, userId: string, before?: bigint) {
   const conds = [eq(notifications.userId, userId)];

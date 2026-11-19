@@ -17,6 +17,7 @@ import { encrypt, decrypt, randomToken, sha256, randomDigits, safeEqual } from '
 import { assertCountryAllowed } from './compliance';
 import { evaluateDeviceRisk } from './risk';
 import { checkSignupVelocity, assertLoginVelocity } from './fraud';
+import { applyReferral } from './community';
 
 authenticator.options = { window: 1 };
 
@@ -32,6 +33,7 @@ export function publicUser(u: User) {
     id: u.id, email: u.email, emailVerified: !!u.emailVerifiedAt, phone: u.phone, phoneVerified: !!u.phoneVerifiedAt,
     tgId: u.tgId, kycTier: u.kycTier, status: u.status, country: u.country, locale: u.locale, displayName: u.displayName,
     totpEnabled: !!u.totpEnabledAt, isMerchant: u.isMerchant, createdAt: u.createdAt,
+    awayMode: u.awayMode, antiPhishingCode: u.antiPhishingCode ? `${u.antiPhishingCode.slice(0, 2)}${'•'.repeat(Math.max(0, u.antiPhishingCode.length - 2))}` : null,
   };
 }
 
@@ -48,11 +50,12 @@ async function screenAndCreate(ctx: Ctx, values: typeof users.$inferInsert, meta
 }
 
 // ---------------------------------------------------------------- email signup / verify
-export async function signupEmail(ctx: Ctx, input: { email: string; password: string; country: string; locale?: string }, meta: ReqMeta = {}) {
+export async function signupEmail(ctx: Ctx, input: { email: string; password: string; country: string; locale?: string; ref?: string }, meta: ReqMeta = {}) {
   const email = input.email.trim().toLowerCase();
   const [exists] = await ctx.db.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = ${email}`);
   if (exists) throw new DomainError('CONFLICT', 'email already registered');
   const u = await screenAndCreate(ctx, { email, passwordHash: await hashPassword(input.password), country: input.country.toUpperCase(), locale: input.locale ?? 'en' }, meta, 'user.signup_email');
+  await applyReferral(ctx.db, u.id, input.ref);
   const token = await issueToken(ctx, u.id, 'email_verify', email, 24 * 3600_000, randomToken(24));
   await ctx.providers.notifier.send({ channel: 'email', to: email, template: 'email_verify', params: { link: `${process.env.WEB_ORIGIN ?? ''}/verify-email?token=${token}` } });
   return { user: u, emailToken: token };

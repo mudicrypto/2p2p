@@ -29,6 +29,13 @@
       "when": 1795113930013,
       "tag": "0003_no_new_account_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795130296565,
+      "tag": "0004_p2p_community",
+      "breakpoints": true
     }
   ]
 }

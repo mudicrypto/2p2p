@@ -14,6 +14,7 @@ export const SignupEmailSchema = z.object({
   password: z.string().min(10).max(256),
   country: zCountry,
   locale: z.string().max(16).optional(),
+  ref: z.string().max(16).optional(), // referral code
 });
 export const LoginSchema = z.object({
   email: z.string().email(),
@@ -44,12 +45,18 @@ export const CreateAdSchema = z
     terms: z.string().max(2000).default(''),
     minCounterpartyTier: z.number().int().min(0).max(3).default(0),
     acceptReversible: z.boolean().default(false),
+    minAccountAgeDays: z.number().int().min(0).max(3650).default(0), // counterparty conditions
+    minCompletedTrades: z.number().int().min(0).max(100_000).default(0),
+    autoReply: z.string().max(500).default(''), // sent to the counterparty when an order opens
   })
   .refine((a) => (a.priceType === 'fixed' ? !!a.price : a.marginBps !== undefined), {
     message: 'fixed ads need price; floating ads need marginBps',
   });
-export type CreateAdInput = z.infer<typeof CreateAdSchema>;
+type CreateAdParsed = z.infer<typeof CreateAdSchema>;
+/** Parsed ad input; the counterparty conditions and auto-reply are optional for direct (non-HTTP) callers. */
+export type CreateAdInput = Omit<CreateAdParsed, 'minAccountAgeDays' | 'minCompletedTrades' | 'autoReply'> & Partial<Pick<CreateAdParsed, 'minAccountAgeDays' | 'minCompletedTrades' | 'autoReply'>>;
 
+const zFlag = z.preprocess((v) => v === true || v === 'true' || v === '1', z.boolean()).optional();
 export const OrderBookQuerySchema = z.object({
   side: z.enum(['buy', 'sell']),
   asset: zAsset,
@@ -57,7 +64,11 @@ export const OrderBookQuerySchema = z.object({
   paymentType: z.string().max(64).optional(),
   amount: decimalStr.optional(), // fiat amount the taker wants
   minTier: z.coerce.number().int().min(0).max(3).optional(),
-  merchantOnly: z.coerce.boolean().optional(),
+  // Query-string booleans: only 'true' / '1' switch a filter on ('false' must not).
+  merchantOnly: zFlag,
+  onlineOnly: zFlag,
+  followingOnly: zFlag,
+  q: z.string().trim().max(40).optional(), // advertiser nickname search
   limit: z.coerce.number().int().min(1).max(100).default(20),
   cursor: z.string().optional(),
 });

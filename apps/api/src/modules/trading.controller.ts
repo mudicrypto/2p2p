@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 import { z } from 'zod';
 import {
-  addPaymentMethod, listPaymentMethods, createAd, setAdStatus, updateAdPricing, orderBook, myAds, getAd, presentAd, fiatDecimals,
+  addPaymentMethod, listPaymentMethods, createAd, setAdStatus, updateAd, orderBook, myAds, getAd, presentAd, fiatDecimals,
   createOrder, markPaid, cancelOrder, releaseOrder, getOrderFor, presentOrder, listMyOrders, userBalances, getLimits, limitUsageFor, type User,
 } from '@p2p/core';
 import { CreateAdSchema, OrderBookQuerySchema, CreateOrderSchema, fromMinor, assetDecimals, type Asset } from '@p2p/shared';
@@ -13,6 +13,15 @@ import { bookCache } from '../common/book-cache';
 
 const AddPmSchema = z.object({ type: z.string().max(64), holderName: z.string().min(2).max(128), details: z.record(z.string(), z.string()) });
 const uuid = new Zod(z.string().uuid());
+
+const dec = z.string().regex(/^\d{1,18}(\.\d{1,18})?$/);
+const PatchAdSchema = z.object({
+  status: z.enum(['active', 'paused', 'closed']).optional(),
+  price: dec.optional(), marginBps: z.number().int().min(-2000).max(2000).optional(),
+  minAmount: dec.optional(), maxAmount: dec.optional(), terms: z.string().max(2000).optional(), autoReply: z.string().max(500).optional(),
+  paymentWindowMin: z.number().int().min(5).max(180).optional(), minCounterpartyTier: z.number().int().min(0).max(3).optional(),
+  minAccountAgeDays: z.number().int().min(0).max(3650).optional(), minCompletedTrades: z.number().int().min(0).max(100_000).optional(),
+});
 
 @Controller('v1')
 export class TradingController {
@@ -58,7 +67,10 @@ export class TradingController {
 
   // ---- ads
   @Public() @Get('ads')
-  book(@Query(new Zod(OrderBookQuerySchema, 'OrderBookQuery')) q: z.infer<typeof OrderBookQuerySchema>) { return bookCache().get(q as Record<string, unknown>, () => orderBook(this.ctx, q)); }
+  book(@CurrentUser() u: User | undefined, @Query(new Zod(OrderBookQuerySchema, 'OrderBookQuery')) q: z.infer<typeof OrderBookQuerySchema>) {
+    // Results depend on the viewer (blocked users are hidden, follows can be filtered), so the cache key includes them.
+    return bookCache().get({ ...(q as Record<string, unknown>), viewer: u?.id ?? '' }, () => orderBook(this.ctx, q, u?.id));
+  }
   @Get('me/ads') mine(@CurrentUser() u: User) { return myAds(this.ctx, u.id); }
   @Public() @Get('ads/:id')
   async one(@Param('id', uuid) id: string) { const a = await getAd(this.ctx, id); return presentAd(a, await fiatDecimals(this.ctx.db, a.fiat)); }
@@ -68,9 +80,10 @@ export class TradingController {
     return presentAd(a, await fiatDecimals(this.ctx.db, a.fiat));
   }
   @Patch('ads/:id')
-  async patch(@CurrentUser() u: User, @Param('id', uuid) id: string, @Body(new Zod(z.object({ status: z.enum(['active', 'paused', 'closed']).optional(), price: z.string().optional(), marginBps: z.number().int().min(-2000).max(2000).optional() }), 'PatchAd')) b: any) {
+  async patch(@CurrentUser() u: User, @Param('id', uuid) id: string, @Body(new Zod(PatchAdSchema, 'PatchAd')) b: z.infer<typeof PatchAdSchema>) {
     let a = b.status ? await setAdStatus(this.ctx, u, id, b.status) : await getAd(this.ctx, id);
-    if (b.price || b.marginBps !== undefined) a = await updateAdPricing(this.ctx, u, id, b);
+    const { status: _s, ...rest } = b;
+    if (Object.values(rest).some((v) => v !== undefined)) a = await updateAd(this.ctx, u, id, rest);
     return presentAd(a, await fiatDecimals(this.ctx.db, a.fiat));
   }
 
