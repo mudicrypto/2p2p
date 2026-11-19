@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { kycApplications, riskFlags, orders, users, and, eq } from '@p2p/db';
 import { makeCtx, mkUser, sellAd, ensureSeed, uniq } from './helpers';
 import {
-  namesMatch, createOrder, markPaid, handleIncomingPayment, trackDevice, signupEmail, login, encrypt, balanceOf, userAcct, userRiskScore, sendChatMessage, getLimits, type User,
+  namesMatch, createOrder, markPaid, handleIncomingPayment, trackDevice, signupEmail, login, encrypt, balanceOf, userAcct, userRiskScore, sendChatMessage, getLimits, setConfig, type User,
 } from '../src';
 
 const ctx = makeCtx();
@@ -97,10 +97,14 @@ describe('M8 simulated fraud suite', () => {
     await expect(login(ctx, { email: 'nobody@x.io', password: 'bad' }, { ip: bip })).rejects.toMatchObject({ code: 'RATE_LIMITED' });
   });
 
-  it('new-account cooldown lowers limits for 48h; off-platform chat is flagged', async () => {
+  it('new accounts get full limits by default; an optional new-account cap lowers them; off-platform chat is flagged', async () => {
     const young = await mkUser(ctx, { tier: 1, createdAt: new Date() });
     const old = await mkUser(ctx, { tier: 1 });
-    expect((await getLimits(ctx, ctx.db, young)).daily).toBeLessThan((await getLimits(ctx, ctx.db, old)).daily);
+    expect((await getLimits(ctx, ctx.db, young)).daily).toBe((await getLimits(ctx, ctx.db, old)).daily);
+    await setConfig(ctx.db, 'cooldowns', { newAccountLimitBps: 2500 });
+    try {
+      expect((await getLimits(ctx, ctx.db, young)).daily).toBeLessThan((await getLimits(ctx, ctx.db, old)).daily);
+    } finally { await setConfig(ctx.db, 'cooldowns', { newAccountLimitBps: 10000 }); }
     const { ad } = await sellAd(ctx);
     const o = await createOrder(ctx, old, { adId: ad.id, fiatAmount: '20' });
     await expect(sendChatMessage(ctx, old, o.id, 'pay me outside the platform, telegram @cashfast')).rejects.toMatchObject({ code: 'FORBIDDEN' });
