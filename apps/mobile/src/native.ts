@@ -21,7 +21,7 @@ export const tokenStore = {
   },
 };
 /** Public web origin for legal/status pages and deep links (set per build). */
-export const WEB_URL: string = process.env.EXPO_PUBLIC_WEB_URL || 'https://app.example.com'; // TODO(provider): production domain
+export const WEB_URL: string = process.env.EXPO_PUBLIC_WEB_URL || ((Constants.expoConfig?.extra as { webUrl?: string } | undefined)?.webUrl ?? 'https://app.example.com');
 export const api = createApi(API_URL, tokenStore.get, Constants.sessionId);
 
 export async function biometricUnlock(reason: string): Promise<boolean> {
