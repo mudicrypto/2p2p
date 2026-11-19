@@ -154,9 +154,9 @@ export class AdminController {
   }
 
   // ---------------------------------------------------------- merchants
-  @Perm('users.read') @Get('otc-requests')
+  @Perm('otc.read') @Get('otc-requests')
   otcList(@Query('status') status?: string) { return core.listOtcRequests(this.ctx, { status: status ? String(status).split(',') : undefined }); }
-  @Perm('users.read') @Post('otc-requests/:id/status') @HttpCode(200)
+  @Perm('otc.manage') @Post('otc-requests/:id/status') @HttpCode(200)
   otcStatus(@CurrentAdmin() a: Admin, @Param('id', uuid) id: string, @Body(new Zod(z.object({ status: z.enum(['open', 'contacted', 'closed']) }))) b: { status: 'open' | 'contacted' | 'closed' }) { return core.setOtcStatus(this.ctx, a.id, id, b.status); }
   @Perm('users.read') @Get('merchants')
   merchants() { return core.listMerchants(this.ctx); }

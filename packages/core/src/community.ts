@@ -52,7 +52,7 @@ export const isOnline = (lastSeenAt: Date | null | undefined, now = Date.now()) 
 export async function setAwayMode(ctx: Ctx, user: User, away: boolean) {
   await ctx.db.update(users).set({ awayMode: away }).where(eq(users.id, user.id));
   await audit(ctx.db, { actorType: 'user', actorId: user.id, action: 'user.away_mode', subjectType: 'user', subjectId: user.id, after: { away } });
-  ctx.events.publish({ type: 'book.updated', room: 'ads:*', payload: { userId: user.id } });
+  await refreshBooksOf(ctx, [user.id]);
   return { away };
 }
 
@@ -66,7 +66,8 @@ export async function follow(ctx: Ctx, user: User, otherId: string, on: boolean)
   await assertOther(ctx, user.id, otherId);
   if (on) await ctx.db.insert(userFollows).values({ followerId: user.id, followeeId: otherId }).onConflictDoNothing();
   else await ctx.db.delete(userFollows).where(and(eq(userFollows.followerId, user.id), eq(userFollows.followeeId, otherId)));
-  return { following: on };
+  await refreshBooksOf(ctx, [otherId]);
+  return relationTo(ctx.db, user.id, otherId);
 }
 export async function block(ctx: Ctx, user: User, otherId: string, on: boolean) {
   await assertOther(ctx, user.id, otherId);
@@ -75,7 +76,13 @@ export async function block(ctx: Ctx, user: User, otherId: string, on: boolean) 
     await ctx.db.delete(userFollows).where(and(eq(userFollows.followerId, user.id), eq(userFollows.followeeId, otherId)));
   } else await ctx.db.delete(userBlocks).where(and(eq(userBlocks.blockerId, user.id), eq(userBlocks.blockedId, otherId)));
   await audit(ctx.db, { actorType: 'user', actorId: user.id, action: on ? 'user.block' : 'user.unblock', subjectType: 'user', subjectId: otherId });
-  return { blocked: on };
+  await refreshBooksOf(ctx, [user.id, otherId]);
+  return relationTo(ctx.db, user.id, otherId);
+}
+/** Tell every market these users have live ads in to refresh (drops cached books, pushes 'book' to open pages). */
+async function refreshBooksOf(ctx: Ctx, userIds: string[]) {
+  const rows = await ctx.db.selectDistinct({ asset: ads.asset, fiat: ads.fiat }).from(ads).where(and(inArray(ads.userId, userIds), inArray(ads.status, ['active', 'paused'])));
+  for (const r of rows) ctx.events.publish({ type: 'book.updated', room: `ads:${r.asset}:${r.fiat}`, payload: {} });
 }
 /** True if either user blocked the other. */
 export async function isBlockedBetween(db: DbOrTx, a: string, b: string) {

@@ -1,11 +1,13 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { Download } from 'lucide-react';
 import { Badge, Button, Card, Skeleton, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
 import { api } from '../../../lib/api';
 import { ACTIVE_STATUSES, useL } from '../../../components/nav';
 import { cdp, orderState } from '../../../components/order-state';
+import { ordersCsv } from '../../../lib/csv';
 
 export default function Orders() {
   const { t, num, money, date } = useI18n();
@@ -19,9 +21,15 @@ export default function Orders() {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
         <h1 className="text-[32px] font-bold tracking-[-0.03em] sm:text-[40px]">{t('ui.ordersNav')}</h1>
+        <div className="flex flex-wrap items-center gap-2">
+        <Button variant="soft" disabled={!rows?.length} data-testid="export-csv" onClick={() => {
+          const url = URL.createObjectURL(new Blob([ordersCsv(rows ?? [])], { type: 'text/csv;charset=utf-8' }));
+          const a = document.createElement('a'); a.href = url; a.download = `parley-orders-${new Date().toISOString().slice(0, 10)}.csv`; a.click(); URL.revokeObjectURL(url);
+        }}><Download size={15} />{t('ui.exportCsv')}</Button>
         <div className="flex rounded-full bg-muted p-1">
           <button type="button" onClick={() => setTab('active')} className={cn('rounded-full px-6 py-2.5 text-[15px] font-semibold', tab === 'active' ? 'bg-ink text-ink-foreground' : '')}>{t('ui.activeN', { n: active.length })}</button>
           <button type="button" onClick={() => setTab('done')} className={cn('rounded-full px-6 py-2.5 text-[15px] font-semibold', tab === 'done' ? 'bg-ink text-ink-foreground' : '')}>{t('order.status.COMPLETED')}</button>
+        </div>
         </div>
       </div>
       <Card className="px-3 py-2 sm:px-6" data-testid="orders-list">

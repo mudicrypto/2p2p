@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ArrowUpRight, ChevronDown, SlidersHorizontal } from 'lucide-react';
+import { ArrowUpRight, Bell, Briefcase, ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
 import { Badge, Button, Card, Skeleton, cn } from '@p2p/ui';
 import { useI18n } from '../lib/i18n';
 import { useSession } from '../lib/session';
@@ -13,6 +13,7 @@ import { useL } from './nav';
 import { TradeDialog, cryptoFor, fiatFor } from './trade-dialog';
 import { cdp } from './order-state';
 import { REGION_KEYS, typesForRegion } from '../lib/regions';
+import { OnlineDot, PriceAlertDialog } from './community';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
 type SortKey = 'price' | 'release' | 'completion' | 'trades';
@@ -53,6 +54,12 @@ function TradeInner() {
   const [merchantOnly, setMerchantOnly] = useState(sp.get('merchant') === '1');
   const [verifiedOnly, setVerifiedOnly] = useState(sp.get('verified') === '1');
   const [sort, setSort] = useState<SortKey>((sp.get('sort') as SortKey) || 'price');
+  const [onlineOnly, setOnlineOnly] = useState(sp.get('online') === '1');
+  const [followingOnly, setFollowingOnly] = useState(sp.get('following') === '1');
+  const [qInput, setQInput] = useState(sp.get('q') ?? '');
+  const [q, setQ] = useState(qInput);
+  useEffect(() => { const h = setTimeout(() => setQ(qInput.trim()), 300); return () => clearTimeout(h); }, [qInput]);
+  const [alertOpen, setAlertOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -67,14 +74,18 @@ function TradeInner() {
     const my = ++seq.current;
     const r = await api<{ items: any[]; nextCursor?: string | null }>(`/ads?${bookQuery()}`).catch(() => ({ items: [], nextCursor: null }));
     if (my === seq.current) { setItems(r.items); setCursor(r.nextCursor ?? null); }
-  }, [side, asset, fiat, pm, merchantOnly, verifiedOnly]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [side, asset, fiat, pm, merchantOnly, verifiedOnly, onlineOnly, followingOnly, q]); // eslint-disable-line react-hooks/exhaustive-deps
   function bookQuery(after?: string) {
-    const q = new URLSearchParams({ side, asset, fiat, limit: '30' });
-    if (pm) q.set('paymentType', pm);
-    if (merchantOnly) q.set('merchantOnly', 'true');
-    if (verifiedOnly) q.set('minTier', '1');
-    if (after) q.set('cursor', after);
-    return q;
+    const search = q;
+    const q2 = new URLSearchParams({ side, asset, fiat, limit: '30' });
+    if (pm) q2.set('paymentType', pm);
+    if (merchantOnly) q2.set('merchantOnly', 'true');
+    if (verifiedOnly) q2.set('minTier', '1');
+    if (onlineOnly) q2.set('onlineOnly', 'true');
+    if (followingOnly) q2.set('followingOnly', 'true');
+    if (search) q2.set('q', search);
+    if (after) q2.set('cursor', after);
+    return q2;
   }
   const loadMore = async () => {
     if (!cursor) return;
@@ -99,8 +110,8 @@ function TradeInner() {
     });
     return sortRows(r, sort); // 'price' keeps the server order (best price first)
   }, [items, amount, side, regionTypes, sort]);
-  const activeFilters = [pm, region, merchantOnly, verifiedOnly, sort !== 'price'].filter(Boolean).length;
-  const clearFilters = () => { setPm(''); setRegion(''); setMerchantOnly(false); setVerifiedOnly(false); setSort('price'); };
+  const activeFilters = [pm, region, merchantOnly, verifiedOnly, onlineOnly, followingOnly, q, sort !== 'price'].filter(Boolean).length;
+  const clearFilters = () => { setPm(''); setRegion(''); setMerchantOnly(false); setVerifiedOnly(false); setOnlineOnly(false); setFollowingOnly(false); setQInput(''); setSort('price'); };
   const usable = rows.filter((r) => r.fits);
   const best = usable[0] ?? rows[0];
   const offeredTypes = useMemo(() => {
@@ -170,7 +181,7 @@ function TradeInner() {
             <Card className="flex items-center justify-between gap-3 p-6">
               <div className="min-w-0">
                 <div className="text-sm text-muted-foreground">{t('ui.bestMatchOf', { n: usable.length || rows.length })} · <Link href={L(`/profile/${best.ad.advertiser.id}`)} className="hover:text-foreground">{t('ui.viewPassport')}</Link></div>
-                <div className="mt-1 truncate text-[26px] font-semibold tracking-tight">{best.ad.advertiser.displayName}</div>
+                <div className="mt-1 flex items-center gap-2 text-[26px] font-semibold tracking-tight"><span className="truncate">{best.ad.advertiser.displayName}</span><OnlineDot online={best.ad.advertiser.online} /></div>
               </div>
               <Link href={L(`/profile/${best.ad.advertiser.id}`)} aria-label={t('ui.viewPassport')} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-muted hover:brightness-110"><ArrowUpRight size={18} /></Link>
             </Card>
@@ -188,12 +199,17 @@ function TradeInner() {
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-baseline gap-3"><h2 className="text-[22px] font-semibold tracking-tight">{t('ui.allOffers')}</h2><span className="hidden text-sm text-muted-foreground sm:inline">{sort === 'price' ? t('ui.rankedByGet') : t(`ui.sort_${sort}`)}</span></div>
           <div className="flex items-center gap-2">
+            {me && <Button variant="soft" size="sm" onClick={() => setAlertOpen(true)} data-testid="alert-open" aria-label={t('ui.priceAlert')}><Bell size={15} /><span className="hidden sm:inline">{t('ui.priceAlert')}</span></Button>}
             {activeFilters > 0 && <button type="button" onClick={clearFilters} className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground" data-testid="filter-clear">{t('ui.clearFilters')}</button>}
             <Button variant={showFilters ? 'ink' : 'soft'} size="sm" onClick={() => setShowFilters((v) => !v)} data-testid="filter-toggle" aria-expanded={showFilters}><SlidersHorizontal size={15} />{t('ui.filters')}{activeFilters > 0 && <span className="ms-1 rounded-full bg-primary px-1.5 text-[11px] text-primary-foreground">{activeFilters}</span>}</Button>
           </div>
         </div>
         {showFilters && (
           <div className="mb-3 grid gap-3 rounded-2xl bg-muted/50 p-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="filters">
+            <label className="relative space-y-1 text-[13px] text-muted-foreground sm:col-span-2 lg:col-span-4">{t('ui.searchTrader')}
+              <Search size={16} className="pointer-events-none absolute start-3 top-[34px]" />
+              <input data-testid="filter-q" value={qInput} onChange={(e) => setQInput(e.target.value.slice(0, 40))} placeholder={t('ui.searchTraderPh')} className="h-11 w-full rounded-2xl border border-border bg-card ps-9 pe-3 text-[15px] text-foreground focus:outline-none" />
+            </label>
             <label className="space-y-1 text-[13px] text-muted-foreground">{t('market.paymentMethod')}
               <select data-testid="filter-pm" value={pm} onChange={(e) => setPm(e.target.value)} className="h-11 w-full rounded-2xl border border-border bg-card px-3 text-[15px] text-foreground focus:outline-none">
                 <option value="">{t('ui.allMethods')}</option>{types.map((x) => <option key={x.code} value={x.code}>{x.name}</option>)}
@@ -209,6 +225,8 @@ function TradeInner() {
             <div className="flex flex-col justify-end gap-2 text-[15px]">
               <label className="flex cursor-pointer items-center gap-2"><input type="checkbox" data-testid="filter-merchant" checked={merchantOnly} onChange={(e) => setMerchantOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.merchantsOnly')}</label>
               <label className="flex cursor-pointer items-center gap-2"><input type="checkbox" data-testid="filter-verified" checked={verifiedOnly} onChange={(e) => setVerifiedOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.verifiedOnly')}</label>
+              <label className="flex cursor-pointer items-center gap-2"><input type="checkbox" data-testid="filter-online" checked={onlineOnly} onChange={(e) => setOnlineOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.onlineOnly')}</label>
+              {me && <label className="flex cursor-pointer items-center gap-2"><input type="checkbox" data-testid="filter-following" checked={followingOnly} onChange={(e) => setFollowingOnly(e.target.checked)} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.followingOnly')}</label>}
             </div>
           </div>
         )}
@@ -221,6 +239,8 @@ function TradeInner() {
           <div key={ad.id} data-testid="ad-row" className={cn('grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b border-border py-3.5 last:border-0 md:grid-cols-[1.6fr_1fr_1fr_1.1fr_1.2fr_auto]', !fits && 'opacity-50')}>
             <div className="flex min-w-0 items-center gap-2">
               <Link href={L(`/profile/${ad.advertiser.id}`)} className="truncate text-[16px] font-semibold hover:underline">{ad.advertiser.displayName}</Link>
+              <OnlineDot online={ad.advertiser.online} />
+              {ad.following && <Badge variant="info">{t('ui.followingBtn')}</Badge>}
               {i === 0 && fits && <Badge variant="success">{t('ui.best')}</Badge>}
             </div>
             <div className="num text-[15px] md:order-none" data-testid="ad-price">{num(ad.price, 8)}</div>
@@ -236,6 +256,10 @@ function TradeInner() {
         {cursor && <div className="pt-3 text-center"><Button variant="soft" loading={loadingMore} onClick={loadMore} data-testid="load-more">{t('ui.showMore')}</Button></div>}
       </Card>
       {selected && <TradeDialog ad={selected} side={side} initial={side === 'buy' ? amount : amount ? fiatFor(amount, selected.price) : ''} onClose={() => setSelected(null)} />}
+      <Link href={L('/otc')} className="flex items-center gap-3 rounded-2xl border border-border px-5 py-4 text-sm hover:border-primary/60" data-testid="otc-link">
+        <Briefcase size={18} className="shrink-0 text-primary" /><span className="flex-1"><b>{t('ui.otcTitle')}</b> · <span className="text-muted-foreground">{t('ui.otcTeaser')}</span></span><ArrowUpRight size={16} />
+      </Link>
+      {alertOpen && <PriceAlertDialog side={side} asset={asset} fiat={fiat} suggested={best?.ad.price} onClose={() => setAlertOpen(false)} />}
       {!me && <p className="px-2 text-center text-xs text-muted-foreground">{t('ui.escrowNote')}</p>}
     </div>
   );

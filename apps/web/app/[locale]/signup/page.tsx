@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { MailCheck } from 'lucide-react';
 import { Button, Input, Label } from '@p2p/ui';
@@ -13,12 +13,18 @@ export default function Signup() {
   const { t, locale } = useI18n();
   const L = useL();
   const [f, setF] = useState({ email: '', password: '', country: 'DE' });
+  const [ref, setRef] = useState('');
+  useEffect(() => {
+    // Remember an invite code from ?ref= so it survives navigating to login and back.
+    const r = (new URLSearchParams(window.location.search).get('ref') ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
+    try { if (r) localStorage.setItem('ref', r); setRef(r || localStorage.getItem('ref') || ''); } catch { setRef(r); }
+  }, []);
   const [done, setDone] = useState<string | null>(null);
   const [err, setErr] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setErr(null); setBusy(true);
-    try { const r = await api('/auth/signup', { body: { ...f, country: f.country.toUpperCase(), locale } }); setDone(r.devEmailToken ?? ''); } catch (e) { setErr(e); } finally { setBusy(false); }
+    try { const r = await api('/auth/signup', { body: { ...f, country: f.country.toUpperCase(), locale, ...(ref ? { ref } : {}) } }); setDone(r.devEmailToken ?? ''); try { localStorage.removeItem('ref'); } catch { /* ignore */ } } catch (e) { setErr(e); } finally { setBusy(false); }
   };
   const strength = Math.min(4, [/.{10,}/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter((r) => r.test(f.password)).length + (f.password.length >= 16 ? 1 : 0));
   if (done !== null) return (
@@ -38,6 +44,7 @@ export default function Signup() {
           <div className="mt-2 grid grid-cols-4 gap-1">{[0, 1, 2, 3].map((i) => <span key={i} className={`h-1 rounded-full ${i < strength ? (strength < 2 ? 'bg-sell' : strength < 3 ? 'bg-warn' : 'bg-buy') : 'bg-muted'}`} />)}</div>
           <p className="mt-1 text-[11px] text-muted-foreground">{t('ui.passwordDesc')}</p></div>
         <div><Label htmlFor="country">{t('auth.country')}</Label><Input id="country" className="h-12 uppercase" maxLength={2} value={f.country} onChange={(e) => setF({ ...f, country: e.target.value.toUpperCase() })} required /></div>
+        {ref && <p className="rounded-xl bg-primary/10 px-3 py-2 text-[13px]" data-testid="ref-note">{t('ui.invitedWith', { code: ref })}</p>}
         <ErrorText error={err} />
         <Button type="submit" size="lg" className="w-full" loading={busy} data-testid="signup-submit">{t('auth.signup')}</Button>
         <p className="text-[13px] leading-relaxed text-muted-foreground">{t('ui.agree')} <Link href={L('/legal/terms')} className="underline">{t('launch.terms')}</Link> · <Link href={L('/legal/privacy')} className="underline">{t('launch.privacy')}</Link> · <Link href={L('/legal/risk')} className="underline">{t('launch.risk')}</Link></p>

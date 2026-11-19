@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { api } from './api';
 
-export interface Me { id: string; email?: string; kycTier: number; totpEnabled: boolean; displayName?: string; country: string; emailVerified: boolean; phoneVerified: boolean }
+export interface Me { id: string; email?: string; kycTier: number; totpEnabled: boolean; displayName?: string; country: string; emailVerified: boolean; phoneVerified: boolean; awayMode?: boolean; antiPhishingCode?: string | null }
 const Ctx = createContext<{ me: Me | null; loading: boolean; refresh: () => Promise<void>; setMe: (m: Me | null) => void }>({ me: null, loading: true, refresh: async () => {}, setMe: () => {} });
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);

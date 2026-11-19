@@ -9,6 +9,7 @@ import { useSession } from '../../../../lib/session';
 import { api } from '../../../../lib/api';
 import { useL } from '../../../../components/nav';
 import { ErrorText } from '../../../../components/errors';
+import { ConditionsFields, conditionsBody, type Conditions } from '../../../../components/community';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
 
@@ -30,6 +31,7 @@ export default function NewAd() {
   const [methods, setMethods] = useState<any[]>([]);
   const [fiats, setFiats] = useState<string[]>(['EUR', 'USD']);
   const [selected, setSelected] = useState<string[]>([]);
+  const [cond, setCond] = useState<Conditions>({ minAccountAgeDays: '', minCompletedTrades: '', autoReply: '' });
   const [err, setErr] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function NewAd() {
       const bps = (f.margin.startsWith('-') ? -1 : 1) * (Number(mi || '0') * 100 + Number((mf + '00').slice(0, 2)));
       await api('/ads', { body: {
         side: f.side, asset: f.asset, fiat: f.fiat, priceType: f.priceType, price: f.priceType === 'fixed' ? f.price : undefined, marginBps: f.priceType === 'floating' ? bps : undefined,
-        totalAmount: f.totalAmount, minAmount: f.minAmount, maxAmount: f.maxAmount, paymentMethodIds: selected, paymentWindowMin: Number(f.paymentWindowMin), terms: f.terms, minCounterpartyTier: Number(f.minCounterpartyTier),
+        totalAmount: f.totalAmount, minAmount: f.minAmount, maxAmount: f.maxAmount, paymentMethodIds: selected, paymentWindowMin: Number(f.paymentWindowMin), terms: f.terms, minCounterpartyTier: Number(f.minCounterpartyTier), ...conditionsBody(cond),
       } });
       router.push(L('/ads'));
     } catch (e) { setErr(e); setBusy(false); }
@@ -96,6 +98,9 @@ export default function NewAd() {
               </div>
               <div><Label htmlFor="terms">{t('ad.terms')}</Label><Textarea id="terms" rows={4} value={f.terms} onChange={set('terms')} maxLength={2000} /></div>
             </div>
+          </Section>
+          <Section n={4} title={t('ui.conditions')}>
+            <ConditionsFields value={cond} onChange={setCond} />
           </Section>
         </div>
 

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
-import { BadgeCheck, Check, Fingerprint, KeyRound, Lock, Mail, Phone, ShieldCheck, Smartphone, Store, UserRound } from 'lucide-react';
+import { Ban, BadgeCheck, Bell, Check, Fingerprint, KeyRound, Lock, Mail, Phone, ShieldCheck, Smartphone, Store, Trash2, UserRound, Users, AtSign } from 'lucide-react';
 import { Alert, Avatar, Badge, Button, Card, CopyButton, Input, Label, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
@@ -21,10 +21,20 @@ export default function Account() {
   const [phone, setPhone] = useState({ phone: '', code: '', sent: false, dev: '' });
   const [pw, setPw] = useState({ oldPassword: '', newPassword: '', totp: '', ok: false });
   const [merchant, setMerchant] = useState<any>(null);
+  const [nick, setNick] = useState<{ v: string; ok: boolean } | null>(null);
+  const [apc, setApc] = useState({ v: '', ok: false });
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [rel, setRel] = useState<{ following: any[]; blocked: any[] }>({ following: [], blocked: [] });
+  const loadLists = useCallback(async () => {
+    setAlerts(await api<any[]>('/me/price-alerts').catch(() => []));
+    const [following, blocked] = await Promise.all([api<any[]>('/me/following').catch(() => []), api<any[]>('/me/blocked').catch(() => [])]);
+    setRel({ following, blocked });
+  }, []);
   const load = useCallback(async () => {
     setKyc(await api('/kyc/status').catch(() => null));
     setMerchant(await api('/merchant-program/status').catch(() => null));
   }, []);
+  useEffect(() => { void loadLists(); }, [loadLists]);
   useEffect(() => { void load(); api('/status').then((s) => setTestMode(!!s.testMode)).catch(() => {}); }, [load]);
   const run = async (f: () => Promise<unknown>) => { setErr(null); try { await f(); await load(); await refresh(); } catch (e) { setErr(e); } };
   if (!me) return <div className="mx-auto max-w-md py-20 text-center"><Link href={L('/login')}><Button>{t('nav.login')}</Button></Link></div>;
@@ -74,6 +84,44 @@ export default function Account() {
             );
           })}
         </div>
+      </section>
+
+      {/* Trading profile */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">{t('ui.tradingProfile')}</h2>
+        <Card className="divide-y divide-border">
+          <Row icon={<AtSign size={18} />} title={t('ui.nickname')} desc={t('ui.nicknameDesc')}>
+            <div className="flex w-full gap-2 sm:w-80">
+              <Input data-testid="nickname" maxLength={20} value={nick?.v ?? me.displayName ?? ''} onChange={(e) => setNick({ v: e.target.value, ok: false })} placeholder={t('ui.nickname')} />
+              <Button variant="outline" data-testid="nickname-save" disabled={!nick?.v} onClick={() => run(async () => { await api('/me/nickname', { method: 'PUT', body: { displayName: nick!.v.trim() } }); setNick({ v: nick!.v.trim(), ok: true }); })}>{nick?.ok ? <Check size={15} /> : t('common.save')}</Button>
+            </div>
+          </Row>
+          <Row icon={<ShieldCheck size={18} />} title={t('ui.antiPhishing')} desc={me.antiPhishingCode ? t('ui.antiPhishingSet', { code: me.antiPhishingCode }) : t('ui.antiPhishingDesc')}>
+            <div className="flex w-full gap-2 sm:w-80">
+              <Input data-testid="anti-phishing" maxLength={20} value={apc.v} onChange={(e) => setApc({ v: e.target.value, ok: false })} placeholder={t('ui.antiPhishingPh')} />
+              <Button variant="outline" data-testid="anti-phishing-save" disabled={apc.v.trim().length < 4} onClick={() => run(async () => { await api('/me/anti-phishing', { method: 'PUT', body: { code: apc.v.trim() } }); setApc({ v: '', ok: true }); })}>{apc.ok ? <Check size={15} /> : t('common.save')}</Button>
+            </div>
+          </Row>
+          <Row icon={<Bell size={18} />} title={t('ui.priceAlerts')} desc={t('ui.priceAlertsDesc')}>
+            <ul className="w-full space-y-1.5 text-sm sm:w-80" data-testid="alerts-list">
+              {alerts.length === 0 && <li className="text-muted-foreground">{t('ui.noAlerts')}</li>}
+              {alerts.map((a) => (
+                <li key={a.id} className="flex items-center gap-2 rounded-xl bg-muted px-3 py-2">
+                  <span className={a.side === 'buy' ? 'text-buy' : 'text-sell'}>{t(a.side === 'buy' ? 'market.buy' : 'market.sell')}</span>
+                  <span className="num flex-1">{a.asset} {a.side === 'buy' ? '≤' : '≥'} {a.price} {a.fiat}</span>
+                  <span className="text-xs text-muted-foreground">{a.active ? t('ui.alertActive') : t('ui.alertTriggered', { price: a.triggeredPrice ?? '' })}</span>
+                  <button type="button" aria-label={t('ui.remove')} onClick={() => run(async () => { await api(`/me/price-alerts/${a.id}`, { method: 'DELETE' }); await loadLists(); })} className="text-muted-foreground hover:text-sell"><Trash2 size={14} /></button>
+                </li>))}
+            </ul>
+          </Row>
+          {(['following', 'blocked'] as const).map((k) => (
+            <Row key={k} icon={k === 'following' ? <Users size={18} /> : <Ban size={18} />} title={t(k === 'following' ? 'ui.followedUsers' : 'ui.blockedUsers')} desc={t(k === 'following' ? 'ui.followedDesc' : 'ui.blockedDesc')}>
+              <div className="flex w-full flex-wrap gap-1.5 sm:w-80" data-testid={`${k}-list`}>
+                {rel[k].length === 0 && <span className="text-sm text-muted-foreground">{t('ui.none')}</span>}
+                {rel[k].map((u: any) => <Link key={u.id} href={L(`/profile/${u.id}`)} className="rounded-full bg-muted px-3 py-1 text-sm hover:brightness-110">{u.displayName ?? u.id.slice(0, 8)}</Link>)}
+              </div>
+            </Row>))}
+        </Card>
       </section>
 
       {/* Security */}

@@ -29,6 +29,10 @@ export const SECTIONS: Section[] = [
     { label: 'Approve payout', method: 'POST', path: (r) => `/freeze-reports/${r.id}/review`, body: () => ({ approve: true, payoutAsset: ask('Asset (USDT/BTC/ETH)'), payoutAmount: ask('Amount'), note: ask('Note') }) },
     { label: 'Reject', method: 'POST', path: (r) => `/freeze-reports/${r.id}/review`, body: () => ({ approve: false, note: ask('Reason') }), danger: true },
   ] },
+  { key: 'otc', title: 'Large trade requests', roles: ['support', 'finance', 'compliance'], list: '/otc-requests?status=open,contacted', actions: [
+    { label: 'Mark contacted', method: 'POST', path: (r) => `/otc-requests/${r.id}/status`, body: () => ({ status: 'contacted' }) },
+    { label: 'Close', method: 'POST', path: (r) => `/otc-requests/${r.id}/status`, body: () => ({ status: 'closed' }) },
+  ] },
   { key: 'flags', title: 'Risk flags', roles: ['compliance'], list: '/flags', actions: [{ label: 'Resolve', method: 'POST', path: (r) => `/flags/${r.id}/resolve`, body: () => ({ note: ask('Note') }) }] },
   { key: 'limits', title: 'Limits', roles: ['compliance', 'finance'], list: '/limits', actions: [
     { label: 'Edit', method: 'PUT', path: (r) => `/limits/${r.tier}`, body: () => ({ daily: ask('Daily USD'), monthly: ask('Monthly USD'), perOrder: ask('Per order USD'), withdrawDaily: ask('Withdraw daily USD') }) },

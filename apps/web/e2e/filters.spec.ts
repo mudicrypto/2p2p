@@ -21,6 +21,7 @@ test('offer filters narrow the order book', async ({ browser }) => {
   await expect(row('0.951')).toBeVisible();
   await expect(row('0.993')).toBeVisible();
 
+  await expect(page.getByTestId('filter-toggle')).toHaveCount(1); // hydration can briefly keep a hidden server copy
   await page.getByTestId('filter-toggle').click();
   await page.getByTestId('filter-pm').selectOption('WISE');
   await expect(row('0.993')).toBeVisible();

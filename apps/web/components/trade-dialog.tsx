@@ -8,6 +8,7 @@ import { useSession } from '../lib/session';
 import { api } from '../lib/api';
 import { useL } from './nav';
 import { ErrorText } from './errors';
+import { Requirements } from './community';
 
 /** Decimal string helpers without floats: scale to bigint, divide, format back. */
 const DEC = 8n;
@@ -77,6 +78,7 @@ export function TradeDialog({ ad, side, onClose, initial = '' }: { ad: any; side
             <Select value={pm} onChange={(e) => setPm(e.target.value)}>{mine.map((m) => <option key={m.id} value={m.id}>{m.type} · {m.holderName}</option>)}</Select></div>
         )}
         <div className="flex flex-wrap gap-1.5">{ad.paymentTypes.map((p: string) => <PayChip key={p} code={p} />)}</div>
+        <Requirements ad={ad} />
         {ad.terms && <div className="rounded-xl border border-border p-3 text-xs leading-relaxed text-muted-foreground"><div className="mb-1 font-semibold text-foreground">{t('trade.terms')}</div>{ad.terms}</div>}
         <div className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-xs text-foreground/90"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" />{t('ui.how1d')} {t('trade.window', { minutes: ad.paymentWindowMin })}</div>
         <ErrorText error={err} />

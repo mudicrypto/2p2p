@@ -44,6 +44,8 @@ export const PERMISSIONS: Record<string, AdminRole[]> = {
   'disputes.decide': ['arbiter'],
   'freeze_reports.review': ['arbiter', 'compliance'],
   'orders.read': ['support', 'arbiter', 'compliance'],
+  'otc.read': ['support', 'finance', 'compliance'],
+  'otc.manage': ['support', 'finance'],
   'payment_methods.write': [],
   'fiat.write': [],
   'admins.manage': [],
