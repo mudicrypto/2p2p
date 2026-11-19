@@ -5,16 +5,17 @@ Caddy on the host terminates HTTPS (Let's Encrypt) on one origin, so cookies and
 work. **Test mode only**: `PROVIDER_MODE=mock`, so no real custody, KYC or payment provider is connected
 and no real money can move. Test funds come from Wallet → "Get test funds".
 
-## How deploys work (no SSH needed)
+## How deploys work (no SSH into the server needed)
 
-1. `cloud-init.sh.tmpl` (filled in by `provision.py`) bootstraps the server: swap, Docker, Caddy,
-   `s3cmd`, and `agent.sh` as a systemd timer that runs every minute.
-2. A release is `git archive` of the repo, uploaded to the private bucket as
-   `releases/<id>.tar.gz`, and `latest.txt` is set to `<id>`.
-3. The agent sees the new id, downloads and extracts it, runs `infra/timeweb/deploy.sh`
-   (build images, migrate + seed, `docker compose up -d`), and keeps the last 3 releases.
-4. It writes a status report (container state, recent logs, memory, disk) that Caddy serves at
+1. `cloud-init.sh.tmpl` (filled in at provisioning time) bootstraps the server: swap, Docker, Caddy, git,
+   a **read-only GitHub deploy key** for this repository, and `agent.sh` as a systemd timer (every minute).
+2. The agent fetches the deploy branch. When it moves, it exports that commit to
+   `/opt/parley/releases/<sha>`, runs `infra/timeweb/deploy.sh` (build images, migrate + seed,
+   `docker compose up -d`) and keeps the last 3 releases. Pushing to the branch is the deploy.
+3. It writes a status report (deploy log, containers, recent logs, memory, disk) that Caddy serves at
    `https://<site>/_ops/<ops-token>/status.txt`. The token is random and kept out of the repository.
+
+The deploy key's public half is added in GitHub → repository Settings → Deploy keys, **read-only**.
 
 Secrets (database password, data-encryption key, webhook secret) are generated on the server on first
 deploy, in `/opt/parley/.env` (mode 600), and never leave it.

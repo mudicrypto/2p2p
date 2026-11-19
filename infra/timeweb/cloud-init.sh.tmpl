@@ -15,27 +15,17 @@ mkdir -p /etc/docker
 echo '{"registry-mirrors":["https://dockerhub.timeweb.cloud"],"log-opts":{"max-size":"20m","max-file":"3"}}' > /etc/docker/daemon.json
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y docker.io docker-compose-v2 s3cmd caddy openssl curl
+apt-get install -y docker.io docker-compose-v2 caddy openssl curl git
 systemctl enable --now docker
 mkdir -p /opt/parley/www
 IP="$(curl -fsS --max-time 10 https://api.ipify.org || ip -4 route get 1.1.1.1 | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}')"
 SITE="${IP//./-}.sslip.io"
 echo "$SITE" > /opt/parley/SITE_HOST
-echo "__BUCKET__" > /opt/parley/BUCKET
-umask 077
-cat > /root/.s3cfg <<CFG
-[default]
-access_key = __S3_ACCESS_KEY__
-secret_key = __S3_SECRET_KEY__
-host_base = s3.twcstorage.ru
-host_bucket = s3.twcstorage.ru
-bucket_location = ru-1
-use_https = True
-signature_v2 = False
-CFG
-umask 022
-# Record whether the server can read the release bucket (shown on the status page).
-{ date -u; s3cmd -c /root/.s3cfg ls "s3://__BUCKET__/" 2>&1 | head -20; } > /opt/parley/www/bucket-check.txt || true
+echo "__REPO_URL__" > /opt/parley/REPO_URL
+echo "__BRANCH__" > /opt/parley/BRANCH
+# Read-only GitHub deploy key for this one repository.
+install -d -m 700 /root/.ssh
+echo "__DEPLOY_KEY_B64__" | base64 -d > /root/.ssh/parley_deploy && chmod 600 /root/.ssh/parley_deploy
 cat > /etc/caddy/Caddyfile <<CADDY
 $SITE {
 	encode gzip zstd
