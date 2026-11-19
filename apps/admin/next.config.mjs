@@ -1,6 +1,8 @@
 const API = process.env.API_URL ?? 'http://localhost:4000';
 /** Admin panel: separate domain, no framing, strict CSP. */
 export default {
+  // Optional path prefix (e.g. /admin) when the panel shares a domain with the web app.
+  basePath: process.env.ADMIN_BASE_PATH || undefined,
   transpilePackages: ['@p2p/ui'],
   poweredByHeader: false,
   async rewrites() { return [{ source: '/v1/:path*', destination: `${API}/v1/:path*` }]; },

@@ -7,6 +7,9 @@ FROM base AS build
 # Public URL the browser uses for live updates (Socket.IO); baked into the web build.
 ARG NEXT_PUBLIC_WS_URL=
 ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
+# Path prefix for the admin panel when it shares a domain with the web app (e.g. /admin).
+ARG ADMIN_BASE_PATH=
+ENV ADMIN_BASE_PATH=${ADMIN_BASE_PATH}
 COPY . .
 RUN pnpm install --frozen-lockfile && pnpm turbo run build
 

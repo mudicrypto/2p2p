@@ -7,6 +7,7 @@ set -uo pipefail
 ROOT=/opt/parley; WWW="$ROOT/www"; REPO="$ROOT/repo"; BRANCH="$(cat "$ROOT/BRANCH")"
 mkdir -p "$ROOT/releases" "$WWW"; chmod 755 "$ROOT" "$WWW"
 exec 9>"$ROOT/agent.lock"; flock -n 9 || exit 0
+find "$WWW" -name admin-initial.txt -mmin +120 -delete 2>/dev/null   # hand-over window: 2 hours
 export GIT_SSH_COMMAND="ssh -i /root/.ssh/parley_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
 giterr="$(mktemp)"
 if [ ! -d "$REPO/.git" ]; then

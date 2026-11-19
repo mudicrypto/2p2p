@@ -13,10 +13,13 @@ x-app-env: &app-env
   TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   # random: disables the public dev token until a real bot exists
   METRICS_TOKEN: ${METRICS_TOKEN}
   TOTP_REPLAY_PROTECTION: "on"
+  WEBAUTHN_RP_ID: ${SITE_HOST}
+  WEBAUTHN_ORIGIN: https://${SITE_HOST}
+  ADMIN_IP_ALLOWLIST: "*"     # test server: any IP, still password + passkey; restrict to your IP later
 
 x-build: &build
   context: ../..
-  args: { NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" }
+  args: { NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin }
 
 services:
   postgres:
@@ -31,13 +34,23 @@ services:
     command: ["redis-server", "--appendonly", "yes"]
     volumes: [redisdata:/data]
   migrate:
-    build: { <<: *build, args: { APP: api, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" } }
+    build: { <<: *build, args: { APP: api, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
     image: parley-api
     environment: *app-env
     working_dir: /repo/apps/api
     # Apply migrations, then load reference data (fiats, payment method types, limits). Both are idempotent.
     command: ["sh", "-c", "node /repo/packages/db/dist/migrate.js && node --input-type=module -e \"import { createDb } from '@p2p/db'; import { seed } from '@p2p/core'; const h = createDb(process.env.DATABASE_URL); await seed(h.db); await h.close(); console.log('seeded');\""]
     depends_on: { postgres: { condition: service_healthy } }
+  admin-bootstrap:
+    image: parley-api
+    environment:
+      <<: *app-env
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
+    working_dir: /repo/apps/api
+    # Creates the first superadmin once (no-op when it already exists).
+    command: ["node", "--input-type=module", "-e", "import { createDb } from '@p2p/db'; import { createAdmin } from '@p2p/core'; const email = (process.env.ADMIN_EMAIL || '').toLowerCase(); const h = createDb(process.env.DATABASE_URL); try { if (!email) console.log('no ADMIN_EMAIL'); else { await createAdmin({ db: h.db, now: () => new Date() }, null, { email, password: process.env.ADMIN_INITIAL_PASSWORD, roles: ['superadmin'] }); console.log('admin created'); } } catch (e) { const c = e?.code ?? e?.cause?.code; if (c === '23505') console.log('admin exists'); else throw e; } finally { await h.close(); }"]
+    depends_on: { migrate: { condition: service_completed_successfully } }
   api:
     image: parley-api
     restart: unless-stopped
@@ -45,16 +58,23 @@ services:
     ports: ["127.0.0.1:4000:4000"]
     depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
   worker:
-    build: { <<: *build, args: { APP: worker, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" } }
+    build: { <<: *build, args: { APP: worker, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
     image: parley-worker
     restart: unless-stopped
     environment: *app-env
     depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
   web:
-    build: { <<: *build, args: { APP: web, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}" } }
+    build: { <<: *build, args: { APP: web, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
     image: parley-web
     restart: unless-stopped
     environment: { API_URL: "http://api:4000", PORT: "3000" }
     ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+  admin:
+    build: { <<: *build, args: { APP: admin, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
+    image: parley-admin
+    restart: unless-stopped
+    environment: { API_URL: "http://api:4000", PORT: "3001", ADMIN_IP_ALLOWLIST: "*" }
+    ports: ["127.0.0.1:3001:3001"]
     depends_on: [api]
 volumes: { pgdata: {}, redisdata: {} }
