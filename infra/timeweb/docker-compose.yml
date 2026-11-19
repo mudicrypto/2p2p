@@ -74,7 +74,7 @@ services:
     build: { <<: *build, args: { APP: admin, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
     image: parley-admin
     restart: unless-stopped
-    environment: { API_URL: "http://api:4000", PORT: "3001", ADMIN_IP_ALLOWLIST: "*" }
+    environment: { API_URL: "http://api:4000", PORT: "3001", ADMIN_IP_ALLOWLIST: "*", ADMIN_BASE_PATH: /admin }   # read again at start-up
     ports: ["127.0.0.1:3001:3001"]
     depends_on: [api]
 volumes: { pgdata: {}, redisdata: {} }
