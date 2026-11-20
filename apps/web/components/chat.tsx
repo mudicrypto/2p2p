@@ -38,10 +38,15 @@ export function Chat({ orderId, counterparty, className }: { orderId: string; co
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' }); }, [msgs.length]);
   const send = async (body: string, attachmentKey?: string) => {
     setWarn('');
+    // Clear the box right away so anything typed while this message is sending isn't wiped when it returns.
+    if (body) setText('');
     try {
       const m = await api(`/orders/${orderId}/messages`, { body: { body, attachmentKey } });
-      setMsgs((x) => (x.some((y) => y.id === m.id) ? x : [...x, m])); setText('');
-    } catch (e) { if (e instanceof ApiError && e.code === 'FORBIDDEN') setWarn(t('chat.blocked')); }
+      setMsgs((x) => (x.some((y) => y.id === m.id) ? x : [...x, m]));
+    } catch (e) {
+      if (body) setText((cur) => cur || body); // put an unsent message back unless the user already typed something new
+      if (e instanceof ApiError && e.code === 'FORBIDDEN') setWarn(t('chat.blocked'));
+    }
   };
   const name = counterparty?.displayName ?? counterparty?.id?.slice(0, 8) ?? '';
   return (

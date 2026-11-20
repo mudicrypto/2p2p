@@ -66,9 +66,11 @@ export default function Order() {
     catch (e) { setErr(errText(t, e)); setReceipt('idle'); }
   };
   const send = async () => {
-    if (!text.trim()) return;
-    try { const m = await api.sendMessage(id, text); setMsgs((x) => [...x.filter((y) => y.id !== m.id), m]); setText(''); setTimeout(() => scroll.current?.scrollToEnd(), 50); }
-    catch (e) { setErr((e as { code?: string }).code === 'FORBIDDEN' ? t('chat.blocked') : errText(t, e)); }
+    const body = text;
+    if (!body.trim()) return;
+    setText(''); // clear now so text typed while sending isn't wiped when the reply arrives
+    try { const m = await api.sendMessage(id, body); setMsgs((x) => [...x.filter((y) => y.id !== m.id), m]); setTimeout(() => scroll.current?.scrollToEnd(), 50); }
+    catch (e) { setText((cur) => cur || body); setErr((e as { code?: string }).code === 'FORBIDDEN' ? t('chat.blocked') : errText(t, e)); }
   };
 
   let hero: React.ReactNode;
