@@ -7,6 +7,7 @@ import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { releaseLabel } from '../../src/format';
 import { space } from '../../src/theme';
+import { TrustCard } from '../../src/parity';
 import { Avatar, Badge, Big, Button, Card, Divider, Hero, Row, Screen, Skeleton, Text, errText } from '../../src/ui';
 
 /** Trader passport: reputation from real trade history only. */
@@ -56,6 +57,7 @@ export default function Passport() {
         {stat(t('profile.disputes'), pct(p.disputeRateBps))}
         {stat(t('profile.freezeReports'), num(String(p.freezeReports)))}
       </Row>
+      {p.trust && <TrustCard trust={p.trust} />}
       <Card style={{ gap: 8 }}>
         <Row style={{ justifyContent: 'space-between' }}><Text size="h3">{t('ui.recentFeedback')}</Text><Row style={{ gap: 12 }}><Row style={{ gap: 4 }}><Ionicons name="thumbs-up-outline" size={16} color={c.buy} /><Text weight="700">{p.positiveFeedback}</Text></Row><Row style={{ gap: 4 }}><Ionicons name="thumbs-down-outline" size={16} color={c.sell} /><Text weight="700">{p.negativeFeedback}</Text></Row></Row></Row>
         {total > 0 && <View style={{ height: 6, borderRadius: 3, backgroundColor: c.muted, overflow: 'hidden' }}><View style={{ height: 6, width: `${Math.round((p.positiveFeedback / total) * 100)}%`, backgroundColor: c.buy }} /></View>}

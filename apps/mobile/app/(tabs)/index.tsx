@@ -31,6 +31,11 @@ export default function Trade() {
   const [followingOnly, setFollowingOnly] = useState(false);
   const [merchantOnly, setMerchantOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [saved, setSaved] = useState<any[]>([]);
+  const [naming, setNaming] = useState<string | null>(null);
+  const loadSaved = useCallback(() => { if (me) api.savedSearches().then(setSaved).catch(() => null); }, [me]);
+  useEffect(() => { loadSaved(); }, [loadSaved]);
+  const applySaved = (p: Record<string, string>) => { setSide(p.side === 'sell' ? 'sell' : 'buy'); if (p.asset) setAsset(p.asset); if (p.fiat) setFiat(p.fiat); setPm(p.paymentType ?? ''); setOnlineOnly(p.onlineOnly === 'true'); setFollowingOnly(p.followingOnly === 'true'); setMerchantOnly(p.merchantOnly === 'true'); setVerifiedOnly(p.minTier === '1'); setQInput(p.q ?? ''); };
   const [alert, setAlert] = useState<{ open: boolean; price: string; msg: string | null }>({ open: false, price: '', msg: null });
   const [fiats, setFiats] = useState<string[]>(['USD', 'EUR']);
   const [types, setTypes] = useState<Array<{ code: string; name: string }>>([]);
@@ -138,6 +143,13 @@ export default function Trade() {
               <Chip label={t('ui.merchantsOnly')} active={merchantOnly} onPress={() => setMerchantOnly(!merchantOnly)} />
               <Chip label={t('ui.verifiedOnly')} active={verifiedOnly} onPress={() => setVerifiedOnly(!verifiedOnly)} />
             </Row>
+            {me && <Row style={{ flexWrap: 'wrap', gap: 6 }} testID="saved-searches">
+              <Ionicons name="bookmark-outline" size={16} color={c.sub} />
+              {saved.map((s) => <Row key={s.id} style={{ gap: 2 }}><Chip label={s.name} onPress={() => applySaved(s.params)} /><Press onPress={() => api.deleteSavedSearch(s.id).then(loadSaved).catch(() => null)} accessibilityLabel={t('ui.remove')}><Ionicons name="close-circle" size={18} color={c.sub} /></Press></Row>)}
+              {naming === null ? <Press onPress={() => setNaming('')} testID="saved-new"><Text size="small" tone="sub" style={{ textDecorationLine: 'underline' }}>{t('ui.saveSearch')}</Text></Press>
+                : <Row style={{ gap: 6, flex: 1 }}><View style={{ flex: 1 }}><Input placeholder={t('ui.searchName')} value={naming} maxLength={40} onChangeText={setNaming} testID="saved-name" /></View>
+                  <Button size="sm" title={t('common.save')} disabled={!naming.trim()} onPress={async () => { await api.saveSearch(naming.trim(), { side, asset, fiat, paymentType: pm, onlineOnly, followingOnly, merchantOnly, minTier: verifiedOnly ? '1' : '', q: qInput.trim() }).catch(() => null); setNaming(null); loadSaved(); }} testID="saved-save" /></Row>}
+            </Row>}
             {activeFilters > 0 && <Press onPress={() => { setQInput(''); setOnlineOnly(false); setFollowingOnly(false); setMerchantOnly(false); setVerifiedOnly(false); }}><Text size="small" tone="sub" style={{ textDecorationLine: 'underline' }}>{t('ui.clearFilters')}</Text></Press>}
           </View>
         )}

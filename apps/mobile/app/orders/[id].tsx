@@ -9,6 +9,7 @@ import { useApp } from '../../src/app';
 import { useI18n } from '../../src/i18n';
 import { cdp, orderState } from '../../src/format';
 import { space } from '../../src/theme';
+import { DisputeProgress, SafePayChecklist } from '../../src/parity';
 import { Avatar, Badge, Big, Button, Card, CopyRow, Divider, Hero, Input, Notice, Pill, Press, Row, Skeleton, Text, errText, success } from '../../src/ui';
 
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -20,7 +21,7 @@ function useNow() {
 
 export default function Order() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors: c, me } = useApp();
+  const { colors: c, me, locale } = useApp();
   const { t, money, num, date } = useI18n();
   const now = useNow();
   const [o, setO] = useState<any>(null);
@@ -28,6 +29,10 @@ export default function Order() {
   const [text, setText] = useState('');
   const [totp, setTotp] = useState('');
   const [busy, setBusy] = useState('');
+  const [safe, setSafe] = useState(false);
+  const [canTr, setCanTr] = useState(false);
+  const [tr, setTr] = useState<Record<string, string>>({});
+  useEffect(() => { api.features().then((f) => setCanTr(!!f.chatTranslation)).catch(() => null); }, []);
   const [err, setErr] = useState<string | null>(null);
   const [fb, setFb] = useState(false);
   const [disputing, setDisputing] = useState(false);
@@ -76,7 +81,8 @@ export default function Order() {
       <Pill icon="lock-closed-outline" label={t('ui.inEscrow', { amount: crypto })} />
       <View style={{ alignSelf: 'stretch', height: 6, borderRadius: 3, backgroundColor: c.muted, overflow: 'hidden', marginTop: space(2) }}><View style={{ height: 6, borderRadius: 3, width: `${(left / total) * 100}%`, backgroundColor: left < 120 ? c.sell : c.primary }} /></View>
       {left < 120 && <Text size="small" tone="sell" style={{ textAlign: 'center' }}>{t('ui.underTwoMin')}</Text>}
-      <Button size="lg" title={t('ui.iveSent', { amount: fiatAmt })} loading={busy === 'paid'} onPress={() => act('paid', () => api.markPaid(id))} style={{ alignSelf: 'stretch', marginTop: space(2) }} testID="mark-paid" />
+      {safe ? <SafePayChecklist amount={fiatAmt} holder={o.payee?.holderName} busy={busy === 'paid'} onCancel={() => setSafe(false)} onConfirm={async () => { await act('paid', () => api.markPaid(id)); setSafe(false); }} />
+        : <Button size="lg" title={t('ui.iveSent', { amount: fiatAmt })} onPress={() => setSafe(true)} style={{ alignSelf: 'stretch', marginTop: space(2) }} testID="mark-paid" />}
       <Text size="tiny" tone="sub" style={{ textAlign: 'center' }}>{t('order.confirmPaid', { amount: fiatAmt })}</Text>
     </Hero>
   );
@@ -173,6 +179,8 @@ export default function Order() {
               return (
                 <View key={m.id} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '82%', backgroundColor: mine ? c.ink : c.muted, borderRadius: 20, borderBottomRightRadius: mine ? 6 : 20, borderBottomLeftRadius: mine ? 20 : 6, paddingHorizontal: 14, paddingVertical: 9 }}>
                   {!!m.body && <Text style={{ color: fg }}>{m.body}</Text>}
+                  {!!tr[m.id] && <Text style={{ color: fg, fontStyle: 'italic', marginTop: 4 }} testID="chat-translation">{tr[m.id]}</Text>}
+                  {!mine && canTr && !!m.body && !tr[m.id] && <Press onPress={() => api.translate(id, m.id, locale).then((r) => setTr((x) => ({ ...x, [m.id]: r.text }))).catch(() => null)}><Text size="tiny" tone="sub" style={{ marginTop: 2 }}>{t('ui.translate')}</Text></Press>}
                   {!!m.attachmentKey && <Row style={{ gap: 4 }}><Ionicons name="document-attach" size={14} color={fg} /><Text size="small" style={{ color: fg }}>{t('chat.attach')}</Text></Row>}
                   <Text size="tiny" style={{ color: fg, opacity: 0.6, textAlign: 'right', marginTop: 2 }}>{date(m.createdAt)}</Text>
                 </View>
@@ -220,8 +228,7 @@ function DisputePanel({ o, onDone, onCancel }: { o: any; onDone: () => void; onC
     <Card style={{ gap: 10 }}>
       <Row style={{ justifyContent: 'space-between' }}><Text size="h3">{t('ui.disputeOpen')}</Text>{d && <Badge label={d.status} tone="danger" />}</Row>
       {d && <Text>{t('ui.reason')}: {label(d.reason)}</Text>}
-      {d?.slaDueAt && <Text size="small" tone="sub">{t('ui.arbiterBy', { time: date(d.slaDueAt) })}</Text>}
-      {d && <Text size="small" tone="sub">{t('ui.evidence')}: {d.evidence?.length ?? 0}</Text>}
+      {d && <DisputeProgress d={d} />}
       {d?.decisionNote && <Notice text={d.decisionNote} />}
       {d && !d.resolvedAt && <Button variant="soft" icon="attach" title={t('ui.addEvidence')} onPress={async () => { const k = await pickImage(o.id).catch(() => null); if (k) { await api.addEvidence(d.id, k).catch(() => null); api.dispute(o.id).then(setD).catch(() => null); } }} />}
     </Card>
