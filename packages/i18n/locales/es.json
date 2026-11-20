@@ -625,7 +625,6 @@
   "outsideHours": "Fuera de horario",
   "safeTitle": "¿Seguro para pagar?",
   "safeIntro": "Revisa esto antes de confirmar. Evita la mayoría de estafas P2P y pagos congelados.",
-  "safe1": "Pago desde una cuenta a mi nombre.",
   "safe2": "Envío exactamente {amount} a {holder}, el nombre de esta orden.",
   "safe3": "La nota del pago solo lleva la referencia: sin palabras como cripto, USDT o P2P.",
   "safe4": "Nadie me pidió pagar fuera de parley ni a otra cuenta.",

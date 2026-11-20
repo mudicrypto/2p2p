@@ -61,7 +61,7 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await expect(buyer.getByTestId('chat-scam-warning')).toHaveCount(0); // the caution is for the other side
 
   await buyer.getByTestId('mark-paid').click();
-  for (const i of [0, 1, 2, 3]) await buyer.getByTestId(`safe-${i}`).check();
+  for (const i of [0, 1, 2]) await buyer.getByTestId(`safe-${i}`).check();
   await buyer.getByTestId('safe-confirm').click();
   await expect(buyer.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID');
   await expect(seller.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID'); // realtime push

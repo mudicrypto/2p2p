@@ -625,7 +625,6 @@
   "outsideHours": "Di luar jam operasional",
   "safeTitle": "Aman untuk bayar?",
   "safeIntro": "Periksa ini sebelum konfirmasi. Ini mencegah sebagian besar penipuan P2P dan dana dibekukan.",
-  "safe1": "Saya membayar dari rekening atas nama saya sendiri.",
   "safe2": "Saya mengirim tepat {amount} ke {holder}, nama yang tertera di order ini.",
   "safe3": "Catatan transfer hanya berisi referensi order: tanpa kata kripto, USDT, atau P2P.",
   "safe4": "Tidak ada yang meminta saya membayar di luar parley atau ke rekening lain.",

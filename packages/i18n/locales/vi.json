@@ -625,7 +625,6 @@
   "outsideHours": "Ngoài giờ làm việc",
   "safeTitle": "An toàn để thanh toán?",
   "safeIntro": "Kiểm tra trước khi xác nhận. Giúp tránh hầu hết lừa đảo P2P và tiền bị phong tỏa.",
-  "safe1": "Tôi thanh toán từ tài khoản đứng tên tôi.",
   "safe2": "Tôi chuyển đúng {amount} cho {holder}, tên hiển thị trên lệnh này.",
   "safe3": "Nội dung chuyển khoản chỉ có mã lệnh: không có từ crypto, USDT hay P2P.",
   "safe4": "Không ai yêu cầu tôi trả ngoài parley hoặc vào tài khoản khác.",

@@ -625,7 +625,6 @@
   "outsideHours": "Poza godzinami pracy",
   "safeTitle": "Bezpieczna płatność?",
   "safeIntro": "Sprawdź przed potwierdzeniem. Chroni to przed większością oszustw P2P i blokad płatności.",
-  "safe1": "Płacę z konta na moje nazwisko.",
   "safe2": "Wysyłam dokładnie {amount} do {holder}, nazwy podanej w zleceniu.",
   "safe3": "W tytule przelewu tylko numer zlecenia: bez słów krypto, USDT czy P2P.",
   "safe4": "Nikt nie prosił mnie o płatność poza parley ani na inne konto.",

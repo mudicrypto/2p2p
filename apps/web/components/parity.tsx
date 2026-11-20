@@ -7,7 +7,7 @@ import { useI18n } from '../lib/i18n';
 import { api } from '../lib/api';
 import { ErrorText } from './errors';
 
-const SAFE_ITEMS = ['ui.safe1', 'ui.safe2', 'ui.safe3', 'ui.safe4'] as const;
+const SAFE_ITEMS = ['ui.safe2', 'ui.safe3', 'ui.safe4'] as const;
 /** Before "I have paid": the buyer confirms the four things that prevent most P2P losses. */
 export function SafePayDialog({ amount, holder, onConfirm, onClose, busy }: { amount: string; holder?: string; onConfirm: () => void; onClose: () => void; busy?: boolean }) {
   const { t } = useI18n();

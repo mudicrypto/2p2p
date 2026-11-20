@@ -625,7 +625,6 @@
   "outsideHours": "Außerhalb der Handelszeiten",
   "safeTitle": "Sicher bezahlen?",
   "safeIntro": "Prüfe das vor dem Bestätigen. Es verhindert die meisten P2P-Betrugsfälle und eingefrorene Zahlungen.",
-  "safe1": "Ich zahle von einem Konto auf meinen Namen.",
   "safe2": "Ich sende genau {amount} an {holder}, den Namen in dieser Order.",
   "safe3": "Der Verwendungszweck enthält nur die Referenz: keine Wörter wie Krypto, USDT oder P2P.",
   "safe4": "Niemand hat mich gebeten, außerhalb von parley oder auf ein anderes Konto zu zahlen.",

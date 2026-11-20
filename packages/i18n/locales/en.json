@@ -625,7 +625,6 @@
   "outsideHours": "Outside trading hours",
   "safeTitle": "Safe to pay?",
   "safeIntro": "Check these before you confirm. They prevent most P2P scams and frozen payments.",
-  "safe1": "I'm paying from an account in my own name.",
   "safe2": "I'm sending exactly {amount} to {holder}, the name shown on this order.",
   "safe3": "My payment note has only the order reference: no words like crypto, USDT or P2P.",
   "safe4": "Nobody asked me to pay outside parley or to a different account.",

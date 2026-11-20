@@ -6,7 +6,7 @@ import { useApp } from './app';
 import { useI18n } from './i18n';
 import { Button, Card, Row, Text } from './ui';
 
-const SAFE = ['ui.safe1', 'ui.safe2', 'ui.safe3', 'ui.safe4'];
+const SAFE = ['ui.safe2', 'ui.safe3', 'ui.safe4'];
 export function SafePayChecklist({ amount, holder, busy, onConfirm, onCancel }: { amount: string; holder?: string; busy?: boolean; onConfirm: () => void; onCancel: () => void }) {
   const { colors: c } = useApp();
   const { t } = useI18n();

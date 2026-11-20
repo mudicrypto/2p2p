@@ -625,7 +625,6 @@
   "outsideHours": "Labas sa oras",
   "safeTitle": "Ligtas bang magbayad?",
   "safeIntro": "Suriin ito bago kumpirmahin. Iniiwasan nito ang karamihan ng scam at frozen na bayad.",
-  "safe1": "Nagbabayad ako mula sa account na nakapangalan sa akin.",
   "safe2": "Magpapadala ako ng eksaktong {amount} kay {holder}, ang pangalan sa order na ito.",
   "safe3": "Reference lang ng order ang nasa payment note: walang salitang crypto, USDT o P2P.",
   "safe4": "Walang nag-utos na magbayad ako sa labas ng parley o sa ibang account.",

@@ -625,7 +625,6 @@
   "outsideHours": "Di luar waktu perniagaan",
   "safeTitle": "Selamat untuk bayar?",
   "safeIntro": "Semak ini sebelum mengesahkan. Ia mencegah kebanyakan penipuan P2P dan bayaran dibekukan.",
-  "safe1": "Saya membayar dari akaun atas nama saya sendiri.",
   "safe2": "Saya menghantar tepat {amount} kepada {holder}, nama pada pesanan ini.",
   "safe3": "Nota bayaran hanya ada rujukan pesanan: tiada perkataan kripto, USDT atau P2P.",
   "safe4": "Tiada sesiapa meminta saya membayar di luar parley atau ke akaun lain.",

@@ -625,7 +625,6 @@
   "outsideHours": "Çalışma saatleri dışında",
   "safeTitle": "Ödemek güvenli mi?",
   "safeIntro": "Onaylamadan önce kontrol edin. P2P dolandırıcılıklarının ve donan ödemelerin çoğunu önler.",
-  "safe1": "Kendi adıma olan bir hesaptan ödüyorum.",
   "safe2": "Tam olarak {amount} tutarını bu siparişteki isim olan {holder} kişisine gönderiyorum.",
   "safe3": "Ödeme açıklamasında yalnızca sipariş referansı var: kripto, USDT veya P2P gibi kelimeler yok.",
   "safe4": "Kimse benden parley dışında veya başka bir hesaba ödeme yapmamı istemedi.",
