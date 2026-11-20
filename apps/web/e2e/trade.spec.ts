@@ -67,8 +67,6 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await expect(seller.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID'); // realtime push
 
   await expect(seller.getByTestId('buyer-signals')).toBeVisible(); // first trade for this buyer
-  await expect(seller.getByTestId('release')).toBeDisabled(); // payer-name check first
-  await seller.getByTestId('payer-confirm').check();
   await seller.getByTestId('release-totp').fill('000000');
   await seller.getByTestId('release').click();
   await expect(seller.getByTestId('error')).toBeVisible();

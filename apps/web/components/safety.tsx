@@ -42,17 +42,3 @@ export function ReceiptChecks({ orderId }: { orderId: string }) {
     </div>
   );
 }
-
-/** "The money came from the buyer's own name" — required before release; a mismatch leads to an appeal instead. */
-export function PayerNameCheck({ name, checked, onChange, onMismatch }: { name?: string | null; checked: boolean; onChange: (v: boolean) => void; onMismatch: () => void }) {
-  const { t } = useI18n();
-  return (
-    <div className="space-y-2">
-      <label className={cn('flex cursor-pointer items-start gap-3 rounded-2xl border p-3 text-[15px]', checked ? 'border-primary bg-primary/10' : 'border-border')}>
-        <input type="checkbox" className="mt-1 h-4 w-4 accent-[var(--color-primary)]" checked={checked} onChange={(e) => onChange(e.target.checked)} data-testid="payer-confirm" />
-        <span>{name ? t('ui.payerMatchNamed', { name }) : t('ui.payerMatchUnverified')}</span>
-      </label>
-      <button type="button" className="text-sm font-semibold text-sell underline underline-offset-4" onClick={onMismatch} data-testid="payer-mismatch">{t('ui.payerMismatch')}</button>
-    </div>
-  );
-}

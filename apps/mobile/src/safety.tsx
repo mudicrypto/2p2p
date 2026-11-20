@@ -39,18 +39,3 @@ export function ReceiptChecks({ orderId }: { orderId: string }) {
     </Card>
   );
 }
-
-export function PayerNameCheck({ name, checked, onChange, onMismatch }: { name?: string | null; checked: boolean; onChange: (v: boolean) => void; onMismatch: () => void }) {
-  const { colors: c } = useApp();
-  const { t } = useI18n();
-  return (
-    <View style={{ gap: 6 }}>
-      <Pressable testID="payer-confirm" accessibilityRole="checkbox" accessibilityState={{ checked }} onPress={() => onChange(!checked)}
-        style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start', padding: 12, borderRadius: 16, borderWidth: 1, borderColor: checked ? c.primary : c.border, backgroundColor: checked ? `${c.primary}1a` : 'transparent' }}>
-        <Ionicons name={checked ? 'checkbox' : 'square-outline'} size={20} color={checked ? c.primary : c.sub} />
-        <Text size="small" style={{ flex: 1 }}>{name ? t('ui.payerMatchNamed', { name }) : t('ui.payerMatchUnverified')}</Text>
-      </Pressable>
-      <Pressable onPress={onMismatch} testID="payer-mismatch"><Text size="small" tone="sell" weight="700" style={{ textDecorationLine: 'underline' }}>{t('ui.payerMismatch')}</Text></Pressable>
-    </View>
-  );
-}
