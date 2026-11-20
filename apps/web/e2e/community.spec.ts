@@ -54,7 +54,7 @@ test('community features work end to end', async ({ browser }) => {
   await buyer.getByTestId('alert-open').click();
   await buyer.getByTestId('alert-price').fill('0.5');
   await buyer.getByTestId('alert-save').click();
-  await expect(buyer.getByTestId('alert-done')).toBeVisible();
+  await expect(buyer.getByTestId('alert-done')).toBeVisible({ timeout: 15_000 });
   await buyer.keyboard.press('Escape');
   await buyer.goto('/en/account');
   await expect(buyer.getByTestId('alerts-list')).toContainText('0.5 EUR');

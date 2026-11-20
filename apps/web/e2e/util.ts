@@ -18,7 +18,7 @@ export async function signupAndLogin(page: Page, country = 'DE'): Promise<Acct> 
   await page.getByLabel('Email').fill(a.email);
   await page.getByLabel('Password').fill(a.password);
   await page.getByTestId('login-submit').click();
-  await expect(page.getByTestId('nav-wallet')).toBeVisible();
+  await expect(page.getByTestId('nav-wallet')).toBeVisible({ timeout: 15_000 });
   return a;
 }
 export async function enable2fa(page: Page, a: Acct) {

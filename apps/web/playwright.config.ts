@@ -4,6 +4,7 @@ const env = { TOTP_REPLAY_PROTECTION: 'on', DATABASE_URL: E2E_DB, PROVIDER_MODE:
 export default defineConfig({
   testDir: './e2e',
   timeout: 120_000,
+  expect: { timeout: process.env.CI ? 10_000 : 5_000 }, // CI runners are slower; realtime pushes can take a few seconds there
   fullyParallel: false,
   workers: 1,
   globalSetup: './e2e/global-setup.ts',

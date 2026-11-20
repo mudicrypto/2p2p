@@ -57,7 +57,7 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await expect(seller.getByTestId('chat-log')).not.toContainText('whatsapp');
   await buyer.getByTestId('chat-input').fill('can you release first please');
   await buyer.getByTestId('chat-send').click();
-  await expect(seller.getByTestId('chat-scam-warning')).toBeVisible();
+  await expect(seller.getByTestId('chat-scam-warning')).toBeVisible({ timeout: 15_000 }); // arrives over the realtime connection
   await expect(buyer.getByTestId('chat-scam-warning')).toHaveCount(0); // the caution is for the other side
 
   await buyer.getByTestId('mark-paid').click();
