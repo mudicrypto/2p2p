@@ -1,11 +1,12 @@
-// Seeds N buyers (with session tokens) and S funded sellers each with one SELL ad. Writes fixtures.json.
+// Seeds N buyers (with session tokens), W warm-up buyers and S funded sellers each with one SELL ad. Writes fixtures.json.
 import { writeFileSync } from 'node:fs';
 import { randomBytes, createHash } from 'node:crypto';
 import { createDb, users, sessions, ads } from '@p2p/db';
 import { createProviders } from '@p2p/providers';
 import { seed, devFaucet, addPaymentMethod, createAd, memoryEvents } from '@p2p/core';
 
-const N = Number(process.env.BUYERS ?? 5000), S = Number(process.env.SELLERS ?? 200);
+const W = Number(process.env.WARMUP_BUYERS ?? 300);
+const N = Number(process.env.BUYERS ?? 5000) + W, S = Number(process.env.SELLERS ?? 200);
 const h = createDb(process.env.DATABASE_URL);
 const ctx = { db: h.db, read: h.db, providers: createProviders('mock'), events: memoryEvents(), now: () => new Date() };
 await seed(h.db);
@@ -25,7 +26,7 @@ for (let i = 0; i < S; i++) {
   const ad = await createAd(ctx, u, { side: 'sell', asset: 'USDT', fiat: 'EUR', priceType: 'fixed', price: '0.95', minAmount: '1', maxAmount: '10000', totalAmount: '1000', paymentMethodIds: [pm.id], paymentWindowMin: 60, terms: '', minCounterpartyTier: 0, acceptReversible: false });
   adIds.push(ad.id);
 }
-writeFileSync(new URL('./fixtures.json', import.meta.url), JSON.stringify({ tokens, adIds }));
-console.log(`seeded ${tokens.length} buyers, ${adIds.length} ads`);
+writeFileSync(new URL('./fixtures.json', import.meta.url), JSON.stringify({ warmup: tokens.slice(0, W), tokens: tokens.slice(W), adIds }));
+console.log(`seeded ${tokens.length - W} buyers (+${W} warm-up), ${adIds.length} ads`);
 await h.close();
 void ads;
