@@ -1,9 +1,10 @@
-import type { AiTriageProvider, ChainRiskProvider, CustodyProvider, KycProvider, Notifier, PaymentVerifier, RateSource, StorageProvider, Translator, VirusScanner } from './interfaces';
+import type { AiTriageProvider, ChainRiskProvider, CustodyProvider, KycProvider, Notifier, PaymentVerifier, RateSource, ReceiptReader, StorageProvider, Translator, VirusScanner } from './interfaces';
 import { HeuristicTriage, MemoryStorage, MockChainRisk, MockCustody, MockKyc, MockNotifier, MockPaymentInbox, MockPaymentVerifier, MockRateSource, MockVirusScanner } from './mock';
 import { ChannelNotifier, PostmarkNotifier, TelegramNotifier, TwilioNotifier, ExpoPushNotifier } from './real/notifiers';
 import { SumsubKyc } from './real/sumsub';
 import { ClaudeTriage } from './real/triage';
 import { ClaudeTranslator, LibreTranslator } from './real/translate';
+import { ClaudeReceiptReader } from './real/receipt';
 import { BinanceRateSource, CoinbaseRateSource, FxCrossRateSource, KrakenRateSource } from './real/rates';
 import { TrmChainRisk } from './real/stubs';
 import { VERIFIER_RAILS, createRealVerifier } from './verifiers';
@@ -22,6 +23,8 @@ export interface Providers {
   triage: AiTriageProvider;
   /** Chat translation; undefined when no service is configured (the feature is then hidden). */
   translator?: Translator;
+  /** Receipt reading for automatic payment-proof checks; undefined when not configured. */
+  receiptReader?: ReceiptReader;
   /** Present in mock mode for tests and the dev simulation endpoints. */
   mocks?: { custody: MockCustody; kyc: MockKyc; chainRisk: MockChainRisk; paymentInbox: MockPaymentInbox; notifier: MockNotifier };
 }
@@ -43,14 +46,15 @@ export function createProviders(mode: 'mock' | 'real' = (process.env.PROVIDER_MO
   const verifiers = new Map<string, PaymentVerifier>();
   for (const rail of VERIFIER_RAILS) verifiers.set(rail, (real && createRealVerifier(rail)) || new MockPaymentVerifier(rail, inbox));
 
-  const notifier = real
-    ? new ChannelNotifier({
-        telegram: has('TELEGRAM_BOT_TOKEN') ? new TelegramNotifier() : undefined,
-        email: has('POSTMARK_TOKEN') ? new PostmarkNotifier() : undefined,
-        sms: has('TWILIO_SID', 'TWILIO_TOKEN', 'TWILIO_FROM') ? new TwilioNotifier() : undefined,
-        push: process.env.PUSH_MODE === 'expo' ? new ExpoPushNotifier() : undefined,
-      }, notifierM)
-    : notifierM;
+  // Delivery channels carry no money, so each one is used as soon as it is configured, even in test mode
+  // (SMS stays mock outside real mode: dev OTP codes are shown in the app instead).
+  const realBot = has('TELEGRAM_BOT_TOKEN') && !/^(disabled-|mock-)/.test(process.env.TELEGRAM_BOT_TOKEN!);
+  const notifier = new ChannelNotifier({
+    telegram: realBot ? new TelegramNotifier() : undefined,
+    email: has('POSTMARK_TOKEN') ? new PostmarkNotifier() : undefined,
+    sms: real && has('TWILIO_SID', 'TWILIO_TOKEN', 'TWILIO_FROM') ? new TwilioNotifier() : undefined,
+    push: process.env.PUSH_MODE === 'expo' ? new ExpoPushNotifier() : undefined,
+  }, notifierM);
 
   const rateSources: RateSource[] = real && process.env.RATES_MODE !== 'mock'
     ? [new BinanceRateSource(), new KrakenRateSource(), new CoinbaseRateSource(), new FxCrossRateSource(new CoinbaseRateSource())]
@@ -71,6 +75,7 @@ export function createProviders(mode: 'mock' | 'real' = (process.env.PROVIDER_MO
     scanner: new MockVirusScanner(), // TODO(provider): ClamAV/vendor scanner
     triage: real && has('ANTHROPIC_API_KEY') ? new ClaudeTriage() : new HeuristicTriage(),
     translator: has('ANTHROPIC_API_KEY') ? new ClaudeTranslator() : has('TRANSLATE_API_URL') ? new LibreTranslator() : undefined,
+    receiptReader: has('ANTHROPIC_API_KEY') ? new ClaudeReceiptReader() : undefined,
     mocks: { custody: custodyM, kyc: kycM, chainRisk: riskM, paymentInbox: inbox, notifier: notifierM },
   };
   assertNoMocksInProduction(providers);

@@ -37,5 +37,11 @@ export DOCKER_BUILDKIT=1
 docker compose -p parley --env-file "$ENV" build
 docker compose -p parley --env-file "$ENV" up -d --remove-orphans
 docker image prune -f >/dev/null
+# Telegram alerts: once a real bot token is in .env, point the bot's webhook at this site (secret derived from the token).
+TG="$(grep '^TELEGRAM_BOT_TOKEN=' "$ENV" | cut -d= -f2-)"
+case "$TG" in disabled-*|"") ;; *)
+  SECRET="$(printf '%s' parley-webhook | openssl dgst -sha256 -hmac "$TG" -r | cut -c1-48)"
+  curl -fsS -m 20 "https://api.telegram.org/bot$TG/setWebhook" -d "url=https://$SITE_HOST/v1/telegram/webhook" -d "secret_token=$SECRET" -d 'allowed_updates=["message"]' >/dev/null || echo "telegram webhook setup failed"
+esac
 docker builder prune -f --filter until=48h >/dev/null 2>&1 || true   # keep build cache from filling the disk
 echo "deployed $SITE_HOST"

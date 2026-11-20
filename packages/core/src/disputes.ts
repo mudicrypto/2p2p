@@ -2,7 +2,7 @@
  * Disputes (spec 7): opening with evidence, AI triage (advisory only), arbiter queue with SLA + escalation,
  * decisions that write ledger transactions + audit, repeat-offender auto-freeze.
  */
-import { disputes, disputeEvidence, orders, chatMessages, paymentConfirmations, users, and, eq, inArray, asc, sql } from '@p2p/db';
+import { disputes, disputeEvidence, orders, chatMessages, paymentConfirmations, receiptChecks, users, and, eq, inArray, asc, sql } from '@p2p/db';
 import { DomainError, type OrderActor } from '@p2p/shared';
 import type { Ctx } from './context';
 import { runTx } from './context';
@@ -173,9 +173,11 @@ export async function getDisputeDetail(ctx: Ctx, disputeId: string) {
   const chat = await ctx.db.select().from(chatMessages).where(eq(chatMessages.orderId, o.id)).orderBy(asc(chatMessages.id));
   const evidence = await ctx.db.select().from(disputeEvidence).where(eq(disputeEvidence.disputeId, d.id));
   const confirmations = await ctx.db.select().from(paymentConfirmations).where(eq(paymentConfirmations.orderId, o.id));
+  const receipts = await ctx.db.select().from(receiptChecks).where(eq(receiptChecks.orderId, o.id));
   return {
     dispute: d, order: o,
-    chat: chat.map((c) => ({ id: c.id.toString(), senderId: c.senderId, body: c.body, attachmentKey: c.attachmentKey, flagged: c.flagged, system: c.system, createdAt: c.createdAt })),
+    receiptChecks: receipts.map((r) => ({ fileKey: r.fileKey, flags: r.flags, extracted: r.extracted, createdAt: r.createdAt })),
+    chat: chat.map((c) => ({ id: c.id.toString(), senderId: c.senderId, body: c.body, attachmentKey: c.attachmentKey, flagged: c.flagged, system: c.system, warning: c.warning, createdAt: c.createdAt })),
     evidence: evidence.map((e) => ({ id: e.id.toString(), userId: e.userId, fileKey: e.fileKey, note: e.note, createdAt: e.createdAt })),
     paymentConfirmations: confirmations.map((p) => ({ provider: p.provider, providerRef: p.providerRef, amountMatch: p.amountMatch, referenceMatch: p.referenceMatch, nameMatch: p.nameMatch, createdAt: p.createdAt })),
   };

@@ -78,6 +78,9 @@ export interface VirusScanner { scan(body: Buffer): Promise<{ clean: boolean; si
 // ---- LLM triage (disputes). Never decides; recommendation only.
 export interface TriageInput { orderSummary: Record<string, unknown>; chat: Array<{ from: string; body: string; at: string }>; evidenceNotes: string[]; verifierData: unknown[] }
 export interface TriageOutput { summary: string; recommendation: 'release' | 'refund' | 'split' | 'unclear'; confidence: number; rationale: string }
+export interface ReceiptFields { amount?: string; currency?: string; payerName?: string; payeeName?: string; date?: string; reference?: string }
+/** Reads amount/names from a payment receipt image. Absent when no service is configured. */
+export interface ReceiptReader { read(image: Buffer, contentType: string): Promise<ReceiptFields> }
 /** Translates trade-chat messages. Absent when no translation service is configured. */
 export interface Translator { readonly name: string; translate(text: string, target: string): Promise<string> }
 export interface AiTriageProvider { triage(input: TriageInput): Promise<TriageOutput> }

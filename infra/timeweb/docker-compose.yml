@@ -11,6 +11,11 @@ x-app-env: &app-env
   DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY}
   MOCK_WEBHOOK_SECRET: ${MOCK_WEBHOOK_SECRET}
   TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   # random: disables the public dev token until a real bot exists
+  TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}   # e.g. parley_alerts_bot, together with a real TELEGRAM_BOT_TOKEN
+  PUSH_MODE: ${PUSH_MODE:-expo}                        # phone push via Expo (Android also needs FCM credentials in the Expo project)
+  EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}            # optional: chat translation + automatic receipt reading
+  TRANSLATE_API_URL: ${TRANSLATE_API_URL:-}            # optional: LibreTranslate server for chat translation
   METRICS_TOKEN: ${METRICS_TOKEN}
   TOTP_REPLAY_PROTECTION: "on"
   WEBAUTHN_RP_ID: ${SITE_HOST}

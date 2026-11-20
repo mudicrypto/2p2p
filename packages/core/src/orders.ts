@@ -27,6 +27,7 @@ import { isBlockedBetween } from './community';
 import { presentMessage } from './chat';
 import { recomputeReputation } from './reputation';
 import { onCorridorLegSettled } from './corridors';
+import { buyerSignals, buyerVerifiedName } from './safety';
 
 export type Order = typeof orders.$inferSelect;
 const REF_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -246,12 +247,12 @@ export async function cancelOrder(ctx: Ctx, user: User, orderId: string, reason 
   });
 }
 
-export async function releaseOrder(ctx: Ctx, user: User, orderId: string, totp: string | undefined, opts: { skip2fa?: boolean } = {}) {
+export async function releaseOrder(ctx: Ctx, user: User, orderId: string, totp: string | undefined, opts: { skip2fa?: boolean; payerNameConfirmed?: boolean } = {}) {
   if (!opts.skip2fa) await require2fa(ctx, user, totp);
   return runTx(ctx, async (t) => {
     const o = await lockOrder(t, orderId);
     if (o.sellerId !== user.id) throw new DomainError('FORBIDDEN', 'only the seller can release');
-    const u = await transition(t, o, 'RELEASE', 'seller', user.id, undefined, { releasedAt: ctx.now() });
+    const u = await transition(t, o, 'RELEASE', 'seller', user.id, undefined, { releasedAt: ctx.now(), ...(opts.payerNameConfirmed !== undefined ? { payerNameConfirmed: opts.payerNameConfirmed } : {}) });
     await applyEscrow(ctx, t, o, 'release');
     return u;
   });
@@ -319,7 +320,11 @@ export async function presentOrder(ctx: Ctx, o: Order, viewerId: string) {
   }
   const [cp] = await ctx.db.select({ id: users.id, displayName: users.displayName, kycTier: users.kycTier }).from(users).where(eq(users.id, role === 'buyer' ? o.sellerId : o.buyerId));
   const trading = await getConfig(ctx.db, 'trading');
+  // Seller-only safety info while the order is open: facts about the buyer and their verified name for the payer-name check.
+  const open = ['AWAITING_PAYMENT', 'PAID', 'DISPUTED'].includes(o.status);
+  const sellerView = role === 'seller' && open ? { buyerSignals: await buyerSignals(ctx, o), buyerVerifiedName: await buyerVerifiedName(ctx, o.buyerId) } : {};
   return {
+    ...sellerView, payerNameConfirmed: o.payerNameConfirmed ?? null,
     id: o.id, adId: o.adId, role, status: o.status, asset: o.asset, fiat: o.fiat,
     cryptoAmount: fromMinor(o.cryptoAmount, dec), fiatAmount: fromMinor(o.fiatAmount, fd), price: formatPrice(o.price, fd),
     fee: fromMinor(o.feeAmount, dec), feePayer: o.feePayer, referenceCode: o.referenceCode, paymentType: o.paymentType,

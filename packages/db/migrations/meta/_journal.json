@@ -50,6 +50,20 @@
       "when": 1795155788814,
       "tag": "0006_parity_batch2",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795159251637,
+      "tag": "0007_safety",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795159488987,
+      "tag": "0008_growth",
+      "breakpoints": true
     }
   ]
 }

@@ -99,7 +99,7 @@ export class TradingController {
   @Post('orders/:id/cancel') @HttpCode(200)
   async cancel(@CurrentUser() u: User, @Param('id', uuid) id: string) { return presentOrder(this.ctx, await cancelOrder(this.ctx, u, id), u.id); }
   @Post('orders/:id/release') @HttpCode(200)
-  async release(@CurrentUser() u: User, @Param('id', uuid) id: string, @Body(new Zod(z.object({ totp: z.string().regex(/^\d{6}$/) }), 'ReleaseOrder')) b: { totp: string }) {
-    return presentOrder(this.ctx, await releaseOrder(this.ctx, u, id, b.totp), u.id);
+  async release(@CurrentUser() u: User, @Param('id', uuid) id: string, @Body(new Zod(z.object({ totp: z.string().regex(/^\d{6}$/), payerNameConfirmed: z.boolean().optional() }), 'ReleaseOrder')) b: { totp: string; payerNameConfirmed?: boolean }) {
+    return presentOrder(this.ctx, await releaseOrder(this.ctx, u, id, b.totp, { payerNameConfirmed: b.payerNameConfirmed }), u.id);
   }
 }

@@ -15,6 +15,8 @@ export const CONFIG_DEFAULTS = {
   referral: { enabled: true, rewardAsset: 'USDT', rewardAmount: '5', minTradeUsdCents: 2_000 },
   // Reminders to a seller who hasn't released after the buyer marked the order paid.
   releaseReminders: { afterMin: [10, 30] as number[] },
+  // Paid ad promotion: price per day (charged in USDT to the platform fee account), how many promoted slots show per market.
+  promotion: { pricePerDayUsdt: '2', maxDays: 30, slots: 2 },
   merchants: { minDepositUsdCents: 500_000, levels: [{ level: 1, volume30dUsdCents: 0 }, { level: 2, volume30dUsdCents: 10_000_000 }, { level: 3, volume30dUsdCents: 100_000_000 }] as Array<{ level: number; volume30dUsdCents: number }> },
 };
 export type ConfigKey = keyof typeof CONFIG_DEFAULTS;

@@ -277,6 +277,7 @@ export const ads = pgTable('ads', {
   minAccountAgeDays: integer('min_account_age_days').notNull().default(0), // counterparty conditions
   minCompletedTrades: integer('min_completed_trades').notNull().default(0),
   autoReply: text('auto_reply').notNull().default(''), // sent to the counterparty when an order opens
+  promotedUntil: ts('promoted_until'), // paid promotion: shown in the Promoted slots above the offer list
   status: text('status').notNull().default('active'), // active | paused | closed
   createdAt: createdAt(),
   updatedAt: ts('updated_at').notNull().defaultNow(),
@@ -310,6 +311,7 @@ export const orders = pgTable('orders', {
   paidAt: ts('paid_at'),
   releasedAt: ts('released_at'),
   releaseReminders: smallint('release_reminders').notNull().default(0), // reminders sent to the seller while PAID
+  payerNameConfirmed: boolean('payer_name_confirmed'), // seller's answer at release: money came from the buyer's own name
   cancelledAt: ts('cancelled_at'),
   expiresAt: ts('expires_at').notNull(),
   autoConfirmed: boolean('auto_confirmed').notNull().default(false),
@@ -362,8 +364,38 @@ export const chatMessages = pgTable('chat_messages', {
   attachmentStatus: text('attachment_status'), // pending_scan | clean | infected
   flagged: boolean('flagged').notNull().default(false),
   system: boolean('system').notNull().default(false),
+  warning: text('warning'), // scam pattern detected: shown to the other party as a caution, message still delivered
   createdAt: createdAt(),
 }, (t) => [index('chat_order_idx').on(t.orderId, t.id)]);
+
+/** Automatic checks on payment receipts uploaded by buyers. */
+export const receiptChecks = pgTable('receipt_checks', {
+  fileKey: text('file_key').primaryKey(),
+  orderId: uuid('order_id').notNull().references(() => orders.id),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  sha256: text('sha256').notNull(),
+  flags: jsonb('flags').$type<string[]>().notNull(),
+  extracted: jsonb('extracted').$type<{ amount?: string; currency?: string; payerName?: string; payeeName?: string; date?: string; reference?: string } | null>(),
+  createdAt: createdAt(),
+}, (t) => [index('receipt_checks_hash_idx').on(t.sha256), index('receipt_checks_order_idx').on(t.orderId)]);
+
+/** Best P2P prices and the market rate over time (worker snapshots every 5 minutes) for the price chart. */
+export const priceSnapshots = pgTable('price_snapshots', {
+  id: bigserial('id', { mode: 'bigint' }).primaryKey(),
+  asset: text('asset').notNull(),
+  fiat: text('fiat').notNull(),
+  bestAsk: amount('best_ask'), // cheapest sell ad (what buyers pay)
+  bestBid: amount('best_bid'), // highest buy ad (what sellers get)
+  market: amount('market'),
+  at: ts('at').notNull(),
+}, (t) => [index('price_snapshots_pair_idx').on(t.asset, t.fiat, t.at)]);
+
+/** One-time codes that link a Telegram chat to an account for alerts. */
+export const telegramLinks = pgTable('telegram_links', {
+  code: text('code').primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  expiresAt: ts('expires_at').notNull(),
+});
 
 export const savedSearches = pgTable('saved_searches', {
   id: uuid('id').primaryKey().defaultRandom(),

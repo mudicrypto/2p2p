@@ -34,3 +34,6 @@ export * from './merchants';
 export * from './merchant-api';
 export * from './community';
 export * from './parity';
+export * from './safety';
+export * from './growth';
+export * from './tg-alerts';

@@ -23,7 +23,7 @@ const NEGATIVE_ALLOWED = new Set<AccountKind>(['custody']);
 
 export type LedgerTxType =
   | 'deposit' | 'withdraw' | 'withdraw_reverse' | 'withdraw_complete' | 'escrow_lock' | 'escrow_release' | 'escrow_refund' | 'escrow_split'
-  | 'fee' | 'insurance_payout' | 'internal_transfer' | 'hold_release' | 'security_deposit' | 'security_deposit_return' | 'adjustment' | 'referral_reward';
+  | 'fee' | 'insurance_payout' | 'internal_transfer' | 'hold_release' | 'security_deposit' | 'security_deposit_return' | 'adjustment' | 'referral_reward' | 'ad_promotion';
 
 export interface Posting { account: AccountRef; amount: bigint }
 export interface PostTxInput { type: LedgerTxType; refType?: string; refId?: string; idempotencyKey: string; postings: Posting[] }

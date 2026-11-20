@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   setNickname, setAwayMode, follow, block, listRelations, relationTo, setAntiPhishingCode, referralInfo,
   createPriceAlert, listPriceAlerts, deletePriceAlert, createOtcRequest, listOtcRequests, setBusinessHours, type BusinessHours, type User,
-  listSavedSearches, saveSearch, deleteSavedSearch, translateChatMessage, translationEnabled, referralRewardsInfo,
+  listReceiptChecks, listSavedSearches, saveSearch, deleteSavedSearch, translateChatMessage, translationEnabled, referralRewardsInfo,
 } from '@p2p/core';
 import { DomainError, zAsset, zFiat } from '@p2p/shared';
 import { CTX, type Ctx } from '../common/ctx';
@@ -92,6 +92,10 @@ export class CommunityController {
     if (!/^\d{1,19}$/.test(messageId)) throw new DomainError('VALIDATION', 'bad message id');
     return translateChatMessage(this.ctx, u, id, messageId, b.target);
   }
+
+  // ------------------------------------------------------------ receipt checks
+  @Get('orders/:id/receipt-checks')
+  receipts(@CurrentUser() u: User, @Param('id', uuid) id: string) { return listReceiptChecks(this.ctx, u.id, id); }
 
   // ------------------------------------------------------------ invite rewards
   @Get('me/referral/rewards')

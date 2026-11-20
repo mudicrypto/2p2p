@@ -46,3 +46,5 @@ JOBS['orders.release_reminders'] = (ctx) => core.sendReleaseReminders(ctx).then(
 SCHEDULES.push({ name: 'orders.release_reminders', everyMs: 60_000 });
 JOBS['referrals.pay'] = (ctx) => core.payReferralRewards(ctx).then(() => undefined);
 SCHEDULES.push({ name: 'referrals.pay', everyMs: 300_000 });
+JOBS['prices.snapshot'] = (ctx) => core.snapshotPrices(ctx).then(() => undefined);
+SCHEDULES.push({ name: 'prices.snapshot', everyMs: 300_000 });

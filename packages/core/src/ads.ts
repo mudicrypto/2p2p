@@ -1,5 +1,6 @@
 /** Ads (fixed and floating) and the order book. */
-import { ads, users, reputation, merchantProfiles, and, eq, sql, desc, asc, gte, lte, inArray, notInArray, ilike } from '@p2p/db';
+import { ads, users, reputation, merchantProfiles, and, eq, sql, desc, asc, gt, gte, lte, inArray, notInArray, ilike } from '@p2p/db';
+import { getConfig } from './config';
 import { DomainError, toMinor, parsePrice, assetDecimals, formatPrice, fromMinor, tierCanCreateAds, cryptoToFiat, type Asset, type CreateAdInput } from '@p2p/shared';
 import type { Ctx } from './context';
 import { runTx } from './context';
@@ -158,13 +159,21 @@ export async function orderBook(ctx: Ctx, q: BookQuery, viewerId?: string) {
   if (q.minTier !== undefined) conds.push(gte(users.kycTier, q.minTier));
   if (q.merchantOnly) conds.push(eq(users.isMerchant, true));
   const offset = q.cursor ? Number(Buffer.from(q.cursor, 'base64url').toString()) || 0 : 0;
-  const rows = await ctx.read.select({ ad: ads, u: { id: users.id, displayName: users.displayName, kycTier: users.kycTier, isMerchant: users.isMerchant, createdAt: users.createdAt, lastSeenAt: users.lastSeenAt }, rep: reputation, m: { badge: merchantProfiles.verifiedBadge, level: merchantProfiles.level } })
-    .from(ads).innerJoin(users, eq(users.id, ads.userId)).leftJoin(reputation, eq(reputation.userId, ads.userId)).leftJoin(merchantProfiles, eq(merchantProfiles.userId, ads.userId))
-    .where(and(...conds))
+  const base = () => ctx.read.select({ ad: ads, u: { id: users.id, displayName: users.displayName, kycTier: users.kycTier, isMerchant: users.isMerchant, createdAt: users.createdAt, lastSeenAt: users.lastSeenAt }, rep: reputation, m: { badge: merchantProfiles.verifiedBadge, level: merchantProfiles.level } })
+    .from(ads).innerJoin(users, eq(users.id, ads.userId)).leftJoin(reputation, eq(reputation.userId, ads.userId)).leftJoin(merchantProfiles, eq(merchantProfiles.userId, ads.userId));
+  const rows = await base().where(and(...conds))
     .orderBy(adSide === 'sell' ? asc(ads.price) : desc(ads.price), desc(reputation.completionRateBps), asc(ads.createdAt))
     .limit(q.limit + 1).offset(offset);
-  const items = rows.slice(0, q.limit).map((r) => ({ ...presentAd(r.ad, fd, r.u, r.rep, r.m), following: !!rel?.following.has(r.ad.userId) }));
-  return { items, nextCursor: rows.length > q.limit ? Buffer.from(String(offset + q.limit)).toString('base64url') : null };
+  const present = (r: (typeof rows)[number]) => ({ ...presentAd(r.ad, fd, r.u, r.rep, r.m), following: !!rel?.following.has(r.ad.userId) });
+  const items = rows.slice(0, q.limit).map(present);
+  // Paid promotion: a few slots above the list (first page only), drawn from ads that also match every filter.
+  let promoted: ReturnType<typeof present>[] = [];
+  if (!offset) {
+    const { slots } = await getConfig(ctx.read, 'promotion');
+    const p = await base().where(and(...conds, gt(ads.promotedUntil, ctx.now()))).orderBy(sql`random()`).limit(slots);
+    promoted = p.map((r) => ({ ...present(r), promoted: true }));
+  }
+  return { items, promoted, nextCursor: rows.length > q.limit ? Buffer.from(String(offset + q.limit)).toString('base64url') : null };
 }
 const assetDecimalsSql = (a: string) => sql.raw(String(assetDecimals(a as Asset)));
 
@@ -175,7 +184,7 @@ export function presentAd(ad: Ad, fd: number, u?: any, rep?: any, m?: any) {
     id: ad.id, side: ad.side, asset: ad.asset, fiat: ad.fiat, priceType: ad.priceType, marginBps: ad.marginBps,
     price: formatPrice(ad.price!, fd), minAmount: fromMinor(ad.minAmount, fd), maxAmount: fromMinor(ad.maxAmount < maxByRemaining ? ad.maxAmount : maxByRemaining, fd),
     totalAmount: fromMinor(ad.totalAmount, ad_), remainingAmount: fromMinor(ad.remainingAmount, ad_), paymentTypes: ad.paymentTypes,
-    paymentWindowMin: ad.paymentWindowMin, terms: ad.terms, minCounterpartyTier: ad.minCounterpartyTier, status: ad.status, createdAt: ad.createdAt,
+    paymentWindowMin: ad.paymentWindowMin, terms: ad.terms, minCounterpartyTier: ad.minCounterpartyTier, status: ad.status, createdAt: ad.createdAt, promotedUntil: ad.promotedUntil ?? null,
     minAccountAgeDays: ad.minAccountAgeDays, minCompletedTrades: ad.minCompletedTrades, autoReply: ad.autoReply,
     advertiser: u ? {
       id: u.id, displayName: u.displayName ?? `user-${String(u.id).slice(0, 6)}`, kycTier: u.kycTier, isMerchant: u.isMerchant, verifiedBadge: !!m?.badge, merchantLevel: m?.level ?? 0,

@@ -5,6 +5,7 @@ import { randomToken } from './crypto';
 import type { Ctx } from './context';
 import { runTx } from './context';
 import { filterChat } from './chat-filter';
+import { checkReceipt, scamWarning } from './safety';
 import { flag } from './risk';
 import { notify } from './notifications';
 import type { User } from './auth';
@@ -28,6 +29,8 @@ export async function uploadAttachment(ctx: Ctx, user: User, orderId: string, bo
   if (!scan.clean) throw new DomainError('VALIDATION', 'file rejected by virus scan');
   const key = `orders/${orderId}/${randomToken(18)}`;
   await ctx.providers.storage.put(key, body, sniffed);
+  // Buyer uploads are payment proofs: run the automatic receipt checks (never blocks the upload).
+  await checkReceipt(ctx, orderId, user.id, key, body, sniffed).catch(() => null);
   return { key, contentType: sniffed };
 }
 export function sniff(b: Buffer): string | null {
@@ -51,7 +54,7 @@ export async function sendChatMessage(ctx: Ctx, user: User, orderId: string, bod
     throw new DomainError('FORBIDDEN', 'message blocked: keep communication and payment on-platform', { reasons: f.reasons });
   }
   return runTx(ctx, async (t) => {
-    const [m] = await t.tx.insert(chatMessages).values({ orderId, senderId: user.id, body: text, attachmentKey, attachmentStatus: attachmentKey ? 'clean' : null }).returning();
+    const [m] = await t.tx.insert(chatMessages).values({ orderId, senderId: user.id, body: text, attachmentKey, attachmentStatus: attachmentKey ? 'clean' : null, warning: text ? scamWarning(text) : null }).returning();
     const other = o.buyerId === user.id ? o.sellerId : o.buyerId;
     t.emit({ type: 'chat.message', orderId, payload: presentMessage(m) });
     await notify(t, t.tx, other, 'chat_message', { orderId });
@@ -60,7 +63,7 @@ export async function sendChatMessage(ctx: Ctx, user: User, orderId: string, bod
 }
 
 export function presentMessage(m: typeof chatMessages.$inferSelect) {
-  return { id: m.id.toString(), orderId: m.orderId, senderId: m.senderId, body: m.body, attachmentKey: m.attachmentKey, system: m.system, createdAt: m.createdAt };
+  return { id: m.id.toString(), orderId: m.orderId, senderId: m.senderId, body: m.body, attachmentKey: m.attachmentKey, system: m.system, warning: m.warning ?? null, createdAt: m.createdAt };
 }
 export async function listChat(ctx: Ctx, user: User, orderId: string, afterId?: bigint) {
   await participantOrder(ctx, user.id, orderId);
