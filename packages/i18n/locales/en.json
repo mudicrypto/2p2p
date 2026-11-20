@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "This ad is no longer available",
   "SELF_TRADE": "You can't trade with your own ad",
   "VALIDATION": "Please check the form",
-  "ILLEGAL_TRANSITION": "This action is no longer possible"
+  "ILLEGAL_TRANSITION": "This action is no longer possible",
+  "EMAIL_UNVERIFIED": "Please confirm your email first. Open the link we sent you, or get a new one in your account."
  },
  "corridor": {
   "title": "Send across borders",

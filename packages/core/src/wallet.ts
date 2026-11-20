@@ -10,7 +10,7 @@ import type { Ctx } from './context';
 import { runTx } from './context';
 import { audit } from './audit';
 import { postTx, userAcct, systemAcct, balanceOf } from './ledger';
-import { getConfig } from './config';
+import { getConfig, assertEmailVerified } from './config';
 import { consumeWithdrawLimit, usdCents, reloadUser } from './limits';
 import { require2fa, type User } from './auth';
 import { flag } from './risk';
@@ -127,6 +127,7 @@ export async function requestWithdrawal(ctx: Ctx, userIn: User, input: { asset: 
   if (wcfg.paused) throw new DomainError('WITHDRAWALS_PAUSED', 'withdrawals are temporarily paused');
   const user = await reloadUser(ctx.db, userIn.id);
   if (user.status !== 'active') throw new DomainError('ACCOUNT_FROZEN', 'account not active');
+  await assertEmailVerified(ctx.db, user);
   await require2fa(ctx, user, input.totp);
   assertAddress(input.asset, input.network, input.address);
   const cd = await getConfig(ctx.db, 'cooldowns');

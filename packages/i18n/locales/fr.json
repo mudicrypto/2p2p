@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Cette annonce n'est plus disponible",
   "SELF_TRADE": "Vous ne pouvez pas échanger avec votre propre annonce",
   "VALIDATION": "Veuillez vérifier le formulaire",
-  "ILLEGAL_TRANSITION": "Cette action n'est plus possible"
+  "ILLEGAL_TRANSITION": "Cette action n'est plus possible",
+  "EMAIL_UNVERIFIED": "Confirmez d'abord votre e-mail. Ouvrez le lien envoyé ou demandez-en un nouveau dans votre compte."
  },
  "corridor": {
   "title": "Envoi transfrontalier",

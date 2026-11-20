@@ -56,6 +56,11 @@ test('unconfirmed email: banner and resend link', async ({ page }) => {
   await page.getByLabel('Password').fill(password);
   await page.getByTestId('login-submit').click();
   await expect(page.getByTestId('nav-wallet')).toBeVisible({ timeout: 15_000 });
+  // Trading actions wait for the confirmed email.
+  const csrf = decodeURIComponent((await page.context().cookies()).find((c) => c.name === 'csrf')?.value ?? '');
+  const blocked = await page.request.post('/v1/wallet/withdrawals', { data: { asset: 'USDT', network: 'TRON', address: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE', amount: '1', totp: '123456' }, headers: { 'x-csrf-token': csrf, 'idempotency-key': uniq() } });
+  expect(blocked.status()).toBe(403);
+  expect((await blocked.json()).error).toBe('EMAIL_UNVERIFIED');
   await page.goto('/en/account');
   await expect(page.getByTestId('email-unverified')).toBeVisible();
   await page.getByTestId('resend-email').click();

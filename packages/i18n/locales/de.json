@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Diese Anzeige ist nicht mehr verfügbar",
   "SELF_TRADE": "Du kannst nicht mit deiner eigenen Anzeige handeln",
   "VALIDATION": "Bitte prüfe das Formular",
-  "ILLEGAL_TRANSITION": "Diese Aktion ist nicht mehr möglich"
+  "ILLEGAL_TRANSITION": "Diese Aktion ist nicht mehr möglich",
+  "EMAIL_UNVERIFIED": "Bitte bestätige zuerst deine E-Mail. Öffne den gesendeten Link oder fordere in deinem Konto einen neuen an."
  },
  "corridor": {
   "title": "Grenzüberschreitend senden",

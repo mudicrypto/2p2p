@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Este anúncio não está mais disponível",
   "SELF_TRADE": "Você não pode negociar com o seu próprio anúncio",
   "VALIDATION": "Verifique o formulário",
-  "ILLEGAL_TRANSITION": "Esta ação não é mais possível"
+  "ILLEGAL_TRANSITION": "Esta ação não é mais possível",
+  "EMAIL_UNVERIFIED": "Confirme seu e-mail primeiro. Abra o link que enviamos ou peça outro na sua conta."
  },
  "corridor": {
   "title": "Envio entre países",

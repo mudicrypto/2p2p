@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Ìpolówó yìí kò sí mọ́",
   "SELF_TRADE": "O kò lè ṣòwò pẹ̀lú ìpolówó tirẹ",
   "VALIDATION": "Jọ̀wọ́ ṣàyẹ̀wò fọ́ọ̀mù náà",
-  "ILLEGAL_TRANSITION": "Ìgbésẹ̀ yìí kò ṣeé ṣe mọ́"
+  "ILLEGAL_TRANSITION": "Ìgbésẹ̀ yìí kò ṣeé ṣe mọ́",
+  "EMAIL_UNVERIFIED": "Jọ̀wọ́ kọ́kọ́ jẹ́rìí ímeèlì rẹ. Ṣí ìjápọ̀ tí a fi ránṣẹ́ tàbí gba tuntun nínú àkọọ́lẹ̀ rẹ."
  },
  "corridor": {
   "title": "Fi ránṣẹ́ sí orílẹ̀-èdè mìíràn",

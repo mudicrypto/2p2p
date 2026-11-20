@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Quảng cáo này không còn khả dụng",
   "SELF_TRADE": "Bạn không thể giao dịch với quảng cáo của chính mình",
   "VALIDATION": "Vui lòng kiểm tra biểu mẫu",
-  "ILLEGAL_TRANSITION": "Không thể thực hiện thao tác này nữa"
+  "ILLEGAL_TRANSITION": "Không thể thực hiện thao tác này nữa",
+  "EMAIL_UNVERIFIED": "Vui lòng xác nhận email trước. Mở liên kết chúng tôi đã gửi hoặc nhận liên kết mới trong tài khoản."
  },
  "corridor": {
   "title": "Chuyển tiền xuyên biên giới",

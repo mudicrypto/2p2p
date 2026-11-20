@@ -1,6 +1,6 @@
 /** Ads (fixed and floating) and the order book. */
 import { ads, users, reputation, merchantProfiles, and, eq, sql, desc, asc, gt, gte, lte, inArray, notInArray, ilike } from '@p2p/db';
-import { getConfig } from './config';
+import { getConfig, assertEmailVerified } from './config';
 import { DomainError, toMinor, parsePrice, assetDecimals, formatPrice, fromMinor, tierCanCreateAds, cryptoToFiat, type Asset, type CreateAdInput } from '@p2p/shared';
 import type { Ctx } from './context';
 import { runTx } from './context';
@@ -19,6 +19,7 @@ export type Ad = typeof ads.$inferSelect;
 export async function createAd(ctx: Ctx, user: User, input: CreateAdInput) {
   if (user.status !== 'active') throw new DomainError('ACCOUNT_FROZEN', 'account not active');
   if (!tierCanCreateAds(user.kycTier)) throw new DomainError('TIER_REQUIRED', 'not allowed to create ads');
+  await assertEmailVerified(ctx.db, user);
   await assertCountryAllowed(ctx.db, user.country);
   const asset = input.asset as Asset;
   const fiat = await getFiat(ctx.db, input.fiat);

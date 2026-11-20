@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Wannan tallan baya samuwa yanzu",
   "SELF_TRADE": "Ba za ka iya ciniki da tallanka ba",
   "VALIDATION": "Da fatan duba fom ɗin",
-  "ILLEGAL_TRANSITION": "Wannan aikin ba zai yiwu ba yanzu"
+  "ILLEGAL_TRANSITION": "Wannan aikin ba zai yiwu ba yanzu",
+  "EMAIL_UNVERIFIED": "Da fatan za a tabbatar da imel ɗinka tukuna. Buɗe hanyar haɗin da muka aiko ko nemi sabo a asusunka."
  },
  "corridor": {
   "title": "Aika zuwa wata ƙasa",

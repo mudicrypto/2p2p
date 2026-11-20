@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "この広告は利用できなくなりました",
   "SELF_TRADE": "自分の広告とは取引できません",
   "VALIDATION": "入力内容をご確認ください",
-  "ILLEGAL_TRANSITION": "この操作は実行できなくなりました"
+  "ILLEGAL_TRANSITION": "この操作は実行できなくなりました",
+  "EMAIL_UNVERIFIED": "先にメールアドレスを確認してください。送信したリンクを開くか、アカウントで新しいリンクを受け取ってください。"
  },
  "corridor": {
   "title": "海外送金",

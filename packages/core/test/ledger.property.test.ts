@@ -9,7 +9,7 @@ const ctx = makeCtx();
 afterAll(() => ctx.close());
 
 async function mkUsers(n: number) {
-  const rows = await ctx.db.insert(users).values(Array.from({ length: n }, () => ({ email: `${uniq()}@t.io`, country: 'DE' }))).returning({ id: users.id });
+  const rows = await ctx.db.insert(users).values(Array.from({ length: n }, () => ({ email: `${uniq()}@t.io`, emailVerifiedAt: new Date(), country: 'DE' }))).returning({ id: users.id });
   return rows.map((r) => r.id);
 }
 

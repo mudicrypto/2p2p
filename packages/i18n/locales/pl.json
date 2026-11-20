@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "To ogłoszenie nie jest już dostępne",
   "SELF_TRADE": "Nie możesz handlować z własnym ogłoszeniem",
   "VALIDATION": "Sprawdź formularz",
-  "ILLEGAL_TRANSITION": "Ta czynność nie jest już możliwa"
+  "ILLEGAL_TRANSITION": "Ta czynność nie jest już możliwa",
+  "EMAIL_UNVERIFIED": "Najpierw potwierdź e-mail. Otwórz wysłany link lub poproś o nowy na swoim koncie."
  },
  "corridor": {
   "title": "Przelew między krajami",

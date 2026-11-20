@@ -12,7 +12,7 @@ import type { Ctx, TxCtx } from './context';
 import { runTx } from './context';
 import { audit } from './audit';
 import { postTx, userAcct, systemAcct, type Posting } from './ledger';
-import { getConfig } from './config';
+import { getConfig, assertEmailVerified } from './config';
 import { computeFee } from './fees';
 import { fiatDecimals } from './fiat';
 import { getReferencePrice, floatingPrice } from './rates';
@@ -51,6 +51,7 @@ export async function createOrderInTx(ctx: Ctx, t: TxCtx, takerIn: User, input: 
     if (!ad || ad.status !== 'active') throw new DomainError('AD_UNAVAILABLE', 'ad not available');
     if (ad.userId === taker.id) throw new DomainError('SELF_TRADE', 'cannot trade with your own ad');
     if (taker.status !== 'active') throw new DomainError('ACCOUNT_FROZEN', 'account not active');
+    await assertEmailVerified(t.tx, taker);
     if (taker.kycTier < ad.minCounterpartyTier) throw new DomainError('TIER_REQUIRED', `advertiser requires tier ${ad.minCounterpartyTier}+`);
     const maker = await reloadUser(t.tx, ad.userId);
     if (maker.status !== 'active' || maker.awayMode || maker.offHours) throw new DomainError('AD_UNAVAILABLE', 'advertiser unavailable');

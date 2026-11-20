@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Tangazo hili halipatikani tena",
   "SELF_TRADE": "Huwezi kufanya biashara na tangazo lako mwenyewe",
   "VALIDATION": "Tafadhali kagua fomu",
-  "ILLEGAL_TRANSITION": "Kitendo hiki hakiwezekani tena"
+  "ILLEGAL_TRANSITION": "Kitendo hiki hakiwezekani tena",
+  "EMAIL_UNVERIFIED": "Tafadhali thibitisha barua pepe yako kwanza. Fungua kiungo tulichotuma au pata kipya kwenye akaunti yako."
  },
  "corridor": {
   "title": "Tuma nje ya nchi",

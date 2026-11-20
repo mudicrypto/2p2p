@@ -3,7 +3,7 @@ import { users, orders, chatMessages, notifications, eq, and } from '@p2p/db';
 import { makeCtx, mkUser, sellAd, ensureSeed, uniq } from './helpers';
 import {
   saveSearch, listSavedSearches, deleteSavedSearch, sendReleaseReminders, trustScore, translateChatMessage, payReferralRewards,
-  referralRewardsInfo, rewardsBalance, createOrder, markPaid, signupEmail, referralInfo, publicProfile, postTx, systemAcct, balanceOf, userAcct,
+  referralRewardsInfo, rewardsBalance, createOrder, markPaid, signupEmail, verifyEmail, referralInfo, publicProfile, postTx, systemAcct, balanceOf, userAcct,
   runTx, setConfig, sendChatMessage,
 } from '../src';
 
@@ -85,6 +85,7 @@ describe('P2P parity features', () => {
     const inviter = await mkUser(ctx);
     const { code } = await referralInfo(ctx, inviter);
     const s = await signupEmail(ctx, { email: `${uniq()}@t.io`, password: 'correct horse battery', country: 'DE', ref: code! });
+    await verifyEmail(ctx, s.emailToken);
     const invitee = (await ctx.db.select().from(users).where(eq(users.id, s.user.id)))[0];
     const { ad } = await sellAd(ctx, { price: '0.85' });
     // A trade below the minimum value doesn't count.
@@ -106,5 +107,23 @@ describe('P2P parity features', () => {
     expect(await balanceOf(ctx.db, userAcct(inviter.id, 'USDT')) - before).toBe(5_000_000n);
     const n = await ctx.db.select().from(notifications).where(and(eq(notifications.userId, inviter.id), eq(notifications.type, 'referral_reward')));
     expect(n).toHaveLength(1);
+  });
+});
+
+describe('confirmed email', () => {
+  it('is required to post ads, place orders and withdraw (switchable by admins)', async () => {
+    const { createAd, requestWithdrawal, setConfig: set } = await import('../src');
+    const s = await signupEmail(ctx, { email: `${uniq()}@t.io`, password: 'correct horse battery', country: 'DE' });
+    await ctx.db.update(users).set({ kycTier: 2 }).where(eq(users.id, s.user.id));
+    const u = (await ctx.db.select().from(users).where(eq(users.id, s.user.id)))[0];
+    const { ad } = await sellAd(ctx, { price: '0.86' });
+    await expect(createOrder(ctx, u, { adId: ad.id, fiatAmount: '20' })).rejects.toMatchObject({ code: 'EMAIL_UNVERIFIED' });
+    await expect(createAd(ctx, u, { side: 'buy', asset: 'USDT', fiat: 'EUR', priceType: 'fixed', price: '0.9', minAmount: '10', maxAmount: '100', totalAmount: '100', paymentMethodIds: [], paymentWindowMin: 15, terms: '', minCounterpartyTier: 0 } as never)).rejects.toMatchObject({ code: 'EMAIL_UNVERIFIED' });
+    await expect(requestWithdrawal(ctx, u, { asset: 'USDT', network: 'TRON', address: 'TXYZ', amount: '1' })).rejects.toMatchObject({ code: 'EMAIL_UNVERIFIED' });
+    // Admins can switch the rule off.
+    await set(ctx.db, 'accounts', { requireVerifiedEmail: false });
+    try { expect((await createOrder(ctx, u, { adId: ad.id, fiatAmount: '20' })).id).toBeTruthy(); }
+    finally { await set(ctx.db, 'accounts', { requireVerifiedEmail: true }); }
+    await verifyEmail(ctx, s.emailToken);
   });
 });

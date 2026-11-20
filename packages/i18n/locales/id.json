@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Iklan ini sudah tidak tersedia",
   "SELF_TRADE": "Anda tidak bisa bertransaksi dengan iklan sendiri",
   "VALIDATION": "Periksa kembali formulir",
-  "ILLEGAL_TRANSITION": "Tindakan ini sudah tidak dapat dilakukan"
+  "ILLEGAL_TRANSITION": "Tindakan ini sudah tidak dapat dilakukan",
+  "EMAIL_UNVERIFIED": "Konfirmasi email Anda terlebih dahulu. Buka tautan yang kami kirim atau minta yang baru di akun Anda."
  },
  "corridor": {
   "title": "Kirim lintas negara",

@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "더 이상 이용할 수 없는 광고입니다",
   "SELF_TRADE": "본인 광고와는 거래할 수 없습니다",
   "VALIDATION": "입력 내용을 확인하세요",
-  "ILLEGAL_TRANSITION": "더 이상 수행할 수 없는 작업입니다"
+  "ILLEGAL_TRANSITION": "더 이상 수행할 수 없는 작업입니다",
+  "EMAIL_UNVERIFIED": "먼저 이메일을 확인해 주세요. 보내 드린 링크를 열거나 계정에서 새 링크를 받으세요."
  },
  "corridor": {
   "title": "해외 송금",

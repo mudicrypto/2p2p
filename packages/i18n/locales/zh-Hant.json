@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "此廣告已無法使用",
   "SELF_TRADE": "不能與自己的廣告交易",
   "VALIDATION": "請檢查表單",
-  "ILLEGAL_TRANSITION": "此操作已無法執行"
+  "ILLEGAL_TRANSITION": "此操作已無法執行",
+  "EMAIL_UNVERIFIED": "請先確認你的電子郵件。開啟我們寄出的連結，或在帳戶中重新取得連結。"
  },
  "corridor": {
   "title": "跨境匯款",

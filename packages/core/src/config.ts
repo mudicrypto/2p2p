@@ -1,4 +1,5 @@
 import { systemConfig, eq, type DbOrTx } from '@p2p/db';
+import { DomainError } from '@p2p/shared';
 
 /** Runtime configuration stored in system_config (admin editable, no deploy). Defaults below. */
 export const CONFIG_DEFAULTS = {
@@ -11,6 +12,8 @@ export const CONFIG_DEFAULTS = {
   risk: { manualConfirmScore: 70, depositHoldScore: 70, withdrawBlockScore: 90, velocityOrdersPerHour: 10, maxAccountsPerDevice: 2 },
   disputes: { slaMin: 30, escalateAfterMin: 30, autoFreezeLostDisputes: 3 },
   insurance: { maxPayoutUsdCents: 500_000 },
+  // Accounts with an email must confirm it before posting ads, placing orders or withdrawing (Telegram-only accounts have no email).
+  accounts: { requireVerifiedEmail: true },
   // Invite rewards: paid to the inviter from the rewards fund (admins top it up from fees) after the invitee's first qualifying trade.
   referral: { enabled: true, rewardAsset: 'USDT', rewardAmount: '5', minTradeUsdCents: 2_000 },
   // Reminders to a seller who hasn't released after the buyer marked the order paid.
@@ -41,3 +44,10 @@ export async function setConfig<K extends ConfigKey>(db: DbOrTx, key: K, value: 
   return merged;
 }
 export function clearConfigCache() { cache.clear(); }
+
+/** Throws EMAIL_UNVERIFIED for an account whose email isn't confirmed yet (when the rule is on). */
+export async function assertEmailVerified(db: DbOrTx, user: { email: string | null; emailVerifiedAt: Date | null }) {
+  if (!user.email || user.emailVerifiedAt) return;
+  if (!(await getConfig(db, 'accounts')).requireVerifiedEmail) return;
+  throw new DomainError('EMAIL_UNVERIFIED', 'confirm your email first');
+}

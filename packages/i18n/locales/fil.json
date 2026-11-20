@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Hindi na available ang ad na ito",
   "SELF_TRADE": "Hindi ka puwedeng mag-trade sa sarili mong ad",
   "VALIDATION": "Pakisuri ang form",
-  "ILLEGAL_TRANSITION": "Hindi na posible ang aksyong ito"
+  "ILLEGAL_TRANSITION": "Hindi na posible ang aksyong ito",
+  "EMAIL_UNVERIFIED": "Kumpirmahin muna ang iyong email. Buksan ang link na ipinadala namin o humingi ng bago sa iyong account."
  },
  "corridor": {
   "title": "Magpadala sa ibang bansa",

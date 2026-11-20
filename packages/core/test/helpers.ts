@@ -22,7 +22,7 @@ export async function ensureSeed(ctx: Ctx) {
 }
 export async function mkUser(ctx: Ctx, opts: { tier?: number; country?: string; createdAt?: Date } = {}): Promise<User> {
   const [u] = await ctx.db.insert(users).values({
-    email: `${uniq()}@t.io`, country: opts.country ?? 'DE', kycTier: opts.tier ?? 1,
+    email: `${uniq()}@t.io`, emailVerifiedAt: new Date(), country: opts.country ?? 'DE', kycTier: opts.tier ?? 1,
     createdAt: opts.createdAt ?? new Date(Date.now() - 30 * 86400_000), totpEnabledAt: null,
   }).returning();
   return u;

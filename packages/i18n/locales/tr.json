@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Bu ilan artık mevcut değil",
   "SELF_TRADE": "Kendi ilanınızla işlem yapamazsınız",
   "VALIDATION": "Lütfen formu kontrol edin",
-  "ILLEGAL_TRANSITION": "Bu işlem artık mümkün değil"
+  "ILLEGAL_TRANSITION": "Bu işlem artık mümkün değil",
+  "EMAIL_UNVERIFIED": "Önce e-postanı onayla. Gönderdiğimiz bağlantıyı aç veya hesabından yenisini iste."
  },
  "corridor": {
   "title": "Ülkeler arası gönderim",

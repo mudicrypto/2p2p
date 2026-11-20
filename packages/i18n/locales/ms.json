@@ -202,7 +202,8 @@
   "AD_UNAVAILABLE": "Iklan ini tidak lagi tersedia",
   "SELF_TRADE": "Anda tidak boleh berdagang dengan iklan sendiri",
   "VALIDATION": "Sila semak borang",
-  "ILLEGAL_TRANSITION": "Tindakan ini tidak lagi boleh dilakukan"
+  "ILLEGAL_TRANSITION": "Tindakan ini tidak lagi boleh dilakukan",
+  "EMAIL_UNVERIFIED": "Sahkan e-mel anda dahulu. Buka pautan yang kami hantar atau minta yang baharu dalam akaun anda."
  },
  "corridor": {
   "title": "Hantar merentas negara",
