@@ -233,7 +233,9 @@
   "terms": "Điều khoản dịch vụ",
   "privacy": "Chính sách quyền riêng tư",
   "risk": "Công bố rủi ro",
-  "legalNote": "Bản tiếng Anh là bản có giá trị ràng buộc."
+  "legalNote": "Bản tiếng Anh là bản có giá trị ràng buộc.",
+  "merchant-rules": "Quy định thương nhân",
+  "merchantGuide": "Hướng dẫn thương nhân"
  },
  "ui": {
   "hero1": "Mua bán tiền mã hóa trực tiếp giữa người với người",
@@ -718,6 +720,7 @@
   "tgLinked": "Đã kết nối: thông báo cũng gửi qua Telegram.",
   "tgUnavailable": "Chưa được thiết lập trên máy chủ này.",
   "tgConnect": "Kết nối Telegram",
-  "tgDisconnect": "Ngắt kết nối"
+  "tgDisconnect": "Ngắt kết nối",
+  "agreeMerchantRules": "Khi đăng, bạn đồng ý với"
  }
 }

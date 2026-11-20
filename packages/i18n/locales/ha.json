@@ -233,7 +233,9 @@
   "terms": "Sharuɗɗan sabis",
   "privacy": "Manufar sirri",
   "risk": "Bayyana haɗari",
-  "legalNote": "Sigar Turanci ce ke da iko."
+  "legalNote": "Sigar Turanci ce ke da iko.",
+  "merchant-rules": "Dokokin ’yan kasuwa",
+  "merchantGuide": "Jagorar ’yan kasuwa"
  },
  "ui": {
   "hero1": "Saya da sayar da kirifto, daga mutum zuwa mutum",
@@ -718,6 +720,7 @@
   "tgLinked": "An haɗa: sanarwarka za su zo a Telegram ma.",
   "tgUnavailable": "Ba a saita shi a wannan sabar ba tukuna.",
   "tgConnect": "Haɗa Telegram",
-  "tgDisconnect": "Cire haɗi"
+  "tgDisconnect": "Cire haɗi",
+  "agreeMerchantRules": "Ta hanyar wallafawa ka yarda da"
  }
 }

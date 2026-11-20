@@ -233,7 +233,9 @@
   "terms": "Hizmet şartları",
   "privacy": "Gizlilik politikası",
   "risk": "Risk bildirimi",
-  "legalNote": "Bağlayıcı olan İngilizce sürümdür."
+  "legalNote": "Bağlayıcı olan İngilizce sürümdür.",
+  "merchant-rules": "Satıcı kuralları",
+  "merchantGuide": "Satıcı rehberi"
  },
  "ui": {
   "hero1": "Kriptoyu kişiden kişiye alın ve satın",
@@ -718,6 +720,7 @@
   "tgLinked": "Bağlandı: bildirimleriniz Telegram'a da gelir.",
   "tgUnavailable": "Bu sunucuda henüz kurulmadı.",
   "tgConnect": "Telegram'ı bağla",
-  "tgDisconnect": "Bağlantıyı kes"
+  "tgDisconnect": "Bağlantıyı kes",
+  "agreeMerchantRules": "Yayınlayarak şunları kabul edersiniz:"
  }
 }

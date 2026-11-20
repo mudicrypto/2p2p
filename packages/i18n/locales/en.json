@@ -233,7 +233,9 @@
   "terms": "Terms of service",
   "privacy": "Privacy policy",
   "risk": "Risk disclosure",
-  "legalNote": "The English version is the binding version."
+  "legalNote": "The English version is the binding version.",
+  "merchant-rules": "Merchant rules",
+  "merchantGuide": "Merchant guide"
  },
  "ui": {
   "hero1": "Buy and sell crypto, person to person",
@@ -718,6 +720,7 @@
   "tgLinked": "Connected: your notifications also arrive in Telegram.",
   "tgUnavailable": "Not set up on this server yet.",
   "tgConnect": "Connect Telegram",
-  "tgDisconnect": "Disconnect"
+  "tgDisconnect": "Disconnect",
+  "agreeMerchantRules": "By posting you agree to the"
  }
 }

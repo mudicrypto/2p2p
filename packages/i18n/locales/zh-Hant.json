@@ -233,7 +233,9 @@
   "terms": "服務條款",
   "privacy": "隱私權政策",
   "risk": "風險揭露",
-  "legalNote": "以英文版本為準。"
+  "legalNote": "以英文版本為準。",
+  "merchant-rules": "商家規則",
+  "merchantGuide": "商家指南"
  },
  "ui": {
   "hero1": "點對點買賣加密貨幣",
@@ -718,6 +720,7 @@
   "tgLinked": "已連接：通知也會傳到 Telegram。",
   "tgUnavailable": "此伺服器尚未設定。",
   "tgConnect": "連接 Telegram",
-  "tgDisconnect": "中斷連接"
+  "tgDisconnect": "中斷連接",
+  "agreeMerchantRules": "發布即表示你同意"
  }
 }

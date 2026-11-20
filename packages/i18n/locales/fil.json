@@ -233,7 +233,9 @@
   "terms": "Mga tuntunin ng serbisyo",
   "privacy": "Patakaran sa privacy",
   "risk": "Pagsisiwalat ng panganib",
-  "legalNote": "Ang bersyong Ingles ang may bisa."
+  "legalNote": "Ang bersyong Ingles ang may bisa.",
+  "merchant-rules": "Mga patakaran ng merchant",
+  "merchantGuide": "Gabay ng merchant"
  },
  "ui": {
   "hero1": "Bumili at magbenta ng crypto, tao sa tao",
@@ -718,6 +720,7 @@
   "tgLinked": "Konektado: darating din sa Telegram ang notifications mo.",
   "tgUnavailable": "Hindi pa naka-set up sa server na ito.",
   "tgConnect": "I-connect ang Telegram",
-  "tgDisconnect": "I-disconnect"
+  "tgDisconnect": "I-disconnect",
+  "agreeMerchantRules": "Sa pag-post, sumasang-ayon ka sa"
  }
 }

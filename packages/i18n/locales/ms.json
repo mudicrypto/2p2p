@@ -233,7 +233,9 @@
   "terms": "Terma perkhidmatan",
   "privacy": "Dasar privasi",
   "risk": "Pendedahan risiko",
-  "legalNote": "Versi bahasa Inggeris adalah yang mengikat."
+  "legalNote": "Versi bahasa Inggeris adalah yang mengikat.",
+  "merchant-rules": "Peraturan peniaga",
+  "merchantGuide": "Panduan peniaga"
  },
  "ui": {
   "hero1": "Beli dan jual kripto, terus antara pengguna",
@@ -718,6 +720,7 @@
   "tgLinked": "Disambungkan: makluman juga tiba di Telegram.",
   "tgUnavailable": "Belum disediakan di pelayan ini.",
   "tgConnect": "Sambung Telegram",
-  "tgDisconnect": "Putuskan"
+  "tgDisconnect": "Putuskan",
+  "agreeMerchantRules": "Dengan menyiarkan anda bersetuju dengan"
  }
 }

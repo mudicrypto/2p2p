@@ -233,7 +233,9 @@
   "terms": "利用規約",
   "privacy": "プライバシーポリシー",
   "risk": "リスク開示",
-  "legalNote": "英語版が正本です。"
+  "legalNote": "英語版が正本です。",
+  "merchant-rules": "マーチャント規約",
+  "merchantGuide": "マーチャントガイド"
  },
  "ui": {
   "hero1": "個人間で暗号資産を売買",
@@ -718,6 +720,7 @@
   "tgLinked": "接続済み：通知はTelegramにも届きます。",
   "tgUnavailable": "このサーバーではまだ設定されていません。",
   "tgConnect": "Telegramを接続",
-  "tgDisconnect": "接続解除"
+  "tgDisconnect": "接続解除",
+  "agreeMerchantRules": "掲載すると次に同意したことになります："
  }
 }

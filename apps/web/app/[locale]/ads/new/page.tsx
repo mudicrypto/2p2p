@@ -122,6 +122,7 @@ export default function NewAd() {
           <div className="flex items-start gap-2 rounded-2xl bg-primary/10 p-4 text-xs leading-relaxed"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-primary" />{t('ui.why1d')}</div>
           <ErrorText error={err} />
           <Button type="submit" size="lg" className="w-full" loading={busy} data-testid="publish-ad">{t('ad.submit')}</Button>
+          <p className="text-center text-xs text-muted-foreground">{t('ui.agreeMerchantRules')} <Link href={L('/legal/merchant-rules')} className="underline">{t('launch.merchant-rules')}</Link> · <Link href={L('/guide/merchants')} className="underline">{t('launch.merchantGuide')}</Link></p>
         </div>
       </div>
     </form>

@@ -233,7 +233,9 @@
   "terms": "Àwọn òfin iṣẹ́",
   "privacy": "Ìlànà àṣírí",
   "risk": "Ìfihàn ewu",
-  "legalNote": "Ẹ̀dà Gẹ̀ẹ́sì ni ó ní agbára òfin."
+  "legalNote": "Ẹ̀dà Gẹ̀ẹ́sì ni ó ní agbára òfin.",
+  "merchant-rules": "Òfin àwọn oníṣòwò",
+  "merchantGuide": "Ìtọ́sọ́nà oníṣòwò"
  },
  "ui": {
   "hero1": "Ra kí o ta crypto, láti ènìyàn sí ènìyàn",
@@ -718,6 +720,7 @@
   "tgLinked": "Ó ti so pọ̀: ìfitónilétí rẹ yóò dé Telegram pẹ̀lú.",
   "tgUnavailable": "Kò tíì ṣètò rẹ̀ lórí sáfà yìí.",
   "tgConnect": "So Telegram pọ̀",
-  "tgDisconnect": "Já a"
+  "tgDisconnect": "Já a",
+  "agreeMerchantRules": "Nípa fífi síta, o gbà"
  }
 }

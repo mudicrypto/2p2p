@@ -233,7 +233,9 @@
   "terms": "Conditions d'utilisation",
   "privacy": "Politique de confidentialité",
   "risk": "Avertissement sur les risques",
-  "legalNote": "La version anglaise fait foi."
+  "legalNote": "La version anglaise fait foi.",
+  "merchant-rules": "Règles marchands",
+  "merchantGuide": "Guide marchand"
  },
  "ui": {
   "hero1": "Achetez et vendez des cryptos, de personne à personne",
@@ -718,6 +720,7 @@
   "tgLinked": "Connecté : vos notifications arrivent aussi sur Telegram.",
   "tgUnavailable": "Pas encore configuré sur ce serveur.",
   "tgConnect": "Connecter Telegram",
-  "tgDisconnect": "Déconnecter"
+  "tgDisconnect": "Déconnecter",
+  "agreeMerchantRules": "En publiant, vous acceptez les"
  }
 }

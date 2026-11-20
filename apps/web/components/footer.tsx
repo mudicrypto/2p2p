@@ -11,7 +11,7 @@ export function Footer() {
         <div className="flex items-center gap-2.5"><Wordmark size={24} /><span className="text-xs text-muted-foreground">© {new Date().getFullYear()}</span></div>
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
           <Link href={L('/p2p')} className="hover:text-foreground">{t('nav.market')}</Link>
-          {(['terms', 'privacy', 'risk'] as const).map((d) => <Link key={d} href={L(`/legal/${d}`)} className="hover:text-foreground">{t(`launch.${d}`)}</Link>)}
+          {(['terms', 'privacy', 'risk', 'merchant-rules'] as const).map((d) => <Link key={d} href={L(`/legal/${d}`)} className="hover:text-foreground">{t(`launch.${d}`)}</Link>)}
           <Link href={L('/status')} className="flex items-center gap-1.5 hover:text-foreground"><span className="h-2 w-2 animate-pulse-soft rounded-full bg-buy" />{t('launch.statusTitle')}</Link>
         </div>
       </div>

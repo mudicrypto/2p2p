@@ -233,7 +233,9 @@
   "terms": "Masharti ya huduma",
   "privacy": "Sera ya faragha",
   "risk": "Ufichuzi wa hatari",
-  "legalNote": "Toleo la Kiingereza ndilo linalofunga."
+  "legalNote": "Toleo la Kiingereza ndilo linalofunga.",
+  "merchant-rules": "Sheria za wafanyabiashara",
+  "merchantGuide": "Mwongozo wa wafanyabiashara"
  },
  "ui": {
   "hero1": "Nunua na uuze kripto, mtu kwa mtu",
@@ -718,6 +720,7 @@
   "tgLinked": "Imeunganishwa: arifa zako zinafika pia Telegram.",
   "tgUnavailable": "Bado haijawekwa kwenye seva hii.",
   "tgConnect": "Unganisha Telegram",
-  "tgDisconnect": "Tenganisha"
+  "tgDisconnect": "Tenganisha",
+  "agreeMerchantRules": "Kwa kuchapisha unakubali"
  }
 }

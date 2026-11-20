@@ -5,6 +5,28 @@ cd "$(dirname "$0")"
 # Caddy (user "caddy") must read the status folder; keep the agent in step with the release.
 chmod 755 /opt/parley /opt/parley/www 2>/dev/null || true
 install -m 755 ./agent.sh /usr/local/bin/parley-agent
+# Health monitor: every minute, self-healing restarts + alerts (see monitor.sh).
+command -v jq >/dev/null || apt-get install -y -q jq >/dev/null 2>&1 || true
+install -m 755 ./monitor.sh /usr/local/bin/parley-monitor
+cat > /etc/systemd/system/parley-monitor.service <<'UNIT'
+[Unit]
+Description=parley health monitor
+After=docker.service
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/parley-monitor
+TimeoutStartSec=300
+UNIT
+cat > /etc/systemd/system/parley-monitor.timer <<'UNIT'
+[Unit]
+Description=Run the parley health monitor every minute
+[Timer]
+OnBootSec=120
+OnUnitActiveSec=60
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload && systemctl enable --now parley-monitor.timer >/dev/null 2>&1 || true
 ENV=/opt/parley/.env
 # Secrets are generated once on the server and never leave it.
 if [ ! -f "$ENV" ]; then

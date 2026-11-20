@@ -233,7 +233,9 @@
   "terms": "Termos de serviço",
   "privacy": "Política de privacidade",
   "risk": "Divulgação de riscos",
-  "legalNote": "A versão em inglês é a vinculante."
+  "legalNote": "A versão em inglês é a vinculante.",
+  "merchant-rules": "Regras para comerciantes",
+  "merchantGuide": "Guia do comerciante"
  },
  "ui": {
   "hero1": "Compre e venda cripto, de pessoa para pessoa",
@@ -718,6 +720,7 @@
   "tgLinked": "Conectado: suas notificações também chegam no Telegram.",
   "tgUnavailable": "Ainda não configurado neste servidor.",
   "tgConnect": "Conectar Telegram",
-  "tgDisconnect": "Desconectar"
+  "tgDisconnect": "Desconectar",
+  "agreeMerchantRules": "Ao publicar você concorda com as"
  }
 }

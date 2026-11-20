@@ -233,7 +233,9 @@
   "terms": "Ketentuan layanan",
   "privacy": "Kebijakan privasi",
   "risk": "Pengungkapan risiko",
-  "legalNote": "Versi bahasa Inggris yang mengikat."
+  "legalNote": "Versi bahasa Inggris yang mengikat.",
+  "merchant-rules": "Aturan merchant",
+  "merchantGuide": "Panduan merchant"
  },
  "ui": {
   "hero1": "Beli dan jual kripto, langsung antarpengguna",
@@ -718,6 +720,7 @@
   "tgLinked": "Terhubung: notifikasi juga masuk ke Telegram.",
   "tgUnavailable": "Belum diatur di server ini.",
   "tgConnect": "Hubungkan Telegram",
-  "tgDisconnect": "Putuskan"
+  "tgDisconnect": "Putuskan",
+  "agreeMerchantRules": "Dengan memasang iklan Anda menyetujui"
  }
 }

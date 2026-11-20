@@ -233,7 +233,9 @@
   "terms": "서비스 약관",
   "privacy": "개인정보 처리방침",
   "risk": "위험 고지",
-  "legalNote": "영문본이 구속력을 가집니다."
+  "legalNote": "영문본이 구속력을 가집니다.",
+  "merchant-rules": "판매자 규칙",
+  "merchantGuide": "판매자 가이드"
  },
  "ui": {
   "hero1": "사람과 사람 사이에서 직접 암호화폐를 사고파세요",
@@ -718,6 +720,7 @@
   "tgLinked": "연결됨: 알림이 텔레그램에도 옵니다.",
   "tgUnavailable": "이 서버에 아직 설정되지 않았습니다.",
   "tgConnect": "텔레그램 연결",
-  "tgDisconnect": "연결 해제"
+  "tgDisconnect": "연결 해제",
+  "agreeMerchantRules": "게시하면 다음에 동의합니다:"
  }
 }
