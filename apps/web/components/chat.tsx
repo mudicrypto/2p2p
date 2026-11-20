@@ -28,12 +28,22 @@ export function Chat({ orderId, counterparty, className }: { orderId: string; co
   const fileRef = useRef<HTMLInputElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    api<any[]>(`/orders/${orderId}/messages`).then(setMsgs).catch(() => {});
+    // Merge by id: history and live messages can overlap, and nothing may be dropped.
+    const merge = (incoming: any[]) => setMsgs((m) => {
+      const seen = new Set(m.map((x) => x.id));
+      const add = incoming.filter((x) => !seen.has(x.id));
+      return add.length ? [...m, ...add].sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt))) : m;
+    });
+    const fetchAll = () => api<any[]>(`/orders/${orderId}/messages`).then(merge).catch(() => {});
     const s = socket();
-    const onOrder = (p: any) => { if (p.type === 'chat.message') setMsgs((m) => (m.some((x) => x.id === p.id) ? m : [...m, p])); };
+    // Join the order room, then load the history: anything sent before the join finished is in the history,
+    // anything after arrives live. Same again after a reconnect.
+    const joinAndFetch = () => { s.emit('join', `order:${orderId}`, () => void fetchAll()); };
+    void fetchAll(); joinAndFetch();
+    const onOrder = (p: any) => { if (p.type === 'chat.message') merge([p]); };
     const onTyping = (p: any) => { if (p.userId !== me?.id) { setTyping(true); setTimeout(() => setTyping(false), 2000); } };
-    s.on('order', onOrder); s.on('typing', onTyping);
-    return () => { s.off('order', onOrder); s.off('typing', onTyping); };
+    s.on('order', onOrder); s.on('typing', onTyping); s.on('connect', joinAndFetch);
+    return () => { s.off('order', onOrder); s.off('typing', onTyping); s.off('connect', joinAndFetch); };
   }, [orderId, me?.id]);
   useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' }); }, [msgs.length]);
   const send = async (body: string, attachmentKey?: string) => {

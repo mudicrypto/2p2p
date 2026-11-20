@@ -17,15 +17,21 @@ export class RealtimeGateway implements OnGatewayConnection, EventSink {
   constructor(@Inject(CTX) private ctx: Ctx) {}
 
   async handleConnection(s: Socket) {
+    // Clients may send 'join' right away, before this check finishes: join waits on the same promise.
+    s.data.auth = this.authSocket(s);
+    await s.data.auth;
+  }
+  private async authSocket(s: Socket) {
     const cookie = s.handshake.headers.cookie?.match(/(?:^|;\s*)sid=([^;]+)/)?.[1];
     const token = (s.handshake.auth?.token as string | undefined) ?? (cookie ? decodeURIComponent(cookie) : undefined);
-    const a = token ? await authenticate(this.ctx, token) : null;
+    const a = token ? await authenticate(this.ctx, token).catch(() => null) : null;
     if (a) { s.data.userId = a.user.id; s.join(`user:${a.user.id}`); }
   }
 
   @SubscribeMessage('join')
   async join(@ConnectedSocket() s: Socket, @MessageBody() room: string) {
     if (typeof room !== 'string') return { ok: false };
+    await s.data.auth;
     if (/^ads:[A-Z]+:[A-Z]{3}$/.test(room)) { s.join(room); return { ok: true }; }
     const m = /^order:([0-9a-f-]{36})$/.exec(room);
     if (m && s.data.userId) {
