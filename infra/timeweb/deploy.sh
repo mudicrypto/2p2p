@@ -45,7 +45,13 @@ ORIG_HOST="$(cat /opt/parley/ORIG_HOST 2>/dev/null || cat /opt/parley/SITE_HOST)
 WANT="$(grep '^SITE_HOST=' ./site.env | cut -d= -f2 | tr -d ' ')"
 # Only move to a new domain once it really points at this server: switching earlier would break HTTPS for everyone.
 # Until then the agent re-checks every minute (PENDING_HOST) and re-runs this script when the DNS is live.
-ips() { getent ahostsv4 "$1" 2>/dev/null | awk '{print $1}' | sort -u; }
+# Local resolver first; it can keep an old "no such name" answer for a long time, so also ask public DNS (Cloudflare, Google).
+ips() {
+  { getent ahostsv4 "$1" 2>/dev/null | awk '{print $1}'
+    for u in "https://cloudflare-dns.com/dns-query?name=$1&type=A" "https://dns.google/resolve?name=$1&type=A"; do
+      curl -s -m 8 -H 'accept: application/dns-json' "$u" 2>/dev/null | grep -o '"data":"[0-9.]*"' | cut -d'"' -f4
+    done; } | grep -E '^[0-9.]+$' | sort -u
+}
 if [ -n "$WANT" ] && [ "$WANT" != "$(cat /opt/parley/SITE_HOST)" ]; then
   MYIP="$(ips "$ORIG_HOST" | head -1)"
   if [ -n "$MYIP" ] && ips "$WANT" | grep -qx "$MYIP"; then echo "$WANT" > /opt/parley/SITE_HOST; rm -f /opt/parley/PENDING_HOST; echo "switching main domain to $WANT"

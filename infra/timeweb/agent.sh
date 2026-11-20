@@ -26,7 +26,9 @@ if [ -n "$latest" ] && [ "$latest" != "$current" ]; then
 elif [ -f "$ROOT/PENDING_HOST" ] && [ -n "$current" ] && [ -f "$ROOT/releases/$current/infra/timeweb/deploy.sh" ]; then
   # A new main domain is waiting for its DNS: re-run the deploy once it points here.
   want="$(cat "$ROOT/PENDING_HOST")"; me="$(getent ahostsv4 "$(cat "$ROOT/ORIG_HOST" 2>/dev/null)" | awk '{print $1}' | head -1)"
-  if [ -n "$me" ] && getent ahostsv4 "$want" | awk '{print $1}' | grep -qx "$me"; then
+  # Same check as deploy.sh: local resolver or public DNS (the local one can cache "not found" for a long time).
+  pub() { curl -s -m 8 -H 'accept: application/dns-json' "https://cloudflare-dns.com/dns-query?name=$1&type=A" 2>/dev/null | grep -o '"data":"[0-9.]*"' | cut -d'"' -f4; }
+  if [ -n "$me" ] && { getent ahostsv4 "$want" | awk '{print $1}'; pub "$want"; } | grep -qx "$me"; then
     bash "$ROOT/releases/$current/infra/timeweb/deploy.sh" >> "$WWW/deploy-$current.log" 2>&1 && echo "DOMAIN SWITCH OK $want" >> "$WWW/deploy-$current.log"
   fi
 fi
