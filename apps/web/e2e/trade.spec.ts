@@ -55,6 +55,10 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await seller.goto(orderUrl);
   await expect(seller.getByTestId('chat-log')).toContainText('Hello, sending SEPA now');
   await expect(seller.getByTestId('chat-log')).not.toContainText('whatsapp');
+  await buyer.getByTestId('chat-input').fill('can you release first please');
+  await buyer.getByTestId('chat-send').click();
+  await expect(seller.getByTestId('chat-scam-warning')).toBeVisible();
+  await expect(buyer.getByTestId('chat-scam-warning')).toHaveCount(0); // the caution is for the other side
 
   await buyer.getByTestId('mark-paid').click();
   for (const i of [0, 1, 2, 3]) await buyer.getByTestId(`safe-${i}`).check();
@@ -62,6 +66,9 @@ test('full trade flow in the browser: post ad, buy, chat, pay, release, feedback
   await expect(buyer.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID');
   await expect(seller.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID'); // realtime push
 
+  await expect(seller.getByTestId('buyer-signals')).toBeVisible(); // first trade for this buyer
+  await expect(seller.getByTestId('release')).toBeDisabled(); // payer-name check first
+  await seller.getByTestId('payer-confirm').check();
   await seller.getByTestId('release-totp').fill('000000');
   await seller.getByTestId('release').click();
   await expect(seller.getByTestId('error')).toBeVisible();

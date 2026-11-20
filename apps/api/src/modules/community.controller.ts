@@ -3,7 +3,7 @@ import { z } from 'zod';
 import {
   setNickname, setAwayMode, follow, block, listRelations, relationTo, setAntiPhishingCode, referralInfo,
   createPriceAlert, listPriceAlerts, deletePriceAlert, createOtcRequest, listOtcRequests, setBusinessHours, type BusinessHours, type User,
-  listReceiptChecks, listSavedSearches, saveSearch, deleteSavedSearch, translateChatMessage, translationEnabled, referralRewardsInfo,
+  getConfig, telegramAlertsEnabled, listReceiptChecks, listSavedSearches, saveSearch, deleteSavedSearch, translateChatMessage, translationEnabled, referralRewardsInfo,
 } from '@p2p/core';
 import { DomainError, zAsset, zFiat } from '@p2p/shared';
 import { CTX, type Ctx } from '../common/ctx';
@@ -86,7 +86,10 @@ export class CommunityController {
 
   // ------------------------------------------------------------ chat translation
   @Public() @Get('features')
-  features() { return { chatTranslation: translationEnabled(this.ctx) }; }
+  async features() {
+    const promo = await getConfig(this.ctx.db, 'promotion');
+    return { chatTranslation: translationEnabled(this.ctx), telegramAlerts: telegramAlertsEnabled(), promotion: { pricePerDayUsdt: promo.pricePerDayUsdt, maxDays: promo.maxDays } };
+  }
   @Post('orders/:id/messages/:messageId/translate') @HttpCode(200) @RateLimit(60)
   translate(@CurrentUser() u: User, @Param('id', uuid) id: string, @Param('messageId') messageId: string, @Body(new Zod(z.object({ target: z.string().max(10) }), 'Translate')) b: { target: string }) {
     if (!/^\d{1,19}$/.test(messageId)) throw new DomainError('VALIDATION', 'bad message id');

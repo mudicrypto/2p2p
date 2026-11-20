@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import QRCode from 'qrcode';
-import { Ban, BadgeCheck, Bell, Check, Fingerprint, KeyRound, Lock, Mail, Phone, ShieldCheck, Smartphone, Store, Trash2, UserRound, Users, AtSign } from 'lucide-react';
+import { Send, Ban, BadgeCheck, Bell, Check, Fingerprint, KeyRound, Lock, Mail, Phone, ShieldCheck, Smartphone, Store, Trash2, UserRound, Users, AtSign } from 'lucide-react';
 import { Alert, Avatar, Badge, Button, Card, CopyButton, Input, Label, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
 import { useSession } from '../../../lib/session';
@@ -23,6 +23,8 @@ export default function Account() {
   const [merchant, setMerchant] = useState<any>(null);
   const [nick, setNick] = useState<{ v: string; ok: boolean } | null>(null);
   const [apc, setApc] = useState({ v: '', ok: false });
+  const [tg, setTg] = useState<{ available: boolean; linked: boolean; bot: string | null } | null>(null);
+  useEffect(() => { api('/me/telegram').then(setTg).catch(() => {}); }, []);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [rel, setRel] = useState<{ following: any[]; blocked: any[] }>({ following: [], blocked: [] });
   const loadLists = useCallback(async () => {
@@ -101,6 +103,11 @@ export default function Account() {
               <Input data-testid="anti-phishing" maxLength={20} value={apc.v} onChange={(e) => setApc({ v: e.target.value, ok: false })} placeholder={t('ui.antiPhishingPh')} />
               <Button variant="outline" data-testid="anti-phishing-save" disabled={apc.v.trim().length < 4} onClick={() => run(async () => { await api('/me/anti-phishing', { method: 'PUT', body: { code: apc.v.trim() } }); setApc({ v: '', ok: true }); })}>{apc.ok ? <Check size={15} /> : t('common.save')}</Button>
             </div>
+          </Row>
+          <Row icon={<Send size={18} />} title={t('ui.tgAlerts')} desc={tg?.available ? (tg.linked ? t('ui.tgLinked') : t('ui.tgDesc')) : t('ui.tgUnavailable')}>
+            {tg?.available && (tg.linked
+              ? <Button variant="outline" size="sm" data-testid="tg-unlink" onClick={() => run(async () => setTg(await api('/me/telegram', { method: 'DELETE' }).then(() => ({ ...tg, linked: false }))))}>{t('ui.tgDisconnect')}</Button>
+              : <Button size="sm" data-testid="tg-link" onClick={() => run(async () => { const r = await api('/me/telegram/link', { body: {} }); window.open(r.url, '_blank', 'noopener'); })}>{t('ui.tgConnect')}</Button>)}
           </Row>
           <Row icon={<Bell size={18} />} title={t('ui.priceAlerts')} desc={t('ui.priceAlertsDesc')}>
             <ul className="w-full space-y-1.5 text-sm sm:w-80" data-testid="alerts-list">

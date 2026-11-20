@@ -15,6 +15,7 @@ import { cdp } from './order-state';
 import { REGION_KEYS, typesForRegion } from '../lib/regions';
 import { OnlineDot, PriceAlertDialog } from './community';
 import { SavedSearches } from './parity';
+import { FirstTradeGuide, PriceChart } from './market';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
 type SortKey = 'price' | 'release' | 'completion' | 'trades';
@@ -67,14 +68,17 @@ function TradeInner() {
   const [fiats, setFiats] = useState<string[]>(['USD', 'EUR']);
   const [types, setTypes] = useState<Array<{ code: string; name: string }>>([]);
   const [items, setItems] = useState<any[] | null>(null);
+  const [promoted, setPromoted] = useState<any[]>([]);
+  const [hasTraded, setHasTraded] = useState<boolean | null>(null);
+  useEffect(() => { if (me) api<any[]>('/orders').then((r) => setHasTraded(r.some((o) => o.status === 'COMPLETED'))).catch(() => setHasTraded(true)); else setHasTraded(false); }, [me]);
   const [selected, setSelected] = useState<any | null>(null);
   const seq = useRef(0);
   useEffect(() => { api<Array<{ code: string }>>('/fiats').then((r) => r.length && setFiats(r.map((x) => x.code))).catch(() => {}); }, []);
   useEffect(() => { api<any[]>(`/payment-method-types?fiat=${fiat}`).then(setTypes).catch(() => setTypes([])); }, [fiat]);
   const load = useCallback(async () => {
     const my = ++seq.current;
-    const r = await api<{ items: any[]; nextCursor?: string | null }>(`/ads?${bookQuery()}`).catch(() => ({ items: [], nextCursor: null }));
-    if (my === seq.current) { setItems(r.items); setCursor(r.nextCursor ?? null); }
+    const r = await api<{ items: any[]; promoted?: any[]; nextCursor?: string | null }>(`/ads?${bookQuery()}`).catch(() => ({ items: [], promoted: [], nextCursor: null }));
+    if (my === seq.current) { setItems(r.items); setPromoted(r.promoted ?? []); setCursor(r.nextCursor ?? null); }
   }, [side, asset, fiat, pm, merchantOnly, verifiedOnly, onlineOnly, followingOnly, q]); // eslint-disable-line react-hooks/exhaustive-deps
   function bookQuery(after?: string) {
     const search = q;
@@ -138,6 +142,7 @@ function TradeInner() {
         </div>
       </div>
 
+      <FirstTradeGuide show={hasTraded === false} />
       <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
         {/* Amount hero */}
         <Card className="relative overflow-hidden px-5 py-7 text-center sm:px-8">
@@ -240,6 +245,17 @@ function TradeInner() {
         </div>
         {items === null && <div className="space-y-2 pt-3">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-14" />)}</div>}
         {items !== null && rows.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">{t('market.empty')}</p>}
+        {promoted.length > 0 && (
+          <div className="my-2 rounded-2xl border border-primary/40 bg-primary/5 px-3" data-testid="promoted">
+            {promoted.map((ad) => { const get = !amount ? '' : side === 'buy' ? cryptoFor(amount, ad.price) : fiatFor(amount, ad.price); return (
+              <div key={ad.id} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b border-border/60 py-3 last:border-0 md:grid-cols-[1.6fr_1fr_1.2fr_auto]">
+                <div className="flex min-w-0 items-center gap-2"><Badge variant="warning">{t('ui.promoted')}</Badge><Link href={L(`/profile/${ad.advertiser.id}`)} className="truncate font-semibold hover:underline">{ad.advertiser.displayName}</Link><OnlineDot online={ad.advertiser.online} /></div>
+                <div className="num text-[15px]">{num(ad.price, 8)}</div>
+                <div className="num hidden text-[15px] md:block">{get ? `${fmtGet(get)} ${getUnit}` : `${money(ad.minAmount, ad.fiat)} – ${money(ad.maxAmount, ad.fiat)}`}</div>
+                <Button variant="soft" className="w-20" onClick={() => open(ad)} data-testid="trade-promoted">{t(verb)}</Button>
+              </div>); })}
+          </div>
+        )}
         {rows.map(({ ad, get, fits }, i) => (
           <div key={ad.id} data-testid="ad-row" className={cn('grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 border-b border-border py-3.5 last:border-0 md:grid-cols-[1.6fr_1fr_1fr_1.1fr_1.2fr_auto]', !fits && 'opacity-50')}>
             <div className="flex min-w-0 items-center gap-2">
@@ -260,6 +276,7 @@ function TradeInner() {
         ))}
         {cursor && <div className="pt-3 text-center"><Button variant="soft" loading={loadingMore} onClick={loadMore} data-testid="load-more">{t('ui.showMore')}</Button></div>}
       </Card>
+      <PriceChart asset={asset} fiat={fiat} side={side} />
       {selected && <TradeDialog ad={selected} side={side} initial={side === 'buy' ? amount : amount ? fiatFor(amount, selected.price) : ''} onClose={() => setSelected(null)} />}
       <Link href={L('/otc')} className="flex items-center gap-3 rounded-2xl border border-border px-5 py-4 text-sm hover:border-primary/60" data-testid="otc-link">
         <Briefcase size={18} className="shrink-0 text-primary" /><span className="flex-1"><b>{t('ui.otcTitle')}</b> · <span className="text-muted-foreground">{t('ui.otcTeaser')}</span></span><ArrowUpRight size={16} />

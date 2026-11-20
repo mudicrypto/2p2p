@@ -59,6 +59,7 @@ export function Chat({ orderId, counterparty, className }: { orderId: string; co
           return (
             <div key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
               <div className={cn('max-w-[80%] rounded-[20px] px-4 py-2.5 text-[15px]', mine ? 'rounded-ee-md bg-ink text-ink-foreground' : 'rounded-es-md bg-muted')}>
+                {!mine && m.warning && <div className="mb-1 flex items-start gap-1.5 rounded-lg bg-sell/15 px-2 py-1 text-[12px] font-medium text-sell" data-testid="chat-scam-warning"><ShieldAlert size={13} className="mt-0.5 shrink-0" />{t(`ui.scam_${m.warning}`)}</div>}
                 {m.body && <div className="whitespace-pre-wrap break-words">{m.body}</div>}
                 {tr[m.id] && <div className="mt-1 whitespace-pre-wrap break-words border-t border-border/60 pt-1 text-[14px] italic" data-testid="chat-translation">{tr[m.id]}</div>}
                 {!mine && canTranslate && m.body && !tr[m.id] && <button type="button" className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground" onClick={() => translate(m.id)} data-testid="chat-translate"><Languages size={12} />{t('ui.translate')}</button>}

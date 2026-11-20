@@ -12,6 +12,7 @@ import { ErrorText } from '../../../../components/errors';
 import { cdp, orderState } from '../../../../components/order-state';
 import { useL } from '../../../../components/nav';
 import { DisputeProgress, SafePayDialog } from '../../../../components/parity';
+import { BuyerSignals, PayerNameCheck, ReceiptChecks } from '../../../../components/safety';
 
 function useNow() {
   const [now, setNow] = useState(Date.now());
@@ -33,6 +34,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const [fb, setFb] = useState(false);
   const [disputing, setDisputing] = useState(false);
   const [safe, setSafe] = useState(false);
+  const [payerOk, setPayerOk] = useState(false);
   const statusRef = useRef('');
   statusRef.current = o?.status ?? '';
   const load = useCallback(() => api(`/orders/${id}`).then((x) => { setO(x); if (x.status === 'DISPUTED') api(`/orders/${id}/dispute`).then(setDispute).catch(() => {}); }).catch(setErr), [id]);
@@ -153,11 +155,14 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                 <Row label={t('ui.sender')} value={cp} />
                 <Row label={t('order.amount')} value={<span data-testid="fiat-amount">{fiatAmt}</span>} />
                 <Row label={t('ui.reference')} value={o.referenceCode} />
+                <BuyerSignals signals={o.buyerSignals} />
+                <ReceiptChecks orderId={id} />
+                <PayerNameCheck name={o.buyerVerifiedName} checked={payerOk} onChange={setPayerOk} onMismatch={() => { setPayerOk(false); if (disputeIn <= 0) setDisputing(true); else setErr(new Error(t('ui.payerMismatchWait', { time: mmss(disputeIn) }))); }} />
                 <div className="space-y-2 pt-2">
                   <label htmlFor="totp" className="text-sm text-muted-foreground">{t('order.totp')}</label>
                   <Input id="totp" data-testid="release-totp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} className="num h-14 text-center font-mono text-2xl tracking-[0.5em]" value={totp} onChange={(e) => setTotp(e.target.value.replace(/\D/g, ''))} placeholder="••••••" />
                 </div>
-                <Button size="lg" className="w-full" loading={busy === 'release'} onClick={() => act('release', { totp })} data-testid="release">{t('ui.moneyReceived')}</Button>
+                <Button size="lg" className="w-full" loading={busy === 'release'} disabled={!payerOk} onClick={() => act('release', { totp, payerNameConfirmed: true })} data-testid="release">{t('ui.moneyReceived')}</Button>
                 <div className="text-center">
                   {disputeIn > 0 ? <span className="text-sm text-muted-foreground">{t('order.disputeIn', { time: mmss(disputeIn) })}</span>
                     : <button type="button" onClick={() => setDisputing(true)} className="text-[15px] font-semibold underline underline-offset-4" data-testid="open-dispute">{t('ui.notReceived')}</button>}
