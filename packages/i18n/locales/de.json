@@ -613,6 +613,13 @@
   "otc_open": "Wartet",
   "otc_contacted": "Kontaktiert",
   "otc_closed": "Geschlossen",
-  "inviteCodeOpt": "Einladungscode (optional)"
+  "inviteCodeOpt": "Einladungscode (optional)",
+  "businessHours": "Geschäftszeiten",
+  "businessHoursDesc": "Deine Anzeigen erscheinen nur zu diesen Zeiten. Zeitzone: {tz}.",
+  "businessHoursOn": "Nur zu Geschäftszeiten",
+  "opensAt": "Öffnet",
+  "closesAt": "Schließt",
+  "hoursOffNow": "Außerhalb deiner Geschäftszeiten: Anzeigen sind bis zur Öffnung ausgeblendet.",
+  "outsideHours": "Außerhalb der Handelszeiten"
  }
 }

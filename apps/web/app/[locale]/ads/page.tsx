@@ -7,7 +7,7 @@ import { useI18n } from '../../../lib/i18n';
 import { api } from '../../../lib/api';
 import { useL } from '../../../components/nav';
 import { ErrorText } from '../../../components/errors';
-import { EditAdDialog } from '../../../components/community';
+import { BusinessHoursCard, EditAdDialog } from '../../../components/community';
 import { useSession } from '../../../lib/session';
 
 export default function MyAds() {
@@ -33,6 +33,7 @@ export default function MyAds() {
         <div className="min-w-0 flex-1"><div className="font-semibold">{t('ui.awayMode')}</div><p className="text-xs text-muted-foreground">{away ? t('ui.awayOn') : t('ui.awayDesc')}</p></div>
         <Button variant={away ? 'default' : 'soft'} size="sm" onClick={() => setAway(!away)} data-testid="away-toggle">{away ? t('ui.awayBack') : t('ui.awayStart')}</Button>
       </Card>
+      <BusinessHoursCard />
       <ErrorText error={err} />
       <div className="grid gap-3 md:grid-cols-2" data-testid="my-ads">
         {ads === null && Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-44 rounded-2xl" />)}

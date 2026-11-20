@@ -613,6 +613,13 @@
   "otc_open": "等待中",
   "otc_contacted": "已聯繫",
   "otc_closed": "已關閉",
-  "inviteCodeOpt": "邀請碼（選填）"
+  "inviteCodeOpt": "邀請碼（選填）",
+  "businessHours": "營業時間",
+  "businessHoursDesc": "你的廣告只在這些時段顯示。時區：{tz}。",
+  "businessHoursOn": "僅在營業時間",
+  "opensAt": "開始",
+  "closesAt": "結束",
+  "hoursOffNow": "目前不在營業時間：開始營業前廣告會隱藏。",
+  "outsideHours": "非營業時間"
  }
 }

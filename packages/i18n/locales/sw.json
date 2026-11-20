@@ -613,6 +613,13 @@
   "otc_open": "Inasubiri",
   "otc_contacted": "Imewasiliana",
   "otc_closed": "Imefungwa",
-  "inviteCodeOpt": "Msimbo wa mwaliko (si lazima)"
+  "inviteCodeOpt": "Msimbo wa mwaliko (si lazima)",
+  "businessHours": "Saa za kazi",
+  "businessHoursDesc": "Matangazo yako yanaonekana saa hizi tu. Saa za eneo: {tz}.",
+  "businessHoursOn": "Saa za kazi tu",
+  "opensAt": "Hufunguliwa",
+  "closesAt": "Hufungwa",
+  "hoursOffNow": "Nje ya saa zako za kazi sasa: matangazo yamefichwa hadi ufungue.",
+  "outsideHours": "Nje ya saa za kazi"
  }
 }

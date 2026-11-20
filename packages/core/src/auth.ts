@@ -33,7 +33,7 @@ export function publicUser(u: User) {
     id: u.id, email: u.email, emailVerified: !!u.emailVerifiedAt, phone: u.phone, phoneVerified: !!u.phoneVerifiedAt,
     tgId: u.tgId, kycTier: u.kycTier, status: u.status, country: u.country, locale: u.locale, displayName: u.displayName,
     totpEnabled: !!u.totpEnabledAt, isMerchant: u.isMerchant, createdAt: u.createdAt,
-    awayMode: u.awayMode, antiPhishingCode: u.antiPhishingCode ? `${u.antiPhishingCode.slice(0, 2)}${'•'.repeat(Math.max(0, u.antiPhishingCode.length - 2))}` : null,
+    awayMode: u.awayMode, businessHours: u.businessHours ?? null, offHours: u.offHours, antiPhishingCode: u.antiPhishingCode ? `${u.antiPhishingCode.slice(0, 2)}${'•'.repeat(Math.max(0, u.antiPhishingCode.length - 2))}` : null,
   };
 }
 

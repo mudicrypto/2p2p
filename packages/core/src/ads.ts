@@ -143,7 +143,7 @@ export interface BookQuery { side: 'buy' | 'sell'; asset: string; fiat: string; 
 export async function orderBook(ctx: Ctx, q: BookQuery, viewerId?: string) {
   const adSide = q.side === 'buy' ? 'sell' : 'buy';
   const fd = await fiatDecimals(ctx.read, q.fiat);
-  const conds = [eq(ads.asset, q.asset), eq(ads.fiat, q.fiat), eq(ads.side, adSide), eq(ads.status, 'active'), sql`${ads.remainingAmount} > 0`, eq(users.status, 'active'), eq(users.awayMode, false)];
+  const conds = [eq(ads.asset, q.asset), eq(ads.fiat, q.fiat), eq(ads.side, adSide), eq(ads.status, 'active'), sql`${ads.remainingAmount} > 0`, eq(users.status, 'active'), eq(users.awayMode, false), eq(users.offHours, false)];
   const rel = viewerId ? await viewerSets(ctx.read, viewerId) : null;
   if (rel?.hidden.size) conds.push(notInArray(ads.userId, [...rel.hidden]));
   if (q.followingOnly) conds.push(rel?.following.size ? inArray(ads.userId, [...rel.following]) : sql`false`);

@@ -613,6 +613,13 @@
   "otc_open": "En attente",
   "otc_contacted": "Contacté",
   "otc_closed": "Clôturé",
-  "inviteCodeOpt": "Code d'invitation (facultatif)"
+  "inviteCodeOpt": "Code d'invitation (facultatif)",
+  "businessHours": "Heures d'ouverture",
+  "businessHoursDesc": "Vos annonces ne s'affichent qu'à ces heures. Fuseau horaire : {tz}.",
+  "businessHoursOn": "Seulement aux heures d'ouverture",
+  "opensAt": "Ouverture",
+  "closesAt": "Fermeture",
+  "hoursOffNow": "Hors de vos heures d'ouverture : vos annonces sont masquées jusqu'à l'ouverture.",
+  "outsideHours": "Hors horaires"
  }
 }

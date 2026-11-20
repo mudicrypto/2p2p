@@ -15,8 +15,9 @@ export function OnlineDot({ online, className }: { online?: boolean; className?:
 }
 
 /** "Online" / "Last seen 5 min ago" / "Away" line for a trader. */
-export function Presence({ online, lastSeenAt, away }: { online?: boolean; lastSeenAt?: string | null; away?: boolean }) {
+export function Presence({ online, lastSeenAt, away, offHours }: { online?: boolean; lastSeenAt?: string | null; away?: boolean; offHours?: boolean }) {
   const { t, date } = useI18n();
+  if (offHours) return <span className="text-warn" data-testid="presence">{t('ui.outsideHours')}</span>;
   if (away) return <span className="text-warn" data-testid="presence">{t('ui.away')}</span>;
   if (online) return <span className="flex items-center gap-1.5 text-buy" data-testid="presence"><OnlineDot online />{t('ui.online')}</span>;
   if (!lastSeenAt) return null;
@@ -134,5 +135,47 @@ export function PriceAlertDialog({ side, asset, fiat, suggested, onClose }: { si
           : <Button type="submit" className="w-full" disabled={!price} data-testid="alert-save">{t('ui.createAlert')}</Button>}
       </form>
     </Dialog>
+  );
+}
+
+const DAYS = [1, 2, 3, 4, 5, 6, 0];
+/** Weekday short names in the viewer's language (Jan 4 2026 was a Sunday). */
+const dayName = (locale: string, d: number) => new Intl.DateTimeFormat(locale, { weekday: 'short', timeZone: 'UTC' }).format(new Date(Date.UTC(2026, 0, 4 + d)));
+
+/** Merchant business hours: ads only show inside these hours (worker keeps it current). */
+export function BusinessHoursCard() {
+  const { t, locale } = useI18n();
+  const { me, refresh } = useSession();
+  const cur = me?.businessHours ?? null;
+  const tzLocal = typeof Intl !== 'undefined' ? Intl.DateTimeFormat().resolvedOptions().timeZone : 'UTC';
+  const [on, setOn] = useState(!!cur);
+  const [h, setH] = useState(cur ?? { tz: tzLocal, start: '09:00', end: '21:00', days: [1, 2, 3, 4, 5] });
+  const [err, setErr] = useState<unknown>(null);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { setOn(!!me?.businessHours); if (me?.businessHours) setH(me.businessHours); }, [me?.businessHours]);
+  const save = async (enabled: boolean) => {
+    setErr(null); setSaved(false);
+    try { await api('/me/business-hours', { method: 'PUT', body: { hours: enabled ? { ...h, tz: h.tz || tzLocal } : null } }); await refresh(); setSaved(true); } catch (e) { setErr(e); }
+  };
+  return (
+    <div className="space-y-3 rounded-2xl border border-border bg-card p-5" data-testid="hours-card">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="min-w-0 flex-1"><div className="font-semibold">{t('ui.businessHours')}</div><p className="text-xs text-muted-foreground">{t('ui.businessHoursDesc', { tz: h.tz || tzLocal })}</p></div>
+        <label className="flex cursor-pointer items-center gap-2 text-sm"><input type="checkbox" data-testid="hours-on" checked={on} onChange={(e) => { setOn(e.target.checked); if (!e.target.checked && cur) void save(false); }} className="h-4 w-4 accent-[var(--color-primary)]" />{t('ui.businessHoursOn')}</label>
+      </div>
+      {me?.offHours && <p className="rounded-xl bg-warn/10 px-3 py-2 text-xs text-warn" data-testid="hours-off">{t('ui.hoursOffNow')}</p>}
+      {on && (
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="text-xs text-muted-foreground">{t('ui.opensAt')}<Input type="time" data-testid="hours-start" value={h.start} onChange={(e) => setH({ ...h, start: e.target.value })} className="mt-1 w-32" /></label>
+          <label className="text-xs text-muted-foreground">{t('ui.closesAt')}<Input type="time" data-testid="hours-end" value={h.end} onChange={(e) => setH({ ...h, end: e.target.value })} className="mt-1 w-32" /></label>
+          <div className="flex flex-wrap gap-1.5">{DAYS.map((d) => {
+            const sel = h.days.includes(d);
+            return <button key={d} type="button" aria-pressed={sel} onClick={() => setH({ ...h, days: sel ? h.days.filter((x) => x !== d) : [...h.days, d] })} className={cn('h-9 rounded-full px-3 text-xs font-semibold', sel ? 'bg-ink text-ink-foreground' : 'bg-muted')}>{dayName(locale, d)}</button>;
+          })}</div>
+          <Button size="sm" onClick={() => save(true)} disabled={!h.days.length} data-testid="hours-save">{saved ? '✓' : t('common.save')}</Button>
+        </div>
+      )}
+      <ErrorText error={err} />
+    </div>
   );
 }

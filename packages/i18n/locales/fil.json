@@ -613,6 +613,13 @@
   "otc_open": "Naghihintay",
   "otc_contacted": "Nakontak na",
   "otc_closed": "Sarado",
-  "inviteCodeOpt": "Invite code (opsyonal)"
+  "inviteCodeOpt": "Invite code (opsyonal)",
+  "businessHours": "Oras ng negosyo",
+  "businessHoursDesc": "Lalabas lang ang mga ad mo sa mga oras na ito. Time zone: {tz}.",
+  "businessHoursOn": "Sa oras ng negosyo lang",
+  "opensAt": "Bubukas",
+  "closesAt": "Nagsasara",
+  "hoursOffNow": "Labas ka ngayon sa oras ng negosyo: nakatago ang mga ad hanggang magbukas.",
+  "outsideHours": "Labas sa oras"
  }
 }

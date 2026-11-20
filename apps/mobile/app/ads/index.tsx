@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { BusinessHoursCard } from '../../src/conditions';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { api } from '../../src/native';
@@ -9,7 +10,7 @@ import { space } from '../../src/theme';
 import { AssetIcon, Badge, Button, Card, Empty, PayChip, Row, Skeleton, Text, errText } from '../../src/ui';
 
 export default function MyAds() {
-  const { colors: c, me, refresh } = useApp();
+  const { colors: c, me, refresh, locale } = useApp();
   const away = !!me?.awayMode;
   const { t, num } = useI18n();
   const [ads, setAds] = useState<any[] | null>(null);
@@ -27,6 +28,7 @@ export default function MyAds() {
         <View style={{ flex: 1 }}><Text weight="700">{t('ui.awayMode')}</Text><Text size="small" tone="sub">{away ? t('ui.awayOn') : t('ui.awayDesc')}</Text></View>
         <Button size="sm" variant={away ? 'primary' : 'soft'} title={away ? t('ui.awayBack') : t('ui.awayStart')} onPress={async () => { setErr(null); try { await api.setAway(!away); await refresh(); } catch (e) { setErr(errText(t, e)); } }} testID="away-toggle" />
       </Card>
+      <BusinessHoursCard me={me} locale={locale} onSaved={refresh} save={api.setBusinessHours} />
       {err && <Text tone="sell">{err}</Text>}
       {ads === null && <Skeleton height={140} />}
       {ads?.length === 0 && <Empty icon="megaphone-outline" text={t('ui.noAds')} />}

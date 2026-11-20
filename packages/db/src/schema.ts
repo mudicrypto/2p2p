@@ -37,6 +37,8 @@ export const users = pgTable('users', {
   sanctionsHit: boolean('sanctions_hit').notNull().default(false),
   lastSeenAt: ts('last_seen_at'),
   awayMode: boolean('away_mode').notNull().default(false), // "take a break": hides all of the user's ads
+  businessHours: jsonb('business_hours').$type<{ tz: string; start: string; end: string; days: number[] }>(), // merchant trading hours
+  offHours: boolean('off_hours').notNull().default(false), // outside business hours right now (kept current by the worker)
   antiPhishingCode: text('anti_phishing_code'), // shown in every email we send
   referralCode: text('referral_code'),
   referredBy: uuid('referred_by'),

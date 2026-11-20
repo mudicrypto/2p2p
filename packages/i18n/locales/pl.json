@@ -613,6 +613,13 @@
   "otc_open": "Oczekuje",
   "otc_contacted": "Skontaktowano",
   "otc_closed": "Zamknięte",
-  "inviteCodeOpt": "Kod zaproszenia (opcjonalnie)"
+  "inviteCodeOpt": "Kod zaproszenia (opcjonalnie)",
+  "businessHours": "Godziny pracy",
+  "businessHoursDesc": "Ogłoszenia są widoczne tylko w tych godzinach. Strefa czasowa: {tz}.",
+  "businessHoursOn": "Tylko w godzinach pracy",
+  "opensAt": "Otwarcie",
+  "closesAt": "Zamknięcie",
+  "hoursOffNow": "Poza godzinami pracy: ogłoszenia są ukryte do otwarcia.",
+  "outsideHours": "Poza godzinami pracy"
  }
 }

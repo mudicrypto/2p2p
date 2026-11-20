@@ -36,6 +36,13 @@
       "when": 1795130296565,
       "tag": "0004_p2p_community",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795132055209,
+      "tag": "0005_business_hours",
+      "breakpoints": true
     }
   ]
 }

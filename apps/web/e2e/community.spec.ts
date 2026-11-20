@@ -104,3 +104,26 @@ test('orders export as CSV', async ({ page }) => {
   await page.goto('/en/orders');
   await expect(page.getByTestId('export-csv')).toBeDisabled(); // nothing to export yet
 });
+
+test('business hours hide ads outside the chosen hours', async ({ page, context }) => {
+  await signupAndLogin(page);
+  await dev(context, '/dev/tier', { tier: 1 });
+  await dev(context, '/dev/faucet', { asset: 'USDT', amount: '200' });
+  const m = await dev(context, '/payment-methods', { type: 'SEPA', holderName: 'Hours Seller', details: { iban: 'DE89370400440532013000' } });
+  await dev(context, '/ads', { side: 'sell', asset: 'USDT', fiat: 'EUR', priceType: 'fixed', price: '0.977', minAmount: '10', maxAmount: '100', totalAmount: '50', paymentMethodIds: [m.id], paymentWindowMin: 15, terms: '', minCounterpartyTier: 0 });
+  const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const now = await page.evaluate(() => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); });
+  const fmt = (x: number) => { const v = (x + 1440) % 1440; return `${String(Math.floor(v / 60)).padStart(2, '0')}:${String(v % 60).padStart(2, '0')}`; };
+  await page.goto('/en/ads');
+  await page.getByTestId('hours-on').check();
+  await page.getByTestId('hours-start').fill(fmt(now + 120));
+  await page.getByTestId('hours-end').fill(fmt(now + 180));
+  for (const d of ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']) { const b = page.getByRole('button', { name: d, exact: true }); if ((await b.getAttribute('aria-pressed')) !== 'true') await b.click(); }
+  await page.getByTestId('hours-save').click();
+  await expect(page.getByTestId('hours-off')).toBeVisible();
+  await expect(page.getByTestId('hours-card')).toContainText(tz);
+  const r = await page.request.get('/v1/ads?side=buy&asset=USDT&fiat=EUR&limit=100');
+  expect((await r.json()).items.some((a: any) => a.price === '0.977')).toBe(false);
+  await page.getByTestId('hours-on').uncheck();
+  await expect(page.getByTestId('hours-off')).toHaveCount(0);
+});

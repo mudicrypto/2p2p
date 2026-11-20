@@ -179,7 +179,7 @@ export async function checkPriceAlerts(ctx: Ctx) {
       const adSide = a.side === 'buy' ? 'sell' : 'buy';
       const [r] = await ctx.db.select({ p: a.side === 'buy' ? sql<string>`min(${ads.price})` : sql<string>`max(${ads.price})` }).from(ads)
         .innerJoin(users, eq(users.id, ads.userId))
-        .where(and(eq(ads.asset, a.asset), eq(ads.fiat, a.fiat), eq(ads.side, adSide), eq(ads.status, 'active'), sql`${ads.remainingAmount} > 0`, eq(users.status, 'active'), eq(users.awayMode, false)));
+        .where(and(eq(ads.asset, a.asset), eq(ads.fiat, a.fiat), eq(ads.side, adSide), eq(ads.status, 'active'), sql`${ads.remainingAmount} > 0`, eq(users.status, 'active'), eq(users.awayMode, false), eq(users.offHours, false)));
       best.set(key, r?.p ? BigInt(r.p) : null);
     }
     const p = best.get(key);
@@ -216,4 +216,44 @@ export async function setOtcStatus(ctx: Ctx, adminId: string, id: string, status
   await audit(ctx.db, { actorType: 'admin', actorId: adminId, action: 'otc.status', subjectType: 'otc_request', subjectId: id, after: { status } });
   if (status === 'contacted') await notify(ctx, ctx.db, r.userId, 'otc_update', { requestId: id, status });
   return r;
+}
+
+// ---------------------------------------------------------------- business hours
+export type BusinessHours = { tz: string; start: string; end: string; days: number[] };
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+export function validateBusinessHours(h: BusinessHours): BusinessHours {
+  try { new Intl.DateTimeFormat('en-US', { timeZone: h.tz }).format(0); } catch { throw new DomainError('VALIDATION', 'unknown time zone'); }
+  if (!HHMM.test(h.start) || !HHMM.test(h.end) || h.start === h.end) throw new DomainError('VALIDATION', 'hours must be HH:MM and differ');
+  const days = [...new Set(h.days)].filter((d) => Number.isInteger(d) && d >= 0 && d <= 6).sort();
+  if (!days.length) throw new DomainError('VALIDATION', 'pick at least one day');
+  return { tz: h.tz, start: h.start, end: h.end, days };
+}
+/** Whether `now` falls inside the hours (in the merchant's time zone). Overnight spans (22:00–06:00) belong to the day they start. */
+export function withinBusinessHours(h: BusinessHours, now: Date): boolean {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: h.tz, weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now).map((p) => [p.type, p.value]));
+  const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(parts.weekday);
+  const min = Number(parts.hour) * 60 + Number(parts.minute);
+  const toMin = (s: string) => Number(s.slice(0, 2)) * 60 + Number(s.slice(3));
+  const a = toMin(h.start), b = toMin(h.end);
+  if (a < b) return h.days.includes(day) && min >= a && min < b;
+  return (h.days.includes(day) && min >= a) || (h.days.includes((day + 6) % 7) && min < b);
+}
+export async function setBusinessHours(ctx: Ctx, user: User, hours: BusinessHours | null) {
+  const h = hours ? validateBusinessHours(hours) : null;
+  const offHours = h ? !withinBusinessHours(h, ctx.now()) : false;
+  await ctx.db.update(users).set({ businessHours: h, offHours }).where(eq(users.id, user.id));
+  await audit(ctx.db, { actorType: 'user', actorId: user.id, action: 'user.business_hours', subjectType: 'user', subjectId: user.id, after: { hours: h } });
+  await refreshBooksOf(ctx, [user.id]);
+  return { businessHours: h, offHours };
+}
+/** Worker: open/close merchants whose business hours started or ended. */
+export async function applyBusinessHours(ctx: Ctx) {
+  const rows = await ctx.db.select({ id: users.id, h: users.businessHours, off: users.offHours }).from(users).where(sql`${users.businessHours} is not null`);
+  const now = ctx.now(); const changed: string[] = [];
+  for (const r of rows) {
+    const off = !withinBusinessHours(r.h!, now);
+    if (off !== r.off) { await ctx.db.update(users).set({ offHours: off }).where(eq(users.id, r.id)); changed.push(r.id); }
+  }
+  if (changed.length) await refreshBooksOf(ctx, changed);
+  return { changed: changed.length };
 }

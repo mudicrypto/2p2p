@@ -613,6 +613,13 @@
   "otc_open": "در انتظار",
   "otc_contacted": "تماس گرفته شد",
   "otc_closed": "بسته شد",
-  "inviteCodeOpt": "کد دعوت (اختیاری)"
+  "inviteCodeOpt": "کد دعوت (اختیاری)",
+  "businessHours": "ساعات کاری",
+  "businessHoursDesc": "آگهی‌های شما فقط در این ساعات نمایش داده می‌شوند. منطقه زمانی: {tz}.",
+  "businessHoursOn": "فقط در ساعات کاری",
+  "opensAt": "شروع",
+  "closesAt": "پایان",
+  "hoursOffNow": "اکنون خارج از ساعات کاری هستید: آگهی‌ها تا شروع پنهان‌اند.",
+  "outsideHours": "خارج از ساعات کاری"
  }
 }

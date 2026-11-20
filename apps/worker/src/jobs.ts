@@ -40,3 +40,5 @@ JOBS['totp.prune'] = (ctx) => core.pruneTotpState(ctx);
 SCHEDULES.push({ name: 'totp.prune', everyMs: 15 * 60_000 });
 JOBS['price_alerts.check'] = (ctx) => core.checkPriceAlerts(ctx).then(() => undefined);
 SCHEDULES.push({ name: 'price_alerts.check', everyMs: 60_000 });
+JOBS['business_hours.apply'] = (ctx) => core.applyBusinessHours(ctx).then(() => undefined);
+SCHEDULES.push({ name: 'business_hours.apply', everyMs: 60_000 });

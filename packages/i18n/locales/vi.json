@@ -613,6 +613,13 @@
   "otc_open": "Đang chờ",
   "otc_contacted": "Đã liên hệ",
   "otc_closed": "Đã đóng",
-  "inviteCodeOpt": "Mã mời (tùy chọn)"
+  "inviteCodeOpt": "Mã mời (tùy chọn)",
+  "businessHours": "Giờ làm việc",
+  "businessHoursDesc": "Quảng cáo chỉ hiển thị trong giờ này. Múi giờ: {tz}.",
+  "businessHoursOn": "Chỉ trong giờ làm việc",
+  "opensAt": "Mở",
+  "closesAt": "Đóng",
+  "hoursOffNow": "Hiện ngoài giờ làm việc: quảng cáo bị ẩn đến khi mở.",
+  "outsideHours": "Ngoài giờ làm việc"
  }
 }

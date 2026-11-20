@@ -4,7 +4,7 @@ import { makeCtx, mkUser, sellAd, ensureSeed, uniq, sepa, fund } from './helpers
 import {
   setNickname, validateNickname, setAwayMode, follow, block, relationTo, listRelations, touchLastSeen, orderBook, createOrder, createAd, updateAd,
   referralInfo, signupEmail, setAntiPhishingCode, createPriceAlert, listPriceAlerts, checkPriceAlerts, deletePriceAlert,
-  createOtcRequest, listOtcRequests, setOtcStatus, publicProfile, type User,
+  createOtcRequest, listOtcRequests, setOtcStatus, publicProfile, setBusinessHours, applyBusinessHours, withinBusinessHours, validateBusinessHours, type User,
 } from '../src';
 
 const ctx = makeCtx();
@@ -144,5 +144,38 @@ describe('P2P community features', () => {
     const mine = await listOtcRequests(ctx, { userId: u.id });
     expect(mine.find((r) => r.id === reqs[0].id)?.status).toBe('contacted');
     expect((await listOtcRequests(ctx, { status: ['open'] })).some((r) => r.id === reqs[1].id)).toBe(true);
+  });
+});
+
+describe('business hours', () => {
+  const h = (start: string, end: string, days = [0, 1, 2, 3, 4, 5, 6], tz = 'UTC') => ({ tz, start, end, days });
+  it('knows when a merchant is open, including overnight hours and time zones', () => {
+    const at = (iso: string) => new Date(iso);
+    expect(withinBusinessHours(h('09:00', '18:00'), at('2026-11-18T10:00:00Z'))).toBe(true);
+    expect(withinBusinessHours(h('09:00', '18:00'), at('2026-11-18T18:00:00Z'))).toBe(false);
+    expect(withinBusinessHours(h('09:00', '18:00', [1, 2, 3, 4, 5]), at('2026-11-22T10:00:00Z'))).toBe(false); // Sunday
+    expect(withinBusinessHours(h('22:00', '06:00', [3]), at('2026-11-19T03:00:00Z'))).toBe(true);  // Wed night → Thu 03:00
+    expect(withinBusinessHours(h('22:00', '06:00', [3]), at('2026-11-20T03:00:00Z'))).toBe(false); // Thu night not included
+    expect(withinBusinessHours(h('09:00', '18:00', [0, 1, 2, 3, 4, 5, 6], 'Asia/Tokyo'), at('2026-11-18T01:00:00Z'))).toBe(true); // 10:00 in Tokyo
+    expect(() => validateBusinessHours(h('9:00', '18:00'))).toThrow();
+    expect(() => validateBusinessHours(h('09:00', '18:00', [], 'UTC'))).toThrow();
+    expect(() => validateBusinessHours(h('09:00', '18:00', [1], 'Mars/Base'))).toThrow();
+  });
+
+  it('hides ads and blocks orders outside business hours; the worker reopens them', async () => {
+    const { maker, ad } = await sellAd(ctx, { price: '0.818' });
+    const taker = await mkUser(ctx);
+    const nowMin = new Date().getUTCHours() * 60 + new Date().getUTCMinutes();
+    const fmt = (m: number) => `${String(Math.floor(((m + 1440) % 1440) / 60)).padStart(2, '0')}:${String(((m + 1440) % 1440) % 60).padStart(2, '0')}`;
+    // Closed now: open window is 2–3 hours from now.
+    expect((await setBusinessHours(ctx, maker, h(fmt(nowMin + 120), fmt(nowMin + 180)))).offHours).toBe(true);
+    expect(ids(await book())).not.toContain(ad.id);
+    await expect(createOrder(ctx, taker, { adId: ad.id, fiatAmount: '20' })).rejects.toMatchObject({ code: 'AD_UNAVAILABLE' });
+    // Change the stored hours behind the scenes so they include now; the worker job flips the flag back.
+    await ctx.db.update(users).set({ businessHours: h(fmt(nowMin - 60), fmt(nowMin + 60)) }).where(eq(users.id, maker.id));
+    await applyBusinessHours(ctx);
+    expect(ids(await book())).toContain(ad.id);
+    expect((await publicProfile(ctx, maker.id)).offHours).toBe(false);
+    await setBusinessHours(ctx, maker, null);
   });
 });

@@ -613,6 +613,13 @@
   "otc_open": "대기 중",
   "otc_contacted": "연락함",
   "otc_closed": "종료",
-  "inviteCodeOpt": "초대 코드(선택)"
+  "inviteCodeOpt": "초대 코드(선택)",
+  "businessHours": "영업시간",
+  "businessHoursDesc": "광고는 이 시간에만 표시됩니다. 시간대: {tz}.",
+  "businessHoursOn": "영업시간에만",
+  "opensAt": "시작",
+  "closesAt": "종료",
+  "hoursOffNow": "지금은 영업시간 외: 시작 전까지 광고가 숨겨집니다.",
+  "outsideHours": "영업시간 외"
  }
 }

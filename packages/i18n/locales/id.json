@@ -613,6 +613,13 @@
   "otc_open": "Menunggu",
   "otc_contacted": "Dihubungi",
   "otc_closed": "Ditutup",
-  "inviteCodeOpt": "Kode undangan (opsional)"
+  "inviteCodeOpt": "Kode undangan (opsional)",
+  "businessHours": "Jam operasional",
+  "businessHoursDesc": "Iklan Anda hanya tampil pada jam ini. Zona waktu: {tz}.",
+  "businessHoursOn": "Hanya pada jam operasional",
+  "opensAt": "Buka",
+  "closesAt": "Tutup",
+  "hoursOffNow": "Sekarang di luar jam operasional: iklan disembunyikan sampai buka.",
+  "outsideHours": "Di luar jam operasional"
  }
 }

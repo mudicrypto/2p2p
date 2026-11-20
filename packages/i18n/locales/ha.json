@@ -613,6 +613,13 @@
   "otc_open": "Ana jira",
   "otc_contacted": "An tuntuɓa",
   "otc_closed": "An rufe",
-  "inviteCodeOpt": "Lambar gayyata (na zaɓi)"
+  "inviteCodeOpt": "Lambar gayyata (na zaɓi)",
+  "businessHours": "Lokutan aiki",
+  "businessHoursDesc": "Tallace-tallacenka suna bayyana a waɗannan lokutan kawai. Yankin lokaci: {tz}.",
+  "businessHoursOn": "A lokutan aiki kawai",
+  "opensAt": "Buɗewa",
+  "closesAt": "Rufewa",
+  "hoursOffNow": "A wajen lokutan aikinka yanzu: an ɓoye tallace-tallace har sai ka buɗe.",
+  "outsideHours": "A wajen lokutan aiki"
  }
 }

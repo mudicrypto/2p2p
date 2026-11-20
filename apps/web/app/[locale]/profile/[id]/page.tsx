@@ -33,7 +33,7 @@ export default function Passport({ params }: { params: Promise<{ id: string }> }
           <div className="relative">
             <Avatar name={p.displayName} seed={id} size={64} className="mx-auto" />
             <div className="mt-3 flex items-center justify-center gap-1.5 text-[22px] font-semibold tracking-tight">{p.displayName}{p.verifiedBadge && <BadgeCheck size={20} className="text-primary" />}</div>
-            <div className="mt-1 flex flex-wrap items-center justify-center gap-x-3 text-sm text-muted-foreground"><span>{t('profile.age', { days: p.accountAgeDays })}</span><Presence online={p.online} lastSeenAt={p.lastSeenAt} away={p.away} /></div>
+            <div className="mt-1 flex flex-wrap items-center justify-center gap-x-3 text-sm text-muted-foreground"><span>{t('profile.age', { days: p.accountAgeDays })}</span><Presence online={p.online} lastSeenAt={p.lastSeenAt} away={p.away} offHours={p.offHours} /></div>
             <div className="mt-4"><RelationButtons userId={id} /></div>
             <div className="num-xl mt-6 text-[72px] sm:text-[96px]">{(p.tradesTotal ?? p.trades30d) > 0 ? pct(p.completionRateBps) : '—'}</div>
             <div className="text-[15px] font-medium">{(p.tradesTotal ?? p.trades30d) > 0 ? t('ui.completionRate') : t('ui.noTradesYet')}</div>

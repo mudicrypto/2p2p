@@ -52,7 +52,7 @@ export async function createOrderInTx(ctx: Ctx, t: TxCtx, takerIn: User, input: 
     if (taker.status !== 'active') throw new DomainError('ACCOUNT_FROZEN', 'account not active');
     if (taker.kycTier < ad.minCounterpartyTier) throw new DomainError('TIER_REQUIRED', `advertiser requires tier ${ad.minCounterpartyTier}+`);
     const maker = await reloadUser(t.tx, ad.userId);
-    if (maker.status !== 'active' || maker.awayMode) throw new DomainError('AD_UNAVAILABLE', 'advertiser unavailable');
+    if (maker.status !== 'active' || maker.awayMode || maker.offHours) throw new DomainError('AD_UNAVAILABLE', 'advertiser unavailable');
     if (await isBlockedBetween(t.tx, taker.id, maker.id)) throw new DomainError('FORBIDDEN', 'you cannot trade with this user');
     if (ad.minAccountAgeDays > 0 && ctx.now().getTime() - taker.createdAt.getTime() < ad.minAccountAgeDays * 86400_000) {
       throw new DomainError('FORBIDDEN', `advertiser requires an account at least ${ad.minAccountAgeDays} days old`);

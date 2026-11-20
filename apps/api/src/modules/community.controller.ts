@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Post, Put } fro
 import { z } from 'zod';
 import {
   setNickname, setAwayMode, follow, block, listRelations, relationTo, setAntiPhishingCode, referralInfo,
-  createPriceAlert, listPriceAlerts, deletePriceAlert, createOtcRequest, listOtcRequests, type User,
+  createPriceAlert, listPriceAlerts, deletePriceAlert, createOtcRequest, listOtcRequests, setBusinessHours, type BusinessHours, type User,
 } from '@p2p/core';
 import { zAsset, zFiat } from '@p2p/shared';
 import { CTX, type Ctx } from '../common/ctx';
@@ -29,6 +29,10 @@ export class CommunityController {
   @Put('me/anti-phishing') @HttpCode(200)
   antiPhishing(@CurrentUser() u: User, @Body(new Zod(z.object({ code: z.string().max(40).nullable() }), 'AntiPhishing')) b: { code: string | null }) {
     return setAntiPhishingCode(this.ctx, u, b.code);
+  }
+  @Put('me/business-hours') @HttpCode(200)
+  hours(@CurrentUser() u: User, @Body(new Zod(z.object({ hours: z.object({ tz: z.string().max(64), start: z.string().max(5), end: z.string().max(5), days: z.array(z.number().int()).max(7) }).nullable() }), 'BusinessHours')) b: { hours: BusinessHours | null }) {
+    return setBusinessHours(this.ctx, u, b.hours);
   }
   @Get('me/referral')
   referral(@CurrentUser() u: User) { return referralInfo(this.ctx, u); }

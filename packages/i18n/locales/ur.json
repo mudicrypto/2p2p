@@ -613,6 +613,13 @@
   "otc_open": "زیر التواء",
   "otc_contacted": "رابطہ ہو گیا",
   "otc_closed": "بند",
-  "inviteCodeOpt": "دعوتی کوڈ (اختیاری)"
+  "inviteCodeOpt": "دعوتی کوڈ (اختیاری)",
+  "businessHours": "کاروباری اوقات",
+  "businessHoursDesc": "آپ کے اشتہار صرف ان اوقات میں دکھیں گے۔ ٹائم زون: {tz}۔",
+  "businessHoursOn": "صرف کاروباری اوقات میں",
+  "opensAt": "کھلنے کا وقت",
+  "closesAt": "بند ہونے کا وقت",
+  "hoursOffNow": "ابھی آپ کے کاروباری اوقات سے باہر: کھلنے تک اشتہار چھپے ہیں۔",
+  "outsideHours": "اوقات سے باہر"
  }
 }

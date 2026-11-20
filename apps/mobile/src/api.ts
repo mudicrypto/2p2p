@@ -73,6 +73,7 @@ export function createApi(baseUrl: string, getToken: () => string | null | Promi
     merchantStatus: () => call<any>('/merchant-program/status'),
     updateAd: (id: string, b: Record<string, unknown>) => call<any>(`/ads/${id}`, { method: 'PATCH', body: b }),
     setNickname: (displayName: string) => call('/me/nickname', { method: 'PUT', body: { displayName } }),
+    setBusinessHours: (hours: { tz: string; start: string; end: string; days: number[] } | null) => call('/me/business-hours', { method: 'PUT', body: { hours } }),
     setAway: (away: boolean) => call('/me/away', { method: 'PUT', body: { away } }),
     setAntiPhishing: (code: string | null) => call('/me/anti-phishing', { method: 'PUT', body: { code } }),
     referral: () => call<{ code: string; invited: number; traded: number }>('/me/referral'),

@@ -613,6 +613,13 @@
   "otc_open": "অপেক্ষমাণ",
   "otc_contacted": "যোগাযোগ করা হয়েছে",
   "otc_closed": "বন্ধ",
-  "inviteCodeOpt": "আমন্ত্রণ কোড (ঐচ্ছিক)"
+  "inviteCodeOpt": "আমন্ত্রণ কোড (ঐচ্ছিক)",
+  "businessHours": "ব্যবসার সময়",
+  "businessHoursDesc": "আপনার বিজ্ঞাপন শুধু এই সময়ে দেখাবে। টাইম জোন: {tz}।",
+  "businessHoursOn": "শুধু ব্যবসার সময়ে",
+  "opensAt": "খোলে",
+  "closesAt": "বন্ধ হয়",
+  "hoursOffNow": "এখন আপনার ব্যবসার সময়ের বাইরে: খোলা পর্যন্ত বিজ্ঞাপন লুকানো।",
+  "outsideHours": "কাজের সময়ের বাইরে"
  }
 }

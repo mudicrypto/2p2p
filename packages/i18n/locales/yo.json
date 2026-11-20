@@ -613,6 +613,13 @@
   "otc_open": "Ń dúró",
   "otc_contacted": "A ti kàn sí",
   "otc_closed": "Ti parí",
-  "inviteCodeOpt": "Kóòdù ìpè (àṣàyàn)"
+  "inviteCodeOpt": "Kóòdù ìpè (àṣàyàn)",
+  "businessHours": "Àkókò iṣẹ́",
+  "businessHoursDesc": "Ìpolówó rẹ yóò hàn ní àkókò yìí nìkan. Agbègbè àkókò: {tz}.",
+  "businessHoursOn": "Ní àkókò iṣẹ́ nìkan",
+  "opensAt": "Ṣíṣí",
+  "closesAt": "Títì",
+  "hoursOffNow": "Ó ti kọjá àkókò iṣẹ́ rẹ báyìí: a ti fi ìpolówó pamọ́ títí o fi ṣí.",
+  "outsideHours": "Lẹ́yìn àkókò iṣẹ́"
  }
 }

@@ -613,6 +613,13 @@
   "otc_open": "待機中",
   "otc_contacted": "連絡済み",
   "otc_closed": "クローズ",
-  "inviteCodeOpt": "招待コード（任意）"
+  "inviteCodeOpt": "招待コード（任意）",
+  "businessHours": "営業時間",
+  "businessHoursDesc": "広告はこの時間帯のみ表示されます。タイムゾーン：{tz}。",
+  "businessHoursOn": "営業時間のみ",
+  "opensAt": "開始",
+  "closesAt": "終了",
+  "hoursOffNow": "現在は営業時間外：開始まで広告は非表示です。",
+  "outsideHours": "営業時間外"
  }
 }

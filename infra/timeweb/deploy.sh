@@ -37,4 +37,5 @@ export DOCKER_BUILDKIT=1
 docker compose -p parley --env-file "$ENV" build
 docker compose -p parley --env-file "$ENV" up -d --remove-orphans
 docker image prune -f >/dev/null
+docker builder prune -f --filter until=48h >/dev/null 2>&1 || true   # keep build cache from filling the disk
 echo "deployed $SITE_HOST"

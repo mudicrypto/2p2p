@@ -613,6 +613,13 @@
   "otc_open": "قيد الانتظار",
   "otc_contacted": "تم التواصل",
   "otc_closed": "مغلق",
-  "inviteCodeOpt": "رمز الدعوة (اختياري)"
+  "inviteCodeOpt": "رمز الدعوة (اختياري)",
+  "businessHours": "ساعات العمل",
+  "businessHoursDesc": "تظهر إعلاناتك خلال هذه الساعات فقط. المنطقة الزمنية: {tz}.",
+  "businessHoursOn": "خلال ساعات العمل فقط",
+  "opensAt": "يفتح",
+  "closesAt": "يغلق",
+  "hoursOffNow": "خارج ساعات عملك الآن: إعلاناتك مخفية حتى تفتح.",
+  "outsideHours": "خارج ساعات العمل"
  }
 }

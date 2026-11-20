@@ -613,6 +613,13 @@
   "otc_open": "รอดำเนินการ",
   "otc_contacted": "ติดต่อแล้ว",
   "otc_closed": "ปิดแล้ว",
-  "inviteCodeOpt": "รหัสเชิญ (ไม่บังคับ)"
+  "inviteCodeOpt": "รหัสเชิญ (ไม่บังคับ)",
+  "businessHours": "เวลาทำการ",
+  "businessHoursDesc": "โฆษณาของคุณจะแสดงเฉพาะช่วงเวลานี้ เขตเวลา: {tz}",
+  "businessHoursOn": "เฉพาะเวลาทำการ",
+  "opensAt": "เปิด",
+  "closesAt": "ปิด",
+  "hoursOffNow": "ตอนนี้อยู่นอกเวลาทำการ: โฆษณาถูกซ่อนจนกว่าจะเปิด",
+  "outsideHours": "นอกเวลาทำการ"
  }
 }

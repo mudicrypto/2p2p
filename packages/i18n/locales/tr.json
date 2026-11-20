@@ -613,6 +613,13 @@
   "otc_open": "Bekliyor",
   "otc_contacted": "İletişime geçildi",
   "otc_closed": "Kapandı",
-  "inviteCodeOpt": "Davet kodu (isteğe bağlı)"
+  "inviteCodeOpt": "Davet kodu (isteğe bağlı)",
+  "businessHours": "Çalışma saatleri",
+  "businessHoursDesc": "İlanlarınız yalnızca bu saatlerde görünür. Saat dilimi: {tz}.",
+  "businessHoursOn": "Yalnızca çalışma saatlerinde",
+  "opensAt": "Açılış",
+  "closesAt": "Kapanış",
+  "hoursOffNow": "Şu an çalışma saatleriniz dışında: açılana kadar ilanlarınız gizli.",
+  "outsideHours": "Çalışma saatleri dışında"
  }
 }

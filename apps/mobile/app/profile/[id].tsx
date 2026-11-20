@@ -32,7 +32,8 @@ export default function Passport() {
         <Avatar name={p.displayName} seed={id} size={64} />
         <Row style={{ gap: 6 }}><Text size="h3">{p.displayName}</Text>{p.verifiedBadge && <Ionicons name="checkmark-circle" size={18} color={c.primary} />}</Row>
         <Text size="small" tone="sub">{t('profile.age', { days: p.accountAgeDays })}</Text>
-        {p.away ? <Text size="small" tone="warn" testID="presence">{t('ui.away')}</Text>
+        {p.offHours ? <Text size="small" tone="warn" testID="presence">{t('ui.outsideHours')}</Text>
+          : p.away ? <Text size="small" tone="warn" testID="presence">{t('ui.away')}</Text>
           : p.online ? <Row style={{ gap: 6 }} testID="presence"><View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.buy }} /><Text size="small" tone="buy">{t('ui.online')}</Text></Row>
           : p.lastSeenAt ? <Text size="small" tone="sub" testID="presence">{t('ui.lastSeen', { when: date(p.lastSeenAt) })}</Text> : null}
         {rel && <Row style={{ gap: 8, marginTop: space(2) }}>
