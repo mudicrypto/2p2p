@@ -10,6 +10,7 @@ import { useI18n } from '../../src/i18n';
 import { cdp, orderState } from '../../src/format';
 import { space } from '../../src/theme';
 import { DisputeProgress, SafePayChecklist } from '../../src/parity';
+import { BuyerSignals, PayerNameCheck, ReceiptChecks } from '../../src/safety';
 import { Avatar, Badge, Big, Button, Card, CopyRow, Divider, Hero, Input, Notice, Pill, Press, Row, Skeleton, Text, errText, success } from '../../src/ui';
 
 const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -30,6 +31,7 @@ export default function Order() {
   const [totp, setTotp] = useState('');
   const [busy, setBusy] = useState('');
   const [safe, setSafe] = useState(false);
+  const [payerOk, setPayerOk] = useState(false);
   const [canTr, setCanTr] = useState(false);
   const [tr, setTr] = useState<Record<string, string>>({});
   useEffect(() => { api.features().then((f) => setCanTr(!!f.chatTranslation)).catch(() => null); }, []);
@@ -120,8 +122,11 @@ export default function Order() {
               <Line label={t('ui.sender')} value={cp} />
               <Line label={t('order.amount')} value={fiatAmt} />
               <Line label={t('ui.reference')} value={o.referenceCode} />
+              <BuyerSignals signals={o.buyerSignals} />
+              <ReceiptChecks orderId={id} />
+              <PayerNameCheck name={o.buyerVerifiedName} checked={payerOk} onChange={setPayerOk} onMismatch={() => { setPayerOk(false); if (disputeIn <= 0) setDisputing(true); else setErr(t('ui.payerMismatchWait', { time: mmss(disputeIn) })); }} />
               <Input label={t('order.totp')} keyboardType="number-pad" maxLength={6} value={totp} onChangeText={(v) => setTotp(v.replace(/\D/g, ''))} placeholder="••••••" style={{ letterSpacing: 8, textAlign: 'center', fontSize: 22 }} />
-              <Button size="lg" title={t('ui.moneyReceived')} disabled={totp.length !== 6} loading={busy === 'release'} onPress={async () => { if (await biometricUnlock(t('order.release'))) await act('release', () => api.release(id, totp)); }} />
+              <Button size="lg" title={t('ui.moneyReceived')} disabled={totp.length !== 6 || !payerOk} loading={busy === 'release'} onPress={async () => { if (await biometricUnlock(t('order.release'))) await act('release', () => api.release(id, totp, true)); }} testID="release" />
               {disputeIn > 0 ? <Text size="small" tone="sub" style={{ textAlign: 'center' }}>{t('order.disputeIn', { time: mmss(disputeIn) })}</Text>
                 : <Press onPress={() => setDisputing(true)}><Text weight="600" style={{ textAlign: 'center', textDecorationLine: 'underline' }}>{t('ui.notReceived')}</Text></Press>}
             </Card>
@@ -178,6 +183,7 @@ export default function Order() {
               const fg = mine ? c.onInk : c.text;
               return (
                 <View key={m.id} style={{ alignSelf: mine ? 'flex-end' : 'flex-start', maxWidth: '82%', backgroundColor: mine ? c.ink : c.muted, borderRadius: 20, borderBottomRightRadius: mine ? 6 : 20, borderBottomLeftRadius: mine ? 20 : 6, paddingHorizontal: 14, paddingVertical: 9 }}>
+                  {!mine && !!m.warning && <Text size="tiny" weight="700" style={{ color: c.sell, marginBottom: 4 }} testID="chat-scam-warning">⚠ {t(`ui.scam_${m.warning}`)}</Text>}
                   {!!m.body && <Text style={{ color: fg }}>{m.body}</Text>}
                   {!!tr[m.id] && <Text style={{ color: fg, fontStyle: 'italic', marginTop: 4 }} testID="chat-translation">{tr[m.id]}</Text>}
                   {!mine && canTr && !!m.body && !tr[m.id] && <Press onPress={() => api.translate(id, m.id, locale).then((r) => setTr((x) => ({ ...x, [m.id]: r.text }))).catch(() => null)}><Text size="tiny" tone="sub" style={{ marginTop: 2 }}>{t('ui.translate')}</Text></Press>}

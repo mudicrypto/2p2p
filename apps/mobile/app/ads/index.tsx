@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { BusinessHoursCard } from '../../src/conditions';
+import { BulkButtons, MerchantStats, PromotePanel, ShopLink } from '../../src/merchant-tools';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { api } from '../../src/native';
@@ -16,6 +17,7 @@ export default function MyAds() {
   const [ads, setAds] = useState<any[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [promoting, setPromoting] = useState<string | null>(null);
   const load = useCallback(() => api.myAds().then((r) => setAds(r.filter((a) => a.status !== 'closed'))).catch(() => setAds([])), []);
   useFocusEffect(useCallback(() => { void load(); }, [load]));
   const setStatus = async (id: string, s: 'active' | 'paused' | 'closed') => { setErr(null); try { await api.setAdStatus(id, s); await load(); } catch (e) { setErr(errText(t, e)); } };
@@ -29,7 +31,10 @@ export default function MyAds() {
         <Button size="sm" variant={away ? 'primary' : 'soft'} title={away ? t('ui.awayBack') : t('ui.awayStart')} onPress={async () => { setErr(null); try { await api.setAway(!away); await refresh(); } catch (e) { setErr(errText(t, e)); } }} testID="away-toggle" />
       </Card>
       <BusinessHoursCard me={me} locale={locale} onSaved={refresh} save={api.setBusinessHours} />
-      {err && <Text tone="sell">{err}</Text>}
+      <ShopLink me={me} locale={locale} />
+      <MerchantStats />
+      <BulkButtons ids={(ads ?? []).map((a) => a.id)} onDone={() => void load()} />
+      {err &&<Text tone="sell">{err}</Text>}
       {ads === null && <Skeleton height={140} />}
       {ads?.length === 0 && <Empty icon="megaphone-outline" text={t('ui.noAds')} />}
       {ads?.map((a) => (
@@ -59,6 +64,11 @@ export default function MyAds() {
               : <Button size="sm" variant="soft" icon="play" title={t('ad.resume')} onPress={() => setStatus(a.id, 'active')} style={{ flex: 1 }} />}
             <Button size="sm" variant="outline" icon="close" title={t('ad.close')} onPress={() => setStatus(a.id, 'closed')} style={{ flex: 1 }} />
           </Row>
+          <Row>
+            <Button size="sm" variant="ghost" icon="megaphone-outline" title={t('ui.promote')} onPress={() => setPromoting(promoting === a.id ? null : a.id)} style={{ flex: 1 }} testID="promote-open" />
+            {a.promotedUntil && new Date(a.promotedUntil) > new Date() && <Badge label={t('ui.promoted')} tone="warning" />}
+          </Row>
+          {promoting === a.id && <PromotePanel ad={a} onDone={() => void load()} />}
         </Card>
       ))}
     </ScrollView>

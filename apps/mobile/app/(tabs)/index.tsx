@@ -10,6 +10,7 @@ import { useI18n } from '../../src/i18n';
 import { cleanDecimal, cryptoFor, fiatFor, inRange } from '../../src/decimal';
 import { cdp, releaseLabel } from '../../src/format';
 import { ASSETS, space } from '../../src/theme';
+import { FirstTradeGuide, PriceChart } from '../../src/market-extras';
 import { Badge, Button, Card, Chip, Divider, Hero, Input, Notice, PickerChip, Pill, Press, Row, Segmented, Skeleton, Text, errText } from '../../src/ui';
 
 const POPULAR = ['USD', 'EUR', 'GBP', 'NGN', 'BRL', 'INR', 'TRY', 'ARS', 'VND', 'IDR', 'PHP', 'KES', 'UAH', 'PLN', 'MXN', 'ZAR'];
@@ -40,12 +41,15 @@ export default function Trade() {
   const [fiats, setFiats] = useState<string[]>(['USD', 'EUR']);
   const [types, setTypes] = useState<Array<{ code: string; name: string }>>([]);
   const [items, setItems] = useState<any[] | null>(null);
+  const [promoted, setPromoted] = useState<any[]>([]);
+  const [hasTraded, setHasTraded] = useState<boolean | null>(null);
+  useEffect(() => { if (me) api.orders().then((r) => setHasTraded(r.some((o: any) => o.status === 'COMPLETED'))).catch(() => setHasTraded(true)); else setHasTraded(false); }, [me]);
   const [refreshing, setRefreshing] = useState(false);
   const seq = useRef(0); // ignore out-of-order responses when filters change quickly
   const load = useCallback(async () => {
     const my = ++seq.current;
     const r = await api.book({ side, asset, fiat, ...(pm ? { paymentType: pm } : {}), ...(onlineOnly ? { onlineOnly: 'true' } : {}), ...(followingOnly ? { followingOnly: 'true' } : {}), ...(merchantOnly ? { merchantOnly: 'true' } : {}), ...(verifiedOnly ? { minTier: '1' } : {}), ...(q ? { q } : {}) }).catch(() => ({ items: [] }));
-    if (my === seq.current) setItems(r.items);
+    if (my === seq.current) { setItems(r.items); setPromoted((r as { promoted?: any[] }).promoted ?? []); }
   }, [side, asset, fiat, pm, onlineOnly, followingOnly, merchantOnly, verifiedOnly, q]);
   const activeFilters = [onlineOnly, followingOnly, merchantOnly, verifiedOnly, q].filter(Boolean).length;
   const saveAlert = async () => {
@@ -118,6 +122,17 @@ export default function Trade() {
         </Row>
       </> : items === null ? <Skeleton height={160} /> : <Card><Text tone="sub" style={{ textAlign: 'center', paddingVertical: space(6) }}>{t('market.empty')}</Text></Card>}
 
+      <FirstTradeGuide show={hasTraded === false} />
+      {promoted.length > 0 && <Card style={{ gap: 0, borderColor: `${c.primary}66` }} testID="promoted">
+        {promoted.map((ad, i) => (
+          <View key={ad.id}>{i > 0 && <Divider />}
+            <Row style={{ paddingVertical: space(2.5), gap: 10 }}>
+              <View style={{ flex: 1, gap: 3 }}><Row style={{ gap: 6 }}><Badge label={t('ui.promoted')} tone="warning" /><Text weight="600" numberOfLines={1} style={{ flexShrink: 1 }}>{ad.advertiser.displayName}</Text></Row>
+                <Text size="tiny" tone="sub">{num(ad.price, 8)} · {num(ad.minAmount, 2)}–{num(ad.maxAmount, 2)} {ad.fiat}</Text></View>
+              <Button size="sm" variant="soft" title={t(side === 'buy' ? 'market.buy' : 'market.sell')} onPress={() => open(ad, side === 'buy' ? amount : amount ? fiatFor(amount, ad.price) : '')} testID="trade-promoted" />
+            </Row>
+          </View>))}
+      </Card>}
       <Card style={{ gap: 0 }} testID="book">
         <Row style={{ justifyContent: 'space-between', marginBottom: space(1) }}>
           <Text size="h3">{t('ui.allOffers')}</Text>
@@ -171,6 +186,7 @@ export default function Trade() {
           </View>
         ))}
       </Card>
+      <PriceChart asset={asset} fiat={fiat} side={side} />
       <Press onPress={() => router.push(me ? '/otc' : '/login')} testID="otc-link">
         <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Ionicons name="briefcase-outline" size={20} color={c.primary} />

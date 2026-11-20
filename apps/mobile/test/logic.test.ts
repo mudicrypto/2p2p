@@ -7,6 +7,9 @@ describe('deep links', () => {
   it('parses custom scheme, universal links (with locale) and rejects others', () => {
     expect(parseDeepLink(`p2p://orders/${ID}`)).toEqual({ screen: 'order', id: ID });
     expect(parseDeepLink(`https://app.example.com/pt/orders/${ID}`)).toEqual({ screen: 'order', id: ID });
+    expect(parseDeepLink('https://app.example.com/en/m/Kite%20Shop')).toEqual({ screen: 'shop', handle: 'Kite Shop' });
+    expect(routeToPath({ screen: 'shop', handle: 'Kite Shop' })).toBe('/m/Kite%20Shop');
+    expect(parseDeepLink('https://app.example.com/en/m/%3Cscript%3E')).toEqual({ screen: 'unknown' });
     expect(parseDeepLink('p2p://market?asset=USDT&fiat=BRL')).toEqual({ screen: 'market', asset: 'USDT', fiat: 'BRL' });
     expect(parseDeepLink(`https://evil.example.org/orders/${ID}`)).toEqual({ screen: 'unknown' });
     expect(parseDeepLink('p2p://orders/not-a-uuid')).toEqual({ screen: 'unknown' });

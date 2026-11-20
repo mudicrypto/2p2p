@@ -1,5 +1,5 @@
 /** Deep links: p2p://orders/{id}, https://app.example.com/{locale?}/orders/{id}, p2p://market?asset=&fiat=, notification payloads. */
-export type Route = { screen: 'order'; id: string } | { screen: 'market'; asset?: string; fiat?: string } | { screen: 'wallet' } | { screen: 'unknown' };
+export type Route = { screen: 'order'; id: string } | { screen: 'shop'; handle: string } | { screen: 'market'; asset?: string; fiat?: string } | { screen: 'wallet' } | { screen: 'unknown' };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const webHost = (() => { try { return new URL(process.env.EXPO_PUBLIC_WEB_URL || 'https://app.example.com').hostname; } catch { return 'app.example.com'; } })();
 export const UNIVERSAL_HOSTS = [webHost]; // TODO(provider): production domain via EXPO_PUBLIC_WEB_URL
@@ -15,6 +15,7 @@ export function parseDeepLink(raw: string): Route {
   if (parts[0] === 'orders' && parts[1] && UUID.test(parts[1])) return { screen: 'order', id: parts[1] };
   if (parts[0] === 'market' || parts.length === 0) return { screen: 'market', asset: u.searchParams.get('asset') ?? undefined, fiat: u.searchParams.get('fiat') ?? undefined };
   if (parts[0] === 'wallet') return { screen: 'wallet' };
+  if (parts[0] === 'm' && parts[1]) { const h = decodeURIComponent(parts[1]); if (/^[\p{L}\p{N} _-]{3,40}$/u.test(h) || UUID.test(h)) return { screen: 'shop', handle: h }; }
   return { screen: 'unknown' };
 }
 /** Map a push notification's data payload to a route (order events carry orderId). */
@@ -25,6 +26,7 @@ export function routeForNotification(data: Record<string, unknown> | undefined):
 export function routeToPath(r: Route): string {
   if (r.screen === 'order') return `/orders/${r.id}`;
   if (r.screen === 'wallet') return '/wallet';
+  if (r.screen === 'shop') return `/m/${encodeURIComponent(r.handle)}`;
   if (r.screen === 'market') return `/${r.fiat || r.asset ? `?${new URLSearchParams({ ...(r.asset ? { asset: r.asset } : {}), ...(r.fiat ? { fiat: r.fiat } : {}) })}` : ''}`;
   return '/';
 }

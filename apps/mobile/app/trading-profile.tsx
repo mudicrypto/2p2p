@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { Linking, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../src/native';
@@ -17,10 +17,12 @@ export default function TradingProfile() {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [rel, setRel] = useState<{ following: any[]; blocked: any[] }>({ following: [], blocked: [] });
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [tg, setTg] = useState<{ available: boolean; linked: boolean } | null>(null);
   const load = useCallback(async () => {
     setAlerts(await api.priceAlerts().catch(() => []));
     const [following, blocked] = await Promise.all([api.following().catch(() => []), api.blocked().catch(() => [])]);
     setRel({ following, blocked });
+    setTg(await api.telegram().catch(() => null));
   }, []);
   useFocusEffect(useCallback(() => { void load(); }, [load]));
   const run = async (f: () => Promise<unknown>) => { setMsg(null); try { await f(); success(); setMsg({ ok: true, text: '✓' }); await refresh(); await load(); } catch (e) { setMsg({ ok: false, text: errText(t, e) }); } };
@@ -40,6 +42,13 @@ export default function TradingProfile() {
         <Text size="small" tone="sub">{me?.antiPhishingCode ? t('ui.antiPhishingSet', { code: me.antiPhishingCode }) : t('ui.antiPhishingDesc')}</Text>
         <Input value={apc} maxLength={20} placeholder={t('ui.antiPhishingPh')} onChangeText={setApc} testID="anti-phishing" />
         <Button size="sm" title={t('common.save')} disabled={apc.trim().length < 4} onPress={() => run(async () => { await api.setAntiPhishing(apc.trim()); setApc(''); })} />
+      </Card>
+      <Card style={{ gap: 10 }} testID="tg-card">
+        <Text weight="700">{t('ui.tgAlerts')}</Text>
+        <Text size="small" tone="sub">{tg?.available ? (tg.linked ? t('ui.tgLinked') : t('ui.tgDesc')) : t('ui.tgUnavailable')}</Text>
+        {tg?.available && (tg.linked
+          ? <Button size="sm" variant="soft" title={t('ui.tgDisconnect')} onPress={() => run(() => api.telegramUnlink())} />
+          : <Button size="sm" icon="paper-plane-outline" title={t('ui.tgConnect')} onPress={() => run(async () => { const r = await api.telegramLink(); await Linking.openURL(r.url); })} />)}
       </Card>
       <Card style={{ gap: 0 }}>
         <Text weight="700">{t('ui.priceAlerts')}</Text>
