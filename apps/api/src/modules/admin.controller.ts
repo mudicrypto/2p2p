@@ -152,6 +152,12 @@ export class AdminController {
   fund(@CurrentAdmin() a: Admin, @Param('asset') asset: string, @Body(new Zod(z.object({ amount: z.string() }))) b: { amount: string }, @Req() req: any) {
     return core.fundInsurance(this.ctx, a.id, asset as Asset, toMinor(b.amount, assetDecimals(asset as Asset)), String(req.headers['idempotency-key']));
   }
+  @Perm('insurance.fund') @Get('rewards/:asset')
+  async rewardsFund(@Param('asset') asset: string) { return { asset, balance: fromMinor(await core.rewardsBalance(this.ctx, asset), assetDecimals(asset as Asset)) }; }
+  @Perm('insurance.fund') @Post('rewards/:asset/fund') @HttpCode(200)
+  fundRewards(@CurrentAdmin() a: Admin, @Param('asset') asset: string, @Body(new Zod(z.object({ amount: z.string() }))) b: { amount: string }, @Req() req: any) {
+    return core.fundRewards(this.ctx, a.id, asset as Asset, toMinor(b.amount, assetDecimals(asset as Asset)), String(req.headers['idempotency-key']));
+  }
 
   // ---------------------------------------------------------- merchants
   @Perm('otc.read') @Get('otc-requests')

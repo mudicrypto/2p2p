@@ -18,7 +18,7 @@ export async function notify(t: TxCtx | Ctx, db: DbOrTx, userId: string, type: s
   };
   if ('afterCommit' in t) t.afterCommit(deliver); else await deliver();
 }
-const EMAIL_TYPES = new Set(['order_completed', 'order_disputed', 'dispute_resolved', 'withdrawal_status', 'deposit_credited', 'security_alert', 'price_alert', 'otc_update']);
+const EMAIL_TYPES = new Set(['order_completed', 'order_disputed', 'dispute_resolved', 'withdrawal_status', 'deposit_credited', 'security_alert', 'price_alert', 'otc_update', 'release_reminder', 'referral_reward']);
 
 export async function listNotifications(db: DbOrTx, userId: string, before?: bigint) {
   const conds = [eq(notifications.userId, userId)];

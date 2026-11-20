@@ -43,6 +43,13 @@
       "when": 1795132055209,
       "tag": "0005_business_hours",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795155788814,
+      "tag": "0006_parity_batch2",
+      "breakpoints": true
     }
   ]
 }

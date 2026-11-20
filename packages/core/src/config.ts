@@ -11,6 +11,10 @@ export const CONFIG_DEFAULTS = {
   risk: { manualConfirmScore: 70, depositHoldScore: 70, withdrawBlockScore: 90, velocityOrdersPerHour: 10, maxAccountsPerDevice: 2 },
   disputes: { slaMin: 30, escalateAfterMin: 30, autoFreezeLostDisputes: 3 },
   insurance: { maxPayoutUsdCents: 500_000 },
+  // Invite rewards: paid to the inviter from the rewards fund (admins top it up from fees) after the invitee's first qualifying trade.
+  referral: { enabled: true, rewardAsset: 'USDT', rewardAmount: '5', minTradeUsdCents: 2_000 },
+  // Reminders to a seller who hasn't released after the buyer marked the order paid.
+  releaseReminders: { afterMin: [10, 30] as number[] },
   merchants: { minDepositUsdCents: 500_000, levels: [{ level: 1, volume30dUsdCents: 0 }, { level: 2, volume30dUsdCents: 10_000_000 }, { level: 3, volume30dUsdCents: 100_000_000 }] as Array<{ level: number; volume30dUsdCents: number }> },
 };
 export type ConfigKey = keyof typeof CONFIG_DEFAULTS;

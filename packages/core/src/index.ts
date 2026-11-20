@@ -33,3 +33,4 @@ export * from './corridors';
 export * from './merchants';
 export * from './merchant-api';
 export * from './community';
+export * from './parity';

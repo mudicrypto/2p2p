@@ -12,18 +12,18 @@ import { DomainError, type Asset } from '@p2p/shared';
 
 export type AccountKind =
   | 'available' | 'escrow' | 'hold' | 'withdraw_pending' | 'security_deposit' // user-owned
-  | 'custody' | 'fee' | 'insurance' | 'deposit_suspense'; // system-owned
+  | 'custody' | 'fee' | 'insurance' | 'deposit_suspense' | 'rewards'; // system-owned
 export interface AccountRef { ownerType: 'user' | 'system'; ownerId: string; asset: Asset | string; kind: AccountKind }
 
 export const userAcct = (userId: string, asset: string, kind: AccountKind = 'available'): AccountRef => ({ ownerType: 'user', ownerId: userId, asset, kind });
-export const systemAcct = (asset: string, kind: 'custody' | 'fee' | 'insurance' | 'deposit_suspense'): AccountRef => ({ ownerType: 'system', ownerId: kind, asset, kind });
+export const systemAcct = (asset: string, kind: 'custody' | 'fee' | 'insurance' | 'deposit_suspense' | 'rewards'): AccountRef => ({ ownerType: 'system', ownerId: kind, asset, kind });
 
 /** System accounts allowed to go negative. Custody is the contra account: -(custody) == total liabilities. */
 const NEGATIVE_ALLOWED = new Set<AccountKind>(['custody']);
 
 export type LedgerTxType =
   | 'deposit' | 'withdraw' | 'withdraw_reverse' | 'withdraw_complete' | 'escrow_lock' | 'escrow_release' | 'escrow_refund' | 'escrow_split'
-  | 'fee' | 'insurance_payout' | 'internal_transfer' | 'hold_release' | 'security_deposit' | 'security_deposit_return' | 'adjustment';
+  | 'fee' | 'insurance_payout' | 'internal_transfer' | 'hold_release' | 'security_deposit' | 'security_deposit_return' | 'adjustment' | 'referral_reward';
 
 export interface Posting { account: AccountRef; amount: bigint }
 export interface PostTxInput { type: LedgerTxType; refType?: string; refId?: string; idempotencyKey: string; postings: Posting[] }

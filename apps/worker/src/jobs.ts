@@ -42,3 +42,7 @@ JOBS['price_alerts.check'] = (ctx) => core.checkPriceAlerts(ctx).then(() => unde
 SCHEDULES.push({ name: 'price_alerts.check', everyMs: 60_000 });
 JOBS['business_hours.apply'] = (ctx) => core.applyBusinessHours(ctx).then(() => undefined);
 SCHEDULES.push({ name: 'business_hours.apply', everyMs: 60_000 });
+JOBS['orders.release_reminders'] = (ctx) => core.sendReleaseReminders(ctx).then(() => undefined);
+SCHEDULES.push({ name: 'orders.release_reminders', everyMs: 60_000 });
+JOBS['referrals.pay'] = (ctx) => core.payReferralRewards(ctx).then(() => undefined);
+SCHEDULES.push({ name: 'referrals.pay', everyMs: 300_000 });

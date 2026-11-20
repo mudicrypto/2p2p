@@ -191,6 +191,8 @@ export async function getDisputeForParticipant(ctx: Ctx, user: User, orderId: st
   return {
     id: d.id, orderId, reason: d.reason, note: d.note, status: d.status, openedBy: d.openedBy, decision: d.decision, splitBuyerBps: d.splitBuyerBps,
     decisionNote: d.decisionNote, slaDueAt: d.slaDueAt, resolvedAt: d.resolvedAt, createdAt: d.createdAt,
+    // Progress for both parties: whether an arbiter has picked it up and whether it was escalated (no arbiter identity, no AI notes).
+    arbiterAssigned: !!d.assignedArbiterId, escalatedAt: d.escalatedAt,
     evidence: evidence.map((e) => ({ id: e.id.toString(), mine: e.userId === user.id, fileKey: e.userId === user.id ? e.fileKey : undefined, note: e.note, createdAt: e.createdAt })),
   };
 }

@@ -1,8 +1,9 @@
-import type { AiTriageProvider, ChainRiskProvider, CustodyProvider, KycProvider, Notifier, PaymentVerifier, RateSource, StorageProvider, VirusScanner } from './interfaces';
+import type { AiTriageProvider, ChainRiskProvider, CustodyProvider, KycProvider, Notifier, PaymentVerifier, RateSource, StorageProvider, Translator, VirusScanner } from './interfaces';
 import { HeuristicTriage, MemoryStorage, MockChainRisk, MockCustody, MockKyc, MockNotifier, MockPaymentInbox, MockPaymentVerifier, MockRateSource, MockVirusScanner } from './mock';
 import { ChannelNotifier, PostmarkNotifier, TelegramNotifier, TwilioNotifier, ExpoPushNotifier } from './real/notifiers';
 import { SumsubKyc } from './real/sumsub';
 import { ClaudeTriage } from './real/triage';
+import { ClaudeTranslator, LibreTranslator } from './real/translate';
 import { BinanceRateSource, CoinbaseRateSource, FxCrossRateSource, KrakenRateSource } from './real/rates';
 import { TrmChainRisk } from './real/stubs';
 import { VERIFIER_RAILS, createRealVerifier } from './verifiers';
@@ -19,6 +20,8 @@ export interface Providers {
   storage: StorageProvider;
   scanner: VirusScanner;
   triage: AiTriageProvider;
+  /** Chat translation; undefined when no service is configured (the feature is then hidden). */
+  translator?: Translator;
   /** Present in mock mode for tests and the dev simulation endpoints. */
   mocks?: { custody: MockCustody; kyc: MockKyc; chainRisk: MockChainRisk; paymentInbox: MockPaymentInbox; notifier: MockNotifier };
 }
@@ -67,6 +70,7 @@ export function createProviders(mode: 'mock' | 'real' = (process.env.PROVIDER_MO
     storage: new MemoryStorage(), // TODO(provider): S3 adapter once S3_* credentials exist
     scanner: new MockVirusScanner(), // TODO(provider): ClamAV/vendor scanner
     triage: real && has('ANTHROPIC_API_KEY') ? new ClaudeTriage() : new HeuristicTriage(),
+    translator: has('ANTHROPIC_API_KEY') ? new ClaudeTranslator() : has('TRANSLATE_API_URL') ? new LibreTranslator() : undefined,
     mocks: { custody: custodyM, kyc: kycM, chainRisk: riskM, paymentInbox: inbox, notifier: notifierM },
   };
   assertNoMocksInProduction(providers);

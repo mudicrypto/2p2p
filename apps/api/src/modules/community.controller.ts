@@ -3,8 +3,9 @@ import { z } from 'zod';
 import {
   setNickname, setAwayMode, follow, block, listRelations, relationTo, setAntiPhishingCode, referralInfo,
   createPriceAlert, listPriceAlerts, deletePriceAlert, createOtcRequest, listOtcRequests, setBusinessHours, type BusinessHours, type User,
+  listSavedSearches, saveSearch, deleteSavedSearch, translateChatMessage, translationEnabled, referralRewardsInfo,
 } from '@p2p/core';
-import { zAsset, zFiat } from '@p2p/shared';
+import { DomainError, zAsset, zFiat } from '@p2p/shared';
 import { CTX, type Ctx } from '../common/ctx';
 import { CurrentUser, Public } from '../common/auth.guard';
 import { Zod } from '../common/zod';
@@ -72,4 +73,27 @@ export class CommunityController {
   otc(@CurrentUser() u: User, @Body(new Zod(z.object({ side: z.enum(['buy', 'sell']), asset: zAsset, fiat: zFiat, fiatAmount: decimal, note: z.string().max(1000).optional() }), 'OtcRequest')) b: any) {
     return createOtcRequest(this.ctx, u, b);
   }
+
+  // ------------------------------------------------------------ saved searches
+  @Get('me/saved-searches')
+  searches(@CurrentUser() u: User) { return listSavedSearches(this.ctx, u); }
+  @Post('me/saved-searches') @RateLimit(20)
+  addSearch(@CurrentUser() u: User, @Body(new Zod(z.object({ name: z.string().max(40), params: z.record(z.string(), z.union([z.string().max(60), z.boolean(), z.number()])) }), 'SavedSearch')) b: { name: string; params: Record<string, unknown> }) {
+    return saveSearch(this.ctx, u, b.name, b.params);
+  }
+  @Delete('me/saved-searches/:id')
+  removeSearch(@CurrentUser() u: User, @Param('id', uuid) id: string) { return deleteSavedSearch(this.ctx, u, id); }
+
+  // ------------------------------------------------------------ chat translation
+  @Public() @Get('features')
+  features() { return { chatTranslation: translationEnabled(this.ctx) }; }
+  @Post('orders/:id/messages/:messageId/translate') @HttpCode(200) @RateLimit(60)
+  translate(@CurrentUser() u: User, @Param('id', uuid) id: string, @Param('messageId') messageId: string, @Body(new Zod(z.object({ target: z.string().max(10) }), 'Translate')) b: { target: string }) {
+    if (!/^\d{1,19}$/.test(messageId)) throw new DomainError('VALIDATION', 'bad message id');
+    return translateChatMessage(this.ctx, u, id, messageId, b.target);
+  }
+
+  // ------------------------------------------------------------ invite rewards
+  @Get('me/referral/rewards')
+  rewards(@CurrentUser() u: User) { return referralRewardsInfo(this.ctx, u); }
 }

@@ -78,4 +78,6 @@ export interface VirusScanner { scan(body: Buffer): Promise<{ clean: boolean; si
 // ---- LLM triage (disputes). Never decides; recommendation only.
 export interface TriageInput { orderSummary: Record<string, unknown>; chat: Array<{ from: string; body: string; at: string }>; evidenceNotes: string[]; verifierData: unknown[] }
 export interface TriageOutput { summary: string; recommendation: 'release' | 'refund' | 'split' | 'unclear'; confidence: number; rationale: string }
+/** Translates trade-chat messages. Absent when no translation service is configured. */
+export interface Translator { readonly name: string; translate(text: string, target: string): Promise<string> }
 export interface AiTriageProvider { triage(input: TriageInput): Promise<TriageOutput> }

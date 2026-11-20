@@ -6,6 +6,7 @@ import { runTx } from './context';
 import { audit } from './audit';
 import type { User } from './auth';
 import { isOnline } from './community';
+import { trustScore } from './parity';
 
 export async function recomputeReputation(ctx: Ctx, userId: string) {
   const since = new Date(ctx.now().getTime() - 30 * 86400_000);
@@ -71,6 +72,7 @@ export async function publicProfile(ctx: Ctx, userId: string) {
     trades30d: rep?.trades30d ?? 0, tradesTotal: rep?.tradesTotal ?? 0, completionRateBps: rep?.completionRateBps ?? 10000, avgReleaseSec: rep?.avgReleaseSec ?? 0,
     disputeRateBps: rep?.disputeRateBps ?? 0, freezeReports: rep?.freezeReports ?? 0, positiveFeedback: rep?.positiveFeedback ?? 0, negativeFeedback: rep?.negativeFeedback ?? 0,
     recentFeedback: recent,
+    trust: trustScore({ tradesTotal: rep?.tradesTotal ?? 0, completionRateBps: rep?.completionRateBps ?? 10000, disputeRateBps: rep?.disputeRateBps ?? 0, positiveFeedback: rep?.positiveFeedback ?? 0, negativeFeedback: rep?.negativeFeedback ?? 0, accountAgeDays: ageDays, kycTier: u.kycTier, verifiedBadge: !!m?.verifiedBadge, freezeReports: rep?.freezeReports ?? 0 }),
     online: isOnline(u.lastSeenAt), lastSeenAt: u.lastSeenAt ?? null, away: u.awayMode, businessHours: u.businessHours ?? null, offHours: u.offHours,
   };
 }

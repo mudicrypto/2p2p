@@ -309,6 +309,7 @@ export const orders = pgTable('orders', {
   holdUntil: ts('hold_until'),
   paidAt: ts('paid_at'),
   releasedAt: ts('released_at'),
+  releaseReminders: smallint('release_reminders').notNull().default(0), // reminders sent to the seller while PAID
   cancelledAt: ts('cancelled_at'),
   expiresAt: ts('expires_at').notNull(),
   autoConfirmed: boolean('auto_confirmed').notNull().default(false),
@@ -363,6 +364,26 @@ export const chatMessages = pgTable('chat_messages', {
   system: boolean('system').notNull().default(false),
   createdAt: createdAt(),
 }, (t) => [index('chat_order_idx').on(t.orderId, t.id)]);
+
+export const savedSearches = pgTable('saved_searches', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id),
+  name: text('name').notNull(),
+  params: jsonb('params').$type<Record<string, string>>().notNull(),
+  createdAt: createdAt(),
+}, (t) => [index('saved_searches_user_idx').on(t.userId)]);
+
+/** One invite reward per invited user, paid from the rewards fund once they complete a qualifying trade. */
+export const referralRewards = pgTable('referral_rewards', {
+  refereeId: uuid('referee_id').primaryKey().references(() => users.id),
+  referrerId: uuid('referrer_id').notNull().references(() => users.id),
+  orderId: uuid('order_id').notNull().references(() => orders.id),
+  asset: text('asset').notNull(),
+  amount: amount('amount').notNull(),
+  status: text('status').notNull().default('pending'), // pending (fund empty) | paid
+  paidAt: ts('paid_at'),
+  createdAt: createdAt(),
+}, (t) => [index('referral_rewards_referrer_idx').on(t.referrerId)]);
 
 export const disputes = pgTable('disputes', {
   id: uuid('id').primaryKey().defaultRandom(),
