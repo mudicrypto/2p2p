@@ -175,7 +175,9 @@
    "security_alert": "Gargaɗin tsaro",
    "tier_changed": "Matakin tantancewa ya canza",
    "price_alert": "An kai faɗakarwar farashi",
-   "otc_update": "Sabunta buƙatar babban ciniki"
+   "otc_update": "Sabunta buƙatar babban ciniki",
+   "release_reminder": "Tunatarwa: saki crypto",
+   "referral_reward": "An karɓi ladar gayyata"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Buɗewa",
   "closesAt": "Rufewa",
   "hoursOffNow": "A wajen lokutan aikinka yanzu: an ɓoye tallace-tallace har sai ka buɗe.",
-  "outsideHours": "A wajen lokutan aiki"
+  "outsideHours": "A wajen lokutan aiki",
+  "safeTitle": "Biyan kuɗi lafiya?",
+  "safeIntro": "Duba waɗannan kafin ka tabbatar. Suna hana yawancin zamba da daskarewar biyan kuɗi.",
+  "safe1": "Ina biya daga asusun da ke da sunana.",
+  "safe2": "Ina aika daidai {amount} zuwa {holder}, sunan da ke kan wannan oda.",
+  "safe3": "Bayanin biya yana da lambar oda kawai: babu kalmomi kamar crypto, USDT ko P2P.",
+  "safe4": "Babu wanda ya ce in biya a wajen parley ko zuwa wani asusu.",
+  "safeConfirm": "Ee, na aika kuɗin",
+  "dStepOpened": "An buɗe ƙara",
+  "dStepEvidence": "An ƙara shaida ({n})",
+  "dStepReview": "Mai sulhu yana dubawa",
+  "dStepEscalated": "An tura zuwa babban mai sulhu",
+  "dStepDecision": "Hukunci",
+  "trustScore": "Makin amana",
+  "trust_excellent": "Kyakkyawa sosai",
+  "trust_good": "Mai kyau",
+  "trust_fair": "Matsakaici",
+  "trust_new": "Sabo",
+  "trustPart_history": "Cinikin da aka kammala",
+  "trustPart_completion": "Ƙimar kammalawa",
+  "trustPart_feedback": "Ra'ayi",
+  "trustPart_age": "Shekarun asusu",
+  "trustPart_verification": "Tantancewa",
+  "trustPart_disputes": "Ƙananan ƙararraki",
+  "trustPenalty": "−{n} saboda rahotannin daskarewar banki",
+  "saveSearch": "Ajiye wannan nema",
+  "searchName": "Sa suna",
+  "translate": "Fassara",
+  "rewardRule": "Za ka sami {amount} {asset} idan abokin da ka gayyata ya kammala cinikinsa na farko na ${min} ko fiye da wani ba kai ba.",
+  "rewardEarned": "An samu",
+  "rewardPending": "Ana jiran biya"
  }
 }

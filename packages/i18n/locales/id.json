@@ -175,7 +175,9 @@
    "security_alert": "Peringatan keamanan",
    "tier_changed": "Level verifikasi berubah",
    "price_alert": "Peringatan harga tercapai",
-   "otc_update": "Pembaruan permintaan transaksi besar"
+   "otc_update": "Pembaruan permintaan transaksi besar",
+   "release_reminder": "Pengingat: lepaskan kripto",
+   "referral_reward": "Hadiah undangan diterima"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Buka",
   "closesAt": "Tutup",
   "hoursOffNow": "Sekarang di luar jam operasional: iklan disembunyikan sampai buka.",
-  "outsideHours": "Di luar jam operasional"
+  "outsideHours": "Di luar jam operasional",
+  "safeTitle": "Aman untuk bayar?",
+  "safeIntro": "Periksa ini sebelum konfirmasi. Ini mencegah sebagian besar penipuan P2P dan dana dibekukan.",
+  "safe1": "Saya membayar dari rekening atas nama saya sendiri.",
+  "safe2": "Saya mengirim tepat {amount} ke {holder}, nama yang tertera di order ini.",
+  "safe3": "Catatan transfer hanya berisi referensi order: tanpa kata kripto, USDT, atau P2P.",
+  "safe4": "Tidak ada yang meminta saya membayar di luar parley atau ke rekening lain.",
+  "safeConfirm": "Ya, saya sudah mengirim pembayaran",
+  "dStepOpened": "Sengketa dibuka",
+  "dStepEvidence": "Bukti ditambahkan ({n})",
+  "dStepReview": "Arbiter sedang meninjau",
+  "dStepEscalated": "Dinaikkan ke arbiter senior",
+  "dStepDecision": "Keputusan",
+  "trustScore": "Skor kepercayaan",
+  "trust_excellent": "Sangat baik",
+  "trust_good": "Baik",
+  "trust_fair": "Cukup",
+  "trust_new": "Trader baru",
+  "trustPart_history": "Transaksi selesai",
+  "trustPart_completion": "Tingkat penyelesaian",
+  "trustPart_feedback": "Ulasan",
+  "trustPart_age": "Usia akun",
+  "trustPart_verification": "Verifikasi",
+  "trustPart_disputes": "Sedikit sengketa",
+  "trustPenalty": "−{n} karena laporan pembekuan bank",
+  "saveSearch": "Simpan pencarian ini",
+  "searchName": "Beri nama",
+  "translate": "Terjemahkan",
+  "rewardRule": "Anda mendapat {amount} {asset} saat teman yang diundang menyelesaikan transaksi pertama ${min} atau lebih dengan orang lain.",
+  "rewardEarned": "Diperoleh",
+  "rewardPending": "Menunggu dibayar"
  }
 }

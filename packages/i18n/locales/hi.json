@@ -175,7 +175,9 @@
    "security_alert": "सुरक्षा चेतावनी",
    "tier_changed": "सत्यापन स्तर बदला",
    "price_alert": "प्राइस अलर्ट पहुँचा",
-   "otc_update": "बड़े ट्रेड अनुरोध का अपडेट"
+   "otc_update": "बड़े ट्रेड अनुरोध का अपडेट",
+   "release_reminder": "याद दिलाना: क्रिप्टो रिलीज़ करें",
+   "referral_reward": "आमंत्रण इनाम मिला"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "खुलता है",
   "closesAt": "बंद होता है",
   "hoursOffNow": "अभी आपके कारोबारी समय से बाहर: खुलने तक विज्ञापन छिपे हैं।",
-  "outsideHours": "कारोबारी समय के बाहर"
+  "outsideHours": "कारोबारी समय के बाहर",
+  "safeTitle": "भुगतान सुरक्षित है?",
+  "safeIntro": "पुष्टि से पहले इन्हें जाँचें। ये ज़्यादातर P2P धोखाधड़ी और फ्रीज़ भुगतान रोकते हैं।",
+  "safe1": "मैं अपने नाम के खाते से भुगतान कर रहा हूँ।",
+  "safe2": "मैं ठीक {amount} इस ऑर्डर पर दिखे नाम {holder} को भेज रहा हूँ।",
+  "safe3": "भुगतान नोट में सिर्फ़ ऑर्डर रेफ़रेंस है: क्रिप्टो, USDT या P2P जैसे शब्द नहीं।",
+  "safe4": "किसी ने मुझे parley के बाहर या दूसरे खाते में भुगतान करने को नहीं कहा।",
+  "safeConfirm": "हाँ, मैंने भुगतान भेज दिया",
+  "dStepOpened": "विवाद खोला गया",
+  "dStepEvidence": "सबूत जोड़े गए ({n})",
+  "dStepReview": "मध्यस्थ समीक्षा कर रहे हैं",
+  "dStepEscalated": "वरिष्ठ मध्यस्थ को भेजा गया",
+  "dStepDecision": "फ़ैसला",
+  "trustScore": "ट्रस्ट स्कोर",
+  "trust_excellent": "उत्कृष्ट",
+  "trust_good": "अच्छा",
+  "trust_fair": "ठीक-ठाक",
+  "trust_new": "नया ट्रेडर",
+  "trustPart_history": "पूरे हुए ट्रेड",
+  "trustPart_completion": "पूर्णता दर",
+  "trustPart_feedback": "फ़ीडबैक",
+  "trustPart_age": "खाते की उम्र",
+  "trustPart_verification": "सत्यापन",
+  "trustPart_disputes": "कम विवाद",
+  "trustPenalty": "बैंक फ्रीज़ रिपोर्ट के लिए −{n}",
+  "saveSearch": "यह खोज सहेजें",
+  "searchName": "नाम दें",
+  "translate": "अनुवाद",
+  "rewardRule": "जब आपका आमंत्रित दोस्त आपके अलावा किसी के साथ ${min} या अधिक का पहला ट्रेड पूरा करे, आपको {amount} {asset} मिलते हैं।",
+  "rewardEarned": "कमाया",
+  "rewardPending": "भुगतान बाकी"
  }
 }

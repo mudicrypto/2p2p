@@ -175,7 +175,9 @@
    "security_alert": "Alerta de segurança",
    "tier_changed": "Nível de verificação alterado",
    "price_alert": "Alerta de preço atingido",
-   "otc_update": "Atualização da grande negociação"
+   "otc_update": "Atualização da grande negociação",
+   "release_reminder": "Lembrete: libere a cripto",
+   "referral_reward": "Recompensa de convite recebida"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Abre",
   "closesAt": "Fecha",
   "hoursOffNow": "Fora do seu horário agora: seus anúncios ficam ocultos até abrir.",
-  "outsideHours": "Fora do horário"
+  "outsideHours": "Fora do horário",
+  "safeTitle": "Seguro para pagar?",
+  "safeIntro": "Confira antes de confirmar. Isso evita a maioria dos golpes P2P e pagamentos bloqueados.",
+  "safe1": "Estou pagando de uma conta em meu nome.",
+  "safe2": "Estou enviando exatamente {amount} para {holder}, o nome desta ordem.",
+  "safe3": "A observação do pagamento tem só a referência: sem palavras como cripto, USDT ou P2P.",
+  "safe4": "Ninguém me pediu para pagar fora da parley ou para outra conta.",
+  "safeConfirm": "Sim, já enviei o pagamento",
+  "dStepOpened": "Disputa aberta",
+  "dStepEvidence": "Provas enviadas ({n})",
+  "dStepReview": "Um árbitro está analisando",
+  "dStepEscalated": "Encaminhada a um árbitro sênior",
+  "dStepDecision": "Decisão",
+  "trustScore": "Pontuação de confiança",
+  "trust_excellent": "Excelente",
+  "trust_good": "Bom",
+  "trust_fair": "Razoável",
+  "trust_new": "Novo trader",
+  "trustPart_history": "Negociações concluídas",
+  "trustPart_completion": "Taxa de conclusão",
+  "trustPart_feedback": "Avaliações",
+  "trustPart_age": "Idade da conta",
+  "trustPart_verification": "Verificação",
+  "trustPart_disputes": "Poucas disputas",
+  "trustPenalty": "−{n} por relatos de bloqueio bancário",
+  "saveSearch": "Salvar busca",
+  "searchName": "Dê um nome",
+  "translate": "Traduzir",
+  "rewardRule": "Você recebe {amount} {asset} quando um amigo convidado conclui a primeira negociação de ${min} ou mais com outra pessoa.",
+  "rewardEarned": "Ganho",
+  "rewardPending": "Aguardando pagamento"
  }
 }

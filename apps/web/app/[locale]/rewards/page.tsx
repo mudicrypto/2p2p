@@ -15,7 +15,8 @@ export default function Rewards() {
   const L = useL();
   const [info, setInfo] = useState<{ code: string; invited: number; traded: number } | null>(null);
   const [origin, setOrigin] = useState('');
-  useEffect(() => { setOrigin(window.location.origin); if (me) api('/me/referral').then(setInfo).catch(() => {}); }, [me]);
+  const [rw, setRw] = useState<{ enabled: boolean; rewardAsset: string; rewardAmount: string; minTradeUsd: string; earned: string; pending: string } | null>(null);
+  useEffect(() => { setOrigin(window.location.origin); if (me) { api('/me/referral').then(setInfo).catch(() => {}); api('/me/referral/rewards').then(setRw).catch(() => {}); } }, [me]);
   const link = info ? `${origin}${L('/signup')}?ref=${info.code}` : '';
   return (
     <div className="mx-auto max-w-4xl space-y-5">
@@ -43,7 +44,13 @@ export default function Rewards() {
             <Card className="p-6"><UserPlus className="text-primary" /><div className="num mt-3 text-3xl font-bold" data-testid="ref-invited">{num(String(info.invited))}</div><div className="text-sm text-muted-foreground">{t('ui.refInvited')}</div></Card>
             <Card className="p-6"><Users className="text-primary" /><div className="num mt-3 text-3xl font-bold" data-testid="ref-traded">{num(String(info.traded))}</div><div className="text-sm text-muted-foreground">{t('ui.refTraded')}</div></Card>
           </div>
-          <p className="px-2 text-center text-sm text-muted-foreground">{t('ui.referralRewardsSoon')}</p>
+          {rw?.enabled ? (
+            <Card className="grid gap-4 p-6 sm:grid-cols-3" data-testid="ref-rewards">
+              <div className="sm:col-span-3 text-sm text-muted-foreground">{t('ui.rewardRule', { amount: rw.rewardAmount, asset: rw.rewardAsset, min: rw.minTradeUsd })}</div>
+              <div><div className="text-sm text-muted-foreground">{t('ui.rewardEarned')}</div><div className="num text-2xl font-bold" data-testid="ref-earned">{rw.earned} {rw.rewardAsset}</div></div>
+              <div><div className="text-sm text-muted-foreground">{t('ui.rewardPending')}</div><div className="num text-2xl font-bold">{rw.pending} {rw.rewardAsset}</div></div>
+            </Card>
+          ) : <p className="px-2 text-center text-sm text-muted-foreground">{t('ui.referralRewardsSoon')}</p>}
         </>
       )}
     </div>

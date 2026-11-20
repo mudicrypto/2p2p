@@ -175,7 +175,9 @@
    "security_alert": "تنبيه أمني",
    "tier_changed": "تغيّر مستوى التحقق",
    "price_alert": "تم الوصول إلى تنبيه السعر",
-   "otc_update": "تحديث طلب الصفقة الكبيرة"
+   "otc_update": "تحديث طلب الصفقة الكبيرة",
+   "release_reminder": "تذكير: حرّر العملة المشفرة",
+   "referral_reward": "تم استلام مكافأة الدعوة"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "يفتح",
   "closesAt": "يغلق",
   "hoursOffNow": "خارج ساعات عملك الآن: إعلاناتك مخفية حتى تفتح.",
-  "outsideHours": "خارج ساعات العمل"
+  "outsideHours": "خارج ساعات العمل",
+  "safeTitle": "هل الدفع آمن؟",
+  "safeIntro": "تحقق من هذه قبل التأكيد. تمنع معظم عمليات الاحتيال وتجميد المدفوعات.",
+  "safe1": "أدفع من حساب باسمي.",
+  "safe2": "أرسل {amount} بالضبط إلى {holder}، الاسم الظاهر في هذا الطلب.",
+  "safe3": "ملاحظة الدفع تحتوي على المرجع فقط: بدون كلمات مثل كريبتو أو USDT أو P2P.",
+  "safe4": "لم يطلب مني أحد الدفع خارج parley أو إلى حساب آخر.",
+  "safeConfirm": "نعم، أرسلت الدفعة",
+  "dStepOpened": "تم فتح النزاع",
+  "dStepEvidence": "الأدلة المضافة ({n})",
+  "dStepReview": "المحكّم يراجع",
+  "dStepEscalated": "أُحيل إلى محكّم أقدم",
+  "dStepDecision": "القرار",
+  "trustScore": "درجة الثقة",
+  "trust_excellent": "ممتاز",
+  "trust_good": "جيد",
+  "trust_fair": "مقبول",
+  "trust_new": "متداول جديد",
+  "trustPart_history": "الصفقات المكتملة",
+  "trustPart_completion": "نسبة الإكمال",
+  "trustPart_feedback": "التقييمات",
+  "trustPart_age": "عمر الحساب",
+  "trustPart_verification": "التحقق",
+  "trustPart_disputes": "نزاعات قليلة",
+  "trustPenalty": "−{n} بسبب بلاغات تجميد بنكي",
+  "saveSearch": "حفظ هذا البحث",
+  "searchName": "سمِّه",
+  "translate": "ترجمة",
+  "rewardRule": "تحصل على {amount} {asset} عندما يُكمل صديق دعوته أول صفقة بقيمة ${min} أو أكثر مع شخص غيرك.",
+  "rewardEarned": "المكتسب",
+  "rewardPending": "بانتظار الدفع"
  }
 }

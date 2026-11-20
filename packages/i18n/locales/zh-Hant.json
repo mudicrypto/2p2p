@@ -175,7 +175,9 @@
    "security_alert": "安全警示",
    "tier_changed": "驗證等級已變更",
    "price_alert": "已達到價格提醒",
-   "otc_update": "大額交易申請更新"
+   "otc_update": "大額交易申請更新",
+   "release_reminder": "提醒：請放行加密貨幣",
+   "referral_reward": "已收到邀請獎勵"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "開始",
   "closesAt": "結束",
   "hoursOffNow": "目前不在營業時間：開始營業前廣告會隱藏。",
-  "outsideHours": "非營業時間"
+  "outsideHours": "非營業時間",
+  "safeTitle": "可以安全付款嗎？",
+  "safeIntro": "確認前請檢查以下事項，可避免大多數 P2P 詐騙與付款凍結。",
+  "safe1": "我使用本人名下的帳戶付款。",
+  "safe2": "我將準確轉帳 {amount} 給本訂單顯示的 {holder}。",
+  "safe3": "付款備註只有訂單編號：不含加密貨幣、USDT 或 P2P 等字樣。",
+  "safe4": "沒有人要求我在 parley 以外或向其他帳戶付款。",
+  "safeConfirm": "是的，我已付款",
+  "dStepOpened": "已提出申訴",
+  "dStepEvidence": "已提交證據（{n}）",
+  "dStepReview": "仲裁員審核中",
+  "dStepEscalated": "已升級至資深仲裁員",
+  "dStepDecision": "裁決",
+  "trustScore": "信任分數",
+  "trust_excellent": "極佳",
+  "trust_good": "良好",
+  "trust_fair": "普通",
+  "trust_new": "新交易者",
+  "trustPart_history": "已完成交易",
+  "trustPart_completion": "完成率",
+  "trustPart_feedback": "評價",
+  "trustPart_age": "帳戶年資",
+  "trustPart_verification": "驗證",
+  "trustPart_disputes": "爭議少",
+  "trustPenalty": "銀行凍結回報扣 {n} 分",
+  "saveSearch": "儲存此搜尋",
+  "searchName": "命名",
+  "translate": "翻譯",
+  "rewardRule": "受邀好友與他人完成首筆 ${min} 以上交易時，你可獲得 {amount} {asset}。",
+  "rewardEarned": "已獲得",
+  "rewardPending": "待發放"
  }
 }

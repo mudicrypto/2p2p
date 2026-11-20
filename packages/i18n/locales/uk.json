@@ -175,7 +175,9 @@
    "security_alert": "Попередження безпеки",
    "tier_changed": "Рівень верифікації змінено",
    "price_alert": "Ціну досягнуто",
-   "otc_update": "Оновлення щодо великої угоди"
+   "otc_update": "Оновлення щодо великої угоди",
+   "release_reminder": "Нагадування: відпустіть криптовалюту",
+   "referral_reward": "Отримано нагороду за запрошення"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Відкриття",
   "closesAt": "Закриття",
   "hoursOffNow": "Зараз неробочий час: оголошення приховано до відкриття.",
-  "outsideHours": "Неробочий час"
+  "outsideHours": "Неробочий час",
+  "safeTitle": "Можна платити?",
+  "safeIntro": "Перевірте перед підтвердженням. Це захищає від більшості P2P-шахрайств і блокувань.",
+  "safe1": "Я плачу з рахунку на своє ім'я.",
+  "safe2": "Я надсилаю рівно {amount} отримувачу {holder}, вказаному в угоді.",
+  "safe3": "У призначенні платежу лише номер угоди: без слів «крипта», USDT чи P2P.",
+  "safe4": "Мене не просили платити поза parley чи на інший рахунок.",
+  "safeConfirm": "Так, я надіслав платіж",
+  "dStepOpened": "Спір відкрито",
+  "dStepEvidence": "Докази ({n})",
+  "dStepReview": "Арбітр розглядає",
+  "dStepEscalated": "Передано старшому арбітру",
+  "dStepDecision": "Рішення",
+  "trustScore": "Індекс довіри",
+  "trust_excellent": "Відмінно",
+  "trust_good": "Добре",
+  "trust_fair": "Середньо",
+  "trust_new": "Новачок",
+  "trustPart_history": "Завершені угоди",
+  "trustPart_completion": "Частка завершених",
+  "trustPart_feedback": "Відгуки",
+  "trustPart_age": "Вік акаунта",
+  "trustPart_verification": "Верифікація",
+  "trustPart_disputes": "Мало спорів",
+  "trustPenalty": "−{n} за скарги про блокування рахунку",
+  "saveSearch": "Зберегти пошук",
+  "searchName": "Назва",
+  "translate": "Перекласти",
+  "rewardRule": "Ви отримаєте {amount} {asset}, коли запрошений друг завершить першу угоду від ${min} не з вами.",
+  "rewardEarned": "Отримано",
+  "rewardPending": "Очікує виплати"
  }
 }

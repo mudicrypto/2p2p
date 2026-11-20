@@ -47,6 +47,8 @@ test('full trade flow inside the Telegram Mini App', async ({ page }) => {
   await expect(page.getByTestId('order-status')).toHaveAttribute('data-status', 'AWAITING_PAYMENT');
   const orderId = page.url().split('/').pop()!;
   await page.getByTestId('mark-paid').click();
+  for (const i of [0, 1, 2, 3]) await page.getByTestId(`safe-${i}`).check();
+  await page.getByTestId('safe-confirm').click();
   await expect(page.getByTestId('order-status')).toHaveAttribute('data-status', 'PAID');
 
   // seller releases with 2FA via the API; the Mini App updates in realtime

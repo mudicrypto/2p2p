@@ -175,7 +175,9 @@
    "security_alert": "هشدار امنیتی",
    "tier_changed": "سطح احراز هویت تغییر کرد",
    "price_alert": "هشدار قیمت فعال شد",
-   "otc_update": "به‌روزرسانی درخواست معامله بزرگ"
+   "otc_update": "به‌روزرسانی درخواست معامله بزرگ",
+   "release_reminder": "یادآوری: رمزارز را آزاد کنید",
+   "referral_reward": "پاداش دعوت دریافت شد"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "شروع",
   "closesAt": "پایان",
   "hoursOffNow": "اکنون خارج از ساعات کاری هستید: آگهی‌ها تا شروع پنهان‌اند.",
-  "outsideHours": "خارج از ساعات کاری"
+  "outsideHours": "خارج از ساعات کاری",
+  "safeTitle": "پرداخت امن است؟",
+  "safeIntro": "پیش از تأیید این موارد را بررسی کنید. جلوی بیشتر کلاهبرداری‌ها و مسدودی پرداخت را می‌گیرد.",
+  "safe1": "از حسابی به نام خودم پرداخت می‌کنم.",
+  "safe2": "دقیقاً {amount} را به {holder}، نام درج‌شده در این سفارش، می‌فرستم.",
+  "safe3": "توضیح پرداخت فقط شماره سفارش است: بدون کلماتی مثل کریپتو، USDT یا P2P.",
+  "safe4": "کسی از من نخواست خارج از parley یا به حساب دیگری پرداخت کنم.",
+  "safeConfirm": "بله، پرداخت را فرستادم",
+  "dStepOpened": "اختلاف باز شد",
+  "dStepEvidence": "مدارک افزوده شد ({n})",
+  "dStepReview": "داور در حال بررسی است",
+  "dStepEscalated": "به داور ارشد ارجاع شد",
+  "dStepDecision": "تصمیم",
+  "trustScore": "امتیاز اعتماد",
+  "trust_excellent": "عالی",
+  "trust_good": "خوب",
+  "trust_fair": "متوسط",
+  "trust_new": "تازه‌کار",
+  "trustPart_history": "معاملات تکمیل‌شده",
+  "trustPart_completion": "نرخ تکمیل",
+  "trustPart_feedback": "بازخورد",
+  "trustPart_age": "عمر حساب",
+  "trustPart_verification": "احراز هویت",
+  "trustPart_disputes": "اختلاف کم",
+  "trustPenalty": "−{n} بابت گزارش مسدودی حساب",
+  "saveSearch": "ذخیره این جستجو",
+  "searchName": "نام بگذارید",
+  "translate": "ترجمه",
+  "rewardRule": "وقتی دوست دعوت‌شده‌تان اولین معامله ${min} یا بیشتر را با کسی غیر از شما کامل کند، {amount} {asset} می‌گیرید.",
+  "rewardEarned": "دریافت‌شده",
+  "rewardPending": "در انتظار پرداخت"
  }
 }

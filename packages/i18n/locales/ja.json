@@ -175,7 +175,9 @@
    "security_alert": "セキュリティ警告",
    "tier_changed": "認証レベルが変更されました",
    "price_alert": "価格アラートに到達",
-   "otc_update": "大口取引リクエストの更新"
+   "otc_update": "大口取引リクエストの更新",
+   "release_reminder": "リマインダー：暗号資産をリリース",
+   "referral_reward": "招待特典を受け取りました"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "開始",
   "closesAt": "終了",
   "hoursOffNow": "現在は営業時間外：開始まで広告は非表示です。",
-  "outsideHours": "営業時間外"
+  "outsideHours": "営業時間外",
+  "safeTitle": "支払っても安全？",
+  "safeIntro": "確認前にチェックしてください。P2P詐欺や支払い凍結の多くを防げます。",
+  "safe1": "本人名義の口座から支払います。",
+  "safe2": "この注文に表示された {holder} に、ちょうど {amount} を送ります。",
+  "safe3": "振込メモは注文番号のみ：暗号資産・USDT・P2Pなどの語は入れません。",
+  "safe4": "parley外や別の口座への支払いを頼まれていません。",
+  "safeConfirm": "はい、送金しました",
+  "dStepOpened": "申し立て開始",
+  "dStepEvidence": "証拠の提出（{n}）",
+  "dStepReview": "仲裁人が確認中",
+  "dStepEscalated": "上級仲裁人へ移管",
+  "dStepDecision": "裁定",
+  "trustScore": "信頼スコア",
+  "trust_excellent": "非常に良い",
+  "trust_good": "良い",
+  "trust_fair": "まずまず",
+  "trust_new": "新規トレーダー",
+  "trustPart_history": "完了取引",
+  "trustPart_completion": "完了率",
+  "trustPart_feedback": "評価",
+  "trustPart_age": "アカウント歴",
+  "trustPart_verification": "認証",
+  "trustPart_disputes": "紛争が少ない",
+  "trustPenalty": "口座凍結の報告で −{n}",
+  "saveSearch": "この検索を保存",
+  "searchName": "名前",
+  "translate": "翻訳",
+  "rewardRule": "招待した友達があなた以外と ${min} 以上の初取引を完了すると {amount} {asset} がもらえます。",
+  "rewardEarned": "獲得済み",
+  "rewardPending": "支払い待ち"
  }
 }

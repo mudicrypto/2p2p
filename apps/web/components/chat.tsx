@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Paperclip, SendHorizontal, ShieldAlert, FileText } from 'lucide-react';
+import { Paperclip, SendHorizontal, ShieldAlert, FileText, Languages } from 'lucide-react';
 import { Avatar, Button, Card, Input, cn } from '@p2p/ui';
 import { useI18n } from '../lib/i18n';
 import { useSession } from '../lib/session';
@@ -15,9 +15,13 @@ export async function uploadAttachment(orderId: string, file: File): Promise<str
 }
 
 export function Chat({ orderId, counterparty, className }: { orderId: string; counterparty?: { id: string; displayName?: string }; className?: string }) {
-  const { t, date } = useI18n();
+  const { t, date, locale } = useI18n();
   const { me } = useSession();
   const [msgs, setMsgs] = useState<any[]>([]);
+  const [canTranslate, setCanTranslate] = useState(false);
+  const [tr, setTr] = useState<Record<string, string>>({});
+  useEffect(() => { api<{ chatTranslation?: boolean }>('/features').then((f) => setCanTranslate(!!f.chatTranslation)).catch(() => {}); }, []);
+  const translate = async (id: string) => { try { const r = await api(`/orders/${orderId}/messages/${id}/translate`, { body: { target: locale } }); setTr((x) => ({ ...x, [id]: r.text })); } catch { /* show original */ } };
   const [text, setText] = useState('');
   const [warn, setWarn] = useState('');
   const [typing, setTyping] = useState(false);
@@ -56,6 +60,8 @@ export function Chat({ orderId, counterparty, className }: { orderId: string; co
             <div key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
               <div className={cn('max-w-[80%] rounded-[20px] px-4 py-2.5 text-[15px]', mine ? 'rounded-ee-md bg-ink text-ink-foreground' : 'rounded-es-md bg-muted')}>
                 {m.body && <div className="whitespace-pre-wrap break-words">{m.body}</div>}
+                {tr[m.id] && <div className="mt-1 whitespace-pre-wrap break-words border-t border-border/60 pt-1 text-[14px] italic" data-testid="chat-translation">{tr[m.id]}</div>}
+                {!mine && canTranslate && m.body && !tr[m.id] && <button type="button" className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground" onClick={() => translate(m.id)} data-testid="chat-translate"><Languages size={12} />{t('ui.translate')}</button>}
                 {m.attachmentKey && <a className="mt-1 flex items-center gap-1.5 underline-offset-2 hover:underline" target="_blank" rel="noreferrer" href={`/v1/orders/${orderId}/attachments?key=${encodeURIComponent(m.attachmentKey)}`}><FileText size={14} />{t('chat.attach')}</a>}
                 <div className={cn('mt-0.5 text-end text-[10px]', mine ? 'opacity-60' : 'text-muted-foreground')}>{date(m.createdAt)}</div>
               </div>

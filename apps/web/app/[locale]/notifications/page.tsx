@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Bell, BellOff, BellRing, Briefcase, CheckCheck, MessageSquare, Receipt, ShieldAlert, Wallet, Gavel, BadgeCheck } from 'lucide-react';
+import { AlarmClock, Gift, Bell, BellOff, BellRing, Briefcase, CheckCheck, MessageSquare, Receipt, ShieldAlert, Wallet, Gavel, BadgeCheck } from 'lucide-react';
 import { Button, Card, Skeleton, cn } from '@p2p/ui';
 import { useI18n } from '../../../lib/i18n';
 import { api } from '../../../lib/api';
@@ -9,7 +9,7 @@ import { useL } from '../../../components/nav';
 
 const ICON: Record<string, React.ReactNode> = {
   chat_message: <MessageSquare size={17} />, order_disputed: <Gavel size={17} />, dispute_resolved: <Gavel size={17} />, deposit_credited: <Wallet size={17} />,
-  withdrawal_status: <Wallet size={17} />, security_alert: <ShieldAlert size={17} />, tier_changed: <BadgeCheck size={17} />, price_alert: <BellRing size={17} />, otc_update: <Briefcase size={17} />,
+  withdrawal_status: <Wallet size={17} />, security_alert: <ShieldAlert size={17} />, tier_changed: <BadgeCheck size={17} />, price_alert: <BellRing size={17} />, release_reminder: <AlarmClock size={17} />, referral_reward: <Gift size={17} />, otc_update: <Briefcase size={17} />,
 };
 export default function Notifications() {
   const { t, date } = useI18n();
@@ -31,7 +31,7 @@ export default function Notifications() {
               {!n.read && <span className="h-2 w-2 rounded-full bg-primary" />}
             </div>
           );
-          const href = n.payload?.orderId ? `/orders/${n.payload.orderId}` : n.type === 'price_alert' && n.payload?.asset ? `/p2p?side=${n.payload.side}&asset=${n.payload.asset}&fiat=${n.payload.fiat}` : n.type === 'otc_update' ? '/otc' : null;
+          const href = n.payload?.orderId ? `/orders/${n.payload.orderId}` : n.type === 'price_alert' && n.payload?.asset ? `/p2p?side=${n.payload.side}&asset=${n.payload.asset}&fiat=${n.payload.fiat}` : n.type === 'otc_update' ? '/otc' : n.type === 'referral_reward' ? '/rewards' : null;
           return href ? <Link key={n.id} href={L(href)} className="block">{body}</Link> : <div key={n.id}>{body}</div>;
         })}
       </Card>

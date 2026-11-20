@@ -175,7 +175,9 @@
    "security_alert": "Güvenlik uyarısı",
    "tier_changed": "Doğrulama seviyesi değişti",
    "price_alert": "Fiyat alarmına ulaşıldı",
-   "otc_update": "Büyük işlem talebi güncellendi"
+   "otc_update": "Büyük işlem talebi güncellendi",
+   "release_reminder": "Hatırlatma: kriptoyu serbest bırakın",
+   "referral_reward": "Davet ödülü alındı"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Açılış",
   "closesAt": "Kapanış",
   "hoursOffNow": "Şu an çalışma saatleriniz dışında: açılana kadar ilanlarınız gizli.",
-  "outsideHours": "Çalışma saatleri dışında"
+  "outsideHours": "Çalışma saatleri dışında",
+  "safeTitle": "Ödemek güvenli mi?",
+  "safeIntro": "Onaylamadan önce kontrol edin. P2P dolandırıcılıklarının ve donan ödemelerin çoğunu önler.",
+  "safe1": "Kendi adıma olan bir hesaptan ödüyorum.",
+  "safe2": "Tam olarak {amount} tutarını bu siparişteki isim olan {holder} kişisine gönderiyorum.",
+  "safe3": "Ödeme açıklamasında yalnızca sipariş referansı var: kripto, USDT veya P2P gibi kelimeler yok.",
+  "safe4": "Kimse benden parley dışında veya başka bir hesaba ödeme yapmamı istemedi.",
+  "safeConfirm": "Evet, ödemeyi gönderdim",
+  "dStepOpened": "Anlaşmazlık açıldı",
+  "dStepEvidence": "Kanıt eklendi ({n})",
+  "dStepReview": "Bir hakem inceliyor",
+  "dStepEscalated": "Kıdemli hakeme aktarıldı",
+  "dStepDecision": "Karar",
+  "trustScore": "Güven puanı",
+  "trust_excellent": "Mükemmel",
+  "trust_good": "İyi",
+  "trust_fair": "Orta",
+  "trust_new": "Yeni",
+  "trustPart_history": "Tamamlanan işlemler",
+  "trustPart_completion": "Tamamlama oranı",
+  "trustPart_feedback": "Geri bildirim",
+  "trustPart_age": "Hesap yaşı",
+  "trustPart_verification": "Doğrulama",
+  "trustPart_disputes": "Az anlaşmazlık",
+  "trustPenalty": "Banka dondurma bildirimleri için −{n}",
+  "saveSearch": "Bu aramayı kaydet",
+  "searchName": "Ad verin",
+  "translate": "Çevir",
+  "rewardRule": "Davet ettiğiniz bir arkadaş sizden başka biriyle ${min} veya üzeri ilk işlemini tamamladığında {amount} {asset} kazanırsınız.",
+  "rewardEarned": "Kazanılan",
+  "rewardPending": "Ödeme bekliyor"
  }
 }

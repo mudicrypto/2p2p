@@ -29,6 +29,9 @@ export const SECTIONS: Section[] = [
     { label: 'Approve payout', method: 'POST', path: (r) => `/freeze-reports/${r.id}/review`, body: () => ({ approve: true, payoutAsset: ask('Asset (USDT/BTC/ETH)'), payoutAmount: ask('Amount'), note: ask('Note') }) },
     { label: 'Reject', method: 'POST', path: (r) => `/freeze-reports/${r.id}/review`, body: () => ({ approve: false, note: ask('Reason') }), danger: true },
   ] },
+  { key: 'rewards', title: 'Invite rewards fund (USDT)', roles: ['finance'], list: '/rewards/USDT', actions: [
+    { label: 'Fund from fees', method: 'POST', path: () => '/rewards/USDT/fund', body: () => ({ amount: ask('Amount of USDT to move from collected fees into the rewards fund') }) },
+  ] },
   { key: 'otc', title: 'Large trade requests', roles: ['support', 'finance', 'compliance'], list: '/otc-requests?status=open,contacted', actions: [
     { label: 'Mark contacted', method: 'POST', path: (r) => `/otc-requests/${r.id}/status`, body: () => ({ status: 'contacted' }) },
     { label: 'Close', method: 'POST', path: (r) => `/otc-requests/${r.id}/status`, body: () => ({ status: 'closed' }) },

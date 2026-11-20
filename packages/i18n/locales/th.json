@@ -175,7 +175,9 @@
    "security_alert": "การแจ้งเตือนความปลอดภัย",
    "tier_changed": "ระดับการยืนยันเปลี่ยนแปลง",
    "price_alert": "ถึงราคาที่แจ้งเตือนแล้ว",
-   "otc_update": "อัปเดตคำขอเทรดรายใหญ่"
+   "otc_update": "อัปเดตคำขอเทรดรายใหญ่",
+   "release_reminder": "แจ้งเตือน: ปล่อยคริปโต",
+   "referral_reward": "ได้รับรางวัลการเชิญ"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "เปิด",
   "closesAt": "ปิด",
   "hoursOffNow": "ตอนนี้อยู่นอกเวลาทำการ: โฆษณาถูกซ่อนจนกว่าจะเปิด",
-  "outsideHours": "นอกเวลาทำการ"
+  "outsideHours": "นอกเวลาทำการ",
+  "safeTitle": "ปลอดภัยที่จะจ่ายไหม?",
+  "safeIntro": "ตรวจสอบก่อนยืนยัน ช่วยป้องกันการโกงและเงินถูกอายัดส่วนใหญ่",
+  "safe1": "ฉันจ่ายจากบัญชีชื่อของฉันเอง",
+  "safe2": "ฉันโอนเท่ากับ {amount} พอดีให้ {holder} ตามชื่อในคำสั่งนี้",
+  "safe3": "หมายเหตุการโอนมีแค่เลขอ้างอิงคำสั่ง: ไม่มีคำว่าคริปโต USDT หรือ P2P",
+  "safe4": "ไม่มีใครขอให้ฉันจ่ายนอก parley หรือเข้าบัญชีอื่น",
+  "safeConfirm": "ใช่ ฉันโอนเงินแล้ว",
+  "dStepOpened": "เปิดข้อพิพาทแล้ว",
+  "dStepEvidence": "เพิ่มหลักฐานแล้ว ({n})",
+  "dStepReview": "ผู้ตัดสินกำลังตรวจสอบ",
+  "dStepEscalated": "ส่งต่อผู้ตัดสินอาวุโส",
+  "dStepDecision": "คำตัดสิน",
+  "trustScore": "คะแนนความน่าเชื่อถือ",
+  "trust_excellent": "ยอดเยี่ยม",
+  "trust_good": "ดี",
+  "trust_fair": "พอใช้",
+  "trust_new": "เทรดเดอร์ใหม่",
+  "trustPart_history": "เทรดที่สำเร็จ",
+  "trustPart_completion": "อัตราสำเร็จ",
+  "trustPart_feedback": "ความคิดเห็น",
+  "trustPart_age": "อายุบัญชี",
+  "trustPart_verification": "การยืนยันตัวตน",
+  "trustPart_disputes": "ข้อพิพาทน้อย",
+  "trustPenalty": "−{n} จากรายงานบัญชีถูกอายัด",
+  "saveSearch": "บันทึกการค้นหานี้",
+  "searchName": "ตั้งชื่อ",
+  "translate": "แปล",
+  "rewardRule": "คุณได้ {amount} {asset} เมื่อเพื่อนที่เชิญเทรดครั้งแรกมูลค่า ${min} ขึ้นไปกับคนอื่นสำเร็จ",
+  "rewardEarned": "ได้รับแล้ว",
+  "rewardPending": "รอจ่าย"
  }
 }

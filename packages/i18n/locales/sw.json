@@ -175,7 +175,9 @@
    "security_alert": "Tahadhari ya usalama",
    "tier_changed": "Kiwango cha uthibitisho kimebadilika",
    "price_alert": "Arifa ya bei imefikiwa",
-   "otc_update": "Taarifa ya ombi la biashara kubwa"
+   "otc_update": "Taarifa ya ombi la biashara kubwa",
+   "release_reminder": "Kumbusho: achilia crypto",
+   "referral_reward": "Zawadi ya mwaliko imepokelewa"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Hufunguliwa",
   "closesAt": "Hufungwa",
   "hoursOffNow": "Nje ya saa zako za kazi sasa: matangazo yamefichwa hadi ufungue.",
-  "outsideHours": "Nje ya saa za kazi"
+  "outsideHours": "Nje ya saa za kazi",
+  "safeTitle": "Ni salama kulipa?",
+  "safeIntro": "Hakikisha haya kabla ya kuthibitisha. Yanazuia ulaghai mwingi na malipo kuzuiwa.",
+  "safe1": "Ninalipa kutoka akaunti iliyo kwa jina langu.",
+  "safe2": "Ninatuma {amount} kamili kwa {holder}, jina lililo kwenye agizo hili.",
+  "safe3": "Maelezo ya malipo yana kumbukumbu ya agizo tu: bila maneno kama crypto, USDT au P2P.",
+  "safe4": "Hakuna aliyeniomba nilipe nje ya parley au kwa akaunti nyingine.",
+  "safeConfirm": "Ndiyo, nimetuma malipo",
+  "dStepOpened": "Mgogoro umefunguliwa",
+  "dStepEvidence": "Ushahidi umeongezwa ({n})",
+  "dStepReview": "Msuluhishi anakagua",
+  "dStepEscalated": "Imepelekwa kwa msuluhishi mkuu",
+  "dStepDecision": "Uamuzi",
+  "trustScore": "Alama ya uaminifu",
+  "trust_excellent": "Bora sana",
+  "trust_good": "Nzuri",
+  "trust_fair": "Wastani",
+  "trust_new": "Mpya",
+  "trustPart_history": "Biashara zilizokamilika",
+  "trustPart_completion": "Kiwango cha ukamilishaji",
+  "trustPart_feedback": "Maoni",
+  "trustPart_age": "Umri wa akaunti",
+  "trustPart_verification": "Uthibitisho",
+  "trustPart_disputes": "Migogoro michache",
+  "trustPenalty": "−{n} kwa ripoti za kuzuiwa benki",
+  "saveSearch": "Hifadhi utafutaji huu",
+  "searchName": "Ipe jina",
+  "translate": "Tafsiri",
+  "rewardRule": "Unapata {amount} {asset} rafiki uliyemwalika akikamilisha biashara yake ya kwanza ya ${min} au zaidi na mtu mwingine.",
+  "rewardEarned": "Umepata",
+  "rewardPending": "Inasubiri kulipwa"
  }
 }

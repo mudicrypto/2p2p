@@ -175,7 +175,9 @@
    "security_alert": "Alert bezpieczeństwa",
    "tier_changed": "Zmieniono poziom weryfikacji",
    "price_alert": "Osiągnięto alert cenowy",
-   "otc_update": "Aktualizacja zapytania o dużą transakcję"
+   "otc_update": "Aktualizacja zapytania o dużą transakcję",
+   "release_reminder": "Przypomnienie: zwolnij kryptowalutę",
+   "referral_reward": "Otrzymano nagrodę za zaproszenie"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Otwarcie",
   "closesAt": "Zamknięcie",
   "hoursOffNow": "Poza godzinami pracy: ogłoszenia są ukryte do otwarcia.",
-  "outsideHours": "Poza godzinami pracy"
+  "outsideHours": "Poza godzinami pracy",
+  "safeTitle": "Bezpieczna płatność?",
+  "safeIntro": "Sprawdź przed potwierdzeniem. Chroni to przed większością oszustw P2P i blokad płatności.",
+  "safe1": "Płacę z konta na moje nazwisko.",
+  "safe2": "Wysyłam dokładnie {amount} do {holder}, nazwy podanej w zleceniu.",
+  "safe3": "W tytule przelewu tylko numer zlecenia: bez słów krypto, USDT czy P2P.",
+  "safe4": "Nikt nie prosił mnie o płatność poza parley ani na inne konto.",
+  "safeConfirm": "Tak, wysłałem płatność",
+  "dStepOpened": "Spór otwarty",
+  "dStepEvidence": "Dowody dodane ({n})",
+  "dStepReview": "Arbiter rozpatruje",
+  "dStepEscalated": "Przekazano starszemu arbitrowi",
+  "dStepDecision": "Decyzja",
+  "trustScore": "Wskaźnik zaufania",
+  "trust_excellent": "Doskonały",
+  "trust_good": "Dobry",
+  "trust_fair": "Średni",
+  "trust_new": "Nowy",
+  "trustPart_history": "Zakończone transakcje",
+  "trustPart_completion": "Wskaźnik ukończenia",
+  "trustPart_feedback": "Opinie",
+  "trustPart_age": "Wiek konta",
+  "trustPart_verification": "Weryfikacja",
+  "trustPart_disputes": "Mało sporów",
+  "trustPenalty": "−{n} za zgłoszenia blokady konta",
+  "saveSearch": "Zapisz wyszukiwanie",
+  "searchName": "Nazwa",
+  "translate": "Przetłumacz",
+  "rewardRule": "Otrzymasz {amount} {asset}, gdy zaproszony znajomy zakończy pierwszą transakcję za ${min} lub więcej z kimś innym.",
+  "rewardEarned": "Zarobione",
+  "rewardPending": "Oczekuje na wypłatę"
  }
 }

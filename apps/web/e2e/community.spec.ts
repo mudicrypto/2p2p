@@ -127,3 +127,24 @@ test('business hours hide ads outside the chosen hours', async ({ page, context 
   await page.getByTestId('hours-on').uncheck();
   await expect(page.getByTestId('hours-off')).toHaveCount(0);
 });
+
+test('saved searches and the trust score on passports', async ({ page }) => {
+  await signupAndLogin(page);
+  await page.goto('/en/p2p?fiat=EUR');
+  await expect(page.getByTestId('filter-toggle')).toHaveCount(1);
+  await page.getByTestId('filter-toggle').click();
+  await page.getByTestId('filter-online').check();
+  await page.getByTestId('saved-new').click();
+  await page.getByTestId('saved-name').fill('EUR online');
+  await page.getByTestId('saved-save').click();
+  await expect(page.getByTestId('saved-apply')).toHaveText('EUR online');
+  await page.getByTestId('filter-clear').click();
+  await expect(page.getByTestId('filter-online')).not.toBeChecked();
+  await page.getByTestId('saved-apply').click();
+  await expect(page.getByTestId('filter-online')).toBeChecked();
+
+  await page.goto('/en/account');
+  await page.getByRole('link', { name: 'Profile' }).click();
+  await expect(page.getByTestId('trust')).toContainText('Trust score');
+  await expect(page.getByTestId('trust-score')).toHaveText(/^\d+\/100$/);
+});

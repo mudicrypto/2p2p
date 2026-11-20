@@ -175,7 +175,9 @@
    "security_alert": "보안 경고",
    "tier_changed": "인증 등급 변경",
    "price_alert": "가격 알림 도달",
-   "otc_update": "대량 거래 요청 업데이트"
+   "otc_update": "대량 거래 요청 업데이트",
+   "release_reminder": "알림: 코인을 릴리스하세요",
+   "referral_reward": "초대 보상 지급됨"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "시작",
   "closesAt": "종료",
   "hoursOffNow": "지금은 영업시간 외: 시작 전까지 광고가 숨겨집니다.",
-  "outsideHours": "영업시간 외"
+  "outsideHours": "영업시간 외",
+  "safeTitle": "안전하게 결제하나요?",
+  "safeIntro": "확인 전에 점검하세요. 대부분의 P2P 사기와 결제 동결을 막아 줍니다.",
+  "safe1": "본인 명의 계좌에서 결제합니다.",
+  "safe2": "이 주문에 표시된 {holder}에게 정확히 {amount}를 보냅니다.",
+  "safe3": "송금 메모에는 주문 번호만: 코인, USDT, P2P 같은 단어 없음.",
+  "safe4": "parley 밖이나 다른 계좌로 결제하라는 요청을 받지 않았습니다.",
+  "safeConfirm": "네, 송금했습니다",
+  "dStepOpened": "분쟁 접수됨",
+  "dStepEvidence": "증거 제출({n})",
+  "dStepReview": "중재자가 검토 중",
+  "dStepEscalated": "상위 중재자에게 이관",
+  "dStepDecision": "결정",
+  "trustScore": "신뢰 점수",
+  "trust_excellent": "우수",
+  "trust_good": "좋음",
+  "trust_fair": "보통",
+  "trust_new": "신규 트레이더",
+  "trustPart_history": "완료 거래",
+  "trustPart_completion": "완료율",
+  "trustPart_feedback": "피드백",
+  "trustPart_age": "계정 기간",
+  "trustPart_verification": "인증",
+  "trustPart_disputes": "분쟁 적음",
+  "trustPenalty": "은행 동결 신고로 −{n}",
+  "saveSearch": "이 검색 저장",
+  "searchName": "이름",
+  "translate": "번역",
+  "rewardRule": "초대한 친구가 다른 사람과 ${min} 이상 첫 거래를 완료하면 {amount} {asset}를 받습니다.",
+  "rewardEarned": "받은 보상",
+  "rewardPending": "지급 대기"
  }
 }

@@ -175,7 +175,9 @@
    "security_alert": "Sicherheitswarnung",
    "tier_changed": "Verifizierungsstufe geändert",
    "price_alert": "Preisalarm erreicht",
-   "otc_update": "Update zu deiner Großhandelsanfrage"
+   "otc_update": "Update zu deiner Großhandelsanfrage",
+   "release_reminder": "Erinnerung: Krypto freigeben",
+   "referral_reward": "Einladungsprämie erhalten"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Öffnet",
   "closesAt": "Schließt",
   "hoursOffNow": "Außerhalb deiner Geschäftszeiten: Anzeigen sind bis zur Öffnung ausgeblendet.",
-  "outsideHours": "Außerhalb der Handelszeiten"
+  "outsideHours": "Außerhalb der Handelszeiten",
+  "safeTitle": "Sicher bezahlen?",
+  "safeIntro": "Prüfe das vor dem Bestätigen. Es verhindert die meisten P2P-Betrugsfälle und eingefrorene Zahlungen.",
+  "safe1": "Ich zahle von einem Konto auf meinen Namen.",
+  "safe2": "Ich sende genau {amount} an {holder}, den Namen in dieser Order.",
+  "safe3": "Der Verwendungszweck enthält nur die Referenz: keine Wörter wie Krypto, USDT oder P2P.",
+  "safe4": "Niemand hat mich gebeten, außerhalb von parley oder auf ein anderes Konto zu zahlen.",
+  "safeConfirm": "Ja, ich habe bezahlt",
+  "dStepOpened": "Streitfall eröffnet",
+  "dStepEvidence": "Belege hinzugefügt ({n})",
+  "dStepReview": "Ein Schlichter prüft",
+  "dStepEscalated": "An erfahrenen Schlichter übergeben",
+  "dStepDecision": "Entscheidung",
+  "trustScore": "Vertrauenswert",
+  "trust_excellent": "Ausgezeichnet",
+  "trust_good": "Gut",
+  "trust_fair": "Mittel",
+  "trust_new": "Neu",
+  "trustPart_history": "Abgeschlossene Trades",
+  "trustPart_completion": "Abschlussquote",
+  "trustPart_feedback": "Bewertungen",
+  "trustPart_age": "Kontoalter",
+  "trustPart_verification": "Verifizierung",
+  "trustPart_disputes": "Wenige Streitfälle",
+  "trustPenalty": "−{n} wegen Kontosperre-Meldungen",
+  "saveSearch": "Suche speichern",
+  "searchName": "Name",
+  "translate": "Übersetzen",
+  "rewardRule": "Du erhältst {amount} {asset}, wenn ein eingeladener Freund seinen ersten Trade ab ${min} mit jemand anderem abschließt.",
+  "rewardEarned": "Erhalten",
+  "rewardPending": "Ausstehend"
  }
 }

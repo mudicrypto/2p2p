@@ -175,7 +175,9 @@
    "security_alert": "Ìkìlọ̀ ààbò",
    "tier_changed": "Ìpele ìjẹ́rìí ti yí padà",
    "price_alert": "Ìkìlọ̀ iye owó ti dé",
-   "otc_update": "Ìmúdójúìwọ̀n ìbéèrè ìṣòwò ńlá"
+   "otc_update": "Ìmúdójúìwọ̀n ìbéèrè ìṣòwò ńlá",
+   "release_reminder": "Ìránnilétí: tú crypto sílẹ̀",
+   "referral_reward": "A ti gba èrè ìpè"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Ṣíṣí",
   "closesAt": "Títì",
   "hoursOffNow": "Ó ti kọjá àkókò iṣẹ́ rẹ báyìí: a ti fi ìpolówó pamọ́ títí o fi ṣí.",
-  "outsideHours": "Lẹ́yìn àkókò iṣẹ́"
+  "outsideHours": "Lẹ́yìn àkókò iṣẹ́",
+  "safeTitle": "Ṣé ó dára láti sanwó?",
+  "safeIntro": "Ṣàyẹ̀wò wọ̀nyí kí o tó jẹ́rìí. Wọ́n ń dènà ọ̀pọ̀ jìbìtì àti ìdádúró owó.",
+  "safe1": "Mo ń sanwó láti àkáǹtì tí ó wà ní orúkọ mi.",
+  "safe2": "Mo ń fi {amount} gangan ránṣẹ́ sí {holder}, orúkọ tó wà lórí àṣẹ yìí.",
+  "safe3": "Àkọsílẹ̀ ìsanwó ní nọ́ńbà àṣẹ nìkan: kò sí ọ̀rọ̀ bíi crypto, USDT tàbí P2P.",
+  "safe4": "Kò sí ẹni tó ní kí n sanwó lẹ́yìn parley tàbí sí àkáǹtì mìíràn.",
+  "safeConfirm": "Bẹ́ẹ̀ni, mo ti fi owó ránṣẹ́",
+  "dStepOpened": "A ti ṣí ẹjọ́",
+  "dStepEvidence": "A ti fi ẹ̀rí kún un ({n})",
+  "dStepReview": "Alárbitrà ń ṣàyẹ̀wò",
+  "dStepEscalated": "A ti gbé e lọ sí alárbitrà àgbà",
+  "dStepDecision": "Ìpinnu",
+  "trustScore": "Ìdíwọ̀n ìgbẹ́kẹ̀lé",
+  "trust_excellent": "Ó tayọ",
+  "trust_good": "Dára",
+  "trust_fair": "Ó dára díẹ̀",
+  "trust_new": "Oníṣòwò tuntun",
+  "trustPart_history": "Ìṣòwò tí a parí",
+  "trustPart_completion": "Ìwọ̀n ìparí",
+  "trustPart_feedback": "Èsì",
+  "trustPart_age": "Ọjọ́ orí àkáǹtì",
+  "trustPart_verification": "Ìfìdímúlẹ̀",
+  "trustPart_disputes": "Ẹjọ́ díẹ̀",
+  "trustPenalty": "−{n} fún ìròyìn ìdádúró ilé-ìfowópamọ́",
+  "saveSearch": "Fi ìwádìí yìí pamọ́",
+  "searchName": "Fún un lórúkọ",
+  "translate": "Túmọ̀",
+  "rewardRule": "Ìwọ yóò gba {amount} {asset} nígbà tí ọ̀rẹ́ tí o pè bá parí ìṣòwò àkọ́kọ́ ti ${min} tàbí jù bẹ́ẹ̀ lọ pẹ̀lú ẹlòmíràn.",
+  "rewardEarned": "Tí o rí gbà",
+  "rewardPending": "Ń dúró de ìsanwó"
  }
 }

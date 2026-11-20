@@ -175,7 +175,9 @@
    "security_alert": "سیکیورٹی انتباہ",
    "tier_changed": "تصدیق کی سطح تبدیل ہوئی",
    "price_alert": "قیمت الرٹ پہنچ گیا",
-   "otc_update": "بڑی ٹریڈ درخواست اپ ڈیٹ"
+   "otc_update": "بڑی ٹریڈ درخواست اپ ڈیٹ",
+   "release_reminder": "یاد دہانی: کرپٹو جاری کریں",
+   "referral_reward": "دعوتی انعام موصول"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "کھلنے کا وقت",
   "closesAt": "بند ہونے کا وقت",
   "hoursOffNow": "ابھی آپ کے کاروباری اوقات سے باہر: کھلنے تک اشتہار چھپے ہیں۔",
-  "outsideHours": "اوقات سے باہر"
+  "outsideHours": "اوقات سے باہر",
+  "safeTitle": "ادائیگی محفوظ ہے؟",
+  "safeIntro": "تصدیق سے پہلے یہ چیک کریں۔ یہ زیادہ تر P2P دھوکوں اور منجمد ادائیگیوں سے بچاتا ہے۔",
+  "safe1": "میں اپنے نام کے اکاؤنٹ سے ادائیگی کر رہا ہوں۔",
+  "safe2": "میں بالکل {amount} اس آرڈر پر درج نام {holder} کو بھیج رہا ہوں۔",
+  "safe3": "ادائیگی کے نوٹ میں صرف آرڈر ریفرنس ہے: کرپٹو، USDT یا P2P جیسے الفاظ نہیں۔",
+  "safe4": "کسی نے مجھے parley سے باہر یا کسی اور اکاؤنٹ میں ادائیگی کا نہیں کہا۔",
+  "safeConfirm": "ہاں، میں نے ادائیگی بھیج دی",
+  "dStepOpened": "تنازع کھولا گیا",
+  "dStepEvidence": "شواہد شامل ({n})",
+  "dStepReview": "ثالث جائزہ لے رہا ہے",
+  "dStepEscalated": "سینئر ثالث کو بھیجا گیا",
+  "dStepDecision": "فیصلہ",
+  "trustScore": "اعتماد اسکور",
+  "trust_excellent": "بہترین",
+  "trust_good": "اچھا",
+  "trust_fair": "درمیانہ",
+  "trust_new": "نیا ٹریڈر",
+  "trustPart_history": "مکمل ٹریڈز",
+  "trustPart_completion": "تکمیل کی شرح",
+  "trustPart_feedback": "فیڈ بیک",
+  "trustPart_age": "اکاؤنٹ کی عمر",
+  "trustPart_verification": "تصدیق",
+  "trustPart_disputes": "کم تنازعات",
+  "trustPenalty": "بینک منجمد رپورٹس پر −{n}",
+  "saveSearch": "یہ تلاش محفوظ کریں",
+  "searchName": "نام دیں",
+  "translate": "ترجمہ",
+  "rewardRule": "جب آپ کا مدعو دوست آپ کے علاوہ کسی سے ${min} یا زیادہ کی پہلی ٹریڈ مکمل کرے تو آپ کو {amount} {asset} ملتے ہیں۔",
+  "rewardEarned": "حاصل شدہ",
+  "rewardPending": "ادائیگی کا انتظار"
  }
 }

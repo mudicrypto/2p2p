@@ -175,7 +175,9 @@
    "security_alert": "Cảnh báo bảo mật",
    "tier_changed": "Cấp xác minh đã thay đổi",
    "price_alert": "Đã đạt giá cảnh báo",
-   "otc_update": "Cập nhật yêu cầu giao dịch lớn"
+   "otc_update": "Cập nhật yêu cầu giao dịch lớn",
+   "release_reminder": "Nhắc nhở: giải phóng crypto",
+   "referral_reward": "Đã nhận thưởng mời"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Mở",
   "closesAt": "Đóng",
   "hoursOffNow": "Hiện ngoài giờ làm việc: quảng cáo bị ẩn đến khi mở.",
-  "outsideHours": "Ngoài giờ làm việc"
+  "outsideHours": "Ngoài giờ làm việc",
+  "safeTitle": "An toàn để thanh toán?",
+  "safeIntro": "Kiểm tra trước khi xác nhận. Giúp tránh hầu hết lừa đảo P2P và tiền bị phong tỏa.",
+  "safe1": "Tôi thanh toán từ tài khoản đứng tên tôi.",
+  "safe2": "Tôi chuyển đúng {amount} cho {holder}, tên hiển thị trên lệnh này.",
+  "safe3": "Nội dung chuyển khoản chỉ có mã lệnh: không có từ crypto, USDT hay P2P.",
+  "safe4": "Không ai yêu cầu tôi trả ngoài parley hoặc vào tài khoản khác.",
+  "safeConfirm": "Vâng, tôi đã chuyển tiền",
+  "dStepOpened": "Đã mở tranh chấp",
+  "dStepEvidence": "Đã thêm bằng chứng ({n})",
+  "dStepReview": "Trọng tài đang xem xét",
+  "dStepEscalated": "Đã chuyển trọng tài cấp cao",
+  "dStepDecision": "Phán quyết",
+  "trustScore": "Điểm tin cậy",
+  "trust_excellent": "Xuất sắc",
+  "trust_good": "Tốt",
+  "trust_fair": "Khá",
+  "trust_new": "Người mới",
+  "trustPart_history": "Giao dịch hoàn thành",
+  "trustPart_completion": "Tỷ lệ hoàn thành",
+  "trustPart_feedback": "Đánh giá",
+  "trustPart_age": "Tuổi tài khoản",
+  "trustPart_verification": "Xác minh",
+  "trustPart_disputes": "Ít tranh chấp",
+  "trustPenalty": "−{n} do báo cáo phong tỏa ngân hàng",
+  "saveSearch": "Lưu tìm kiếm này",
+  "searchName": "Đặt tên",
+  "translate": "Dịch",
+  "rewardRule": "Bạn nhận {amount} {asset} khi bạn được mời hoàn thành giao dịch đầu tiên từ ${min} với người khác.",
+  "rewardEarned": "Đã nhận",
+  "rewardPending": "Chờ thanh toán"
  }
 }

@@ -8,6 +8,7 @@ import { useI18n } from '../../../../lib/i18n';
 import { api } from '../../../../lib/api';
 import { releaseLabel } from '../../../../components/trade-home';
 import { Presence, RelationButtons } from '../../../../components/community';
+import { TrustCard } from '../../../../components/parity';
 
 export default function Passport({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -49,6 +50,7 @@ export default function Passport({ params }: { params: Promise<{ id: string }> }
           <Stat label={t('ui.usualRelease')} value={p.avgReleaseSec ? releaseLabel(p.avgReleaseSec, t) : '—'} />
           <Stat label={t('profile.disputes')} value={pct(p.disputeRateBps)} />
           <Stat label={t('profile.freezeReports')} value={num(String(p.freezeReports))} />
+          {p.trust && <Card className="col-span-2 p-6"><TrustCard trust={p.trust} /></Card>}
           <Card className="col-span-2 p-6">
             <div className="flex items-center justify-between"><span className="text-sm text-muted-foreground">{t('profile.feedback')}</span>{posPct !== null && <span className="num font-semibold">{posPct}%</span>}</div>
             <div className="mt-2 flex items-center gap-4 text-[22px] font-bold" data-testid="feedback-count"><span className="flex items-center gap-1.5"><ThumbsUp size={18} className="text-buy" />{p.positiveFeedback}</span><span className="flex items-center gap-1.5"><ThumbsDown size={18} className="text-sell" />{p.negativeFeedback}</span></div>

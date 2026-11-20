@@ -14,6 +14,7 @@ import { TradeDialog, cryptoFor, fiatFor } from './trade-dialog';
 import { cdp } from './order-state';
 import { REGION_KEYS, typesForRegion } from '../lib/regions';
 import { OnlineDot, PriceAlertDialog } from './community';
+import { SavedSearches } from './parity';
 
 const ASSETS = ['USDT', 'BTC', 'ETH'];
 type SortKey = 'price' | 'release' | 'completion' | 'trades';
@@ -206,6 +207,10 @@ function TradeInner() {
         </div>
         {showFilters && (
           <div className="mb-3 grid gap-3 rounded-2xl bg-muted/50 p-4 sm:grid-cols-2 lg:grid-cols-4" data-testid="filters">
+            {me && <div className="sm:col-span-2 lg:col-span-4"><SavedSearches current={{ side, asset, fiat, paymentType: pm, region, merchantOnly, minTier: verifiedOnly ? '1' : '', onlineOnly, followingOnly, q: qInput.trim(), sort: sort === 'price' ? '' : sort }} onApply={(p) => {
+              setSide(p.side === 'sell' ? 'sell' : 'buy'); setAsset(p.asset ?? asset); setFiat(p.fiat ?? fiat); setPm(p.paymentType ?? ''); setRegion(p.region ?? '');
+              setMerchantOnly(p.merchantOnly === 'true'); setVerifiedOnly(p.minTier === '1'); setOnlineOnly(p.onlineOnly === 'true'); setFollowingOnly(p.followingOnly === 'true'); setQInput(p.q ?? ''); setSort((p.sort as SortKey) || 'price');
+            }} /></div>}
             <label className="relative space-y-1 text-[13px] text-muted-foreground sm:col-span-2 lg:col-span-4">{t('ui.searchTrader')}
               <Search size={16} className="pointer-events-none absolute start-3 top-[34px]" />
               <input data-testid="filter-q" value={qInput} onChange={(e) => setQInput(e.target.value.slice(0, 40))} placeholder={t('ui.searchTraderPh')} className="h-11 w-full rounded-2xl border border-border bg-card ps-9 pe-3 text-[15px] text-foreground focus:outline-none" />

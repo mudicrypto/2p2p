@@ -175,7 +175,9 @@
    "security_alert": "Alerto sa seguridad",
    "tier_changed": "Nagbago ang antas ng beripikasyon",
    "price_alert": "Naabot ang price alert",
-   "otc_update": "Update sa large trade request"
+   "otc_update": "Update sa large trade request",
+   "release_reminder": "Paalala: i-release ang crypto",
+   "referral_reward": "Natanggap ang invite reward"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Bubukas",
   "closesAt": "Nagsasara",
   "hoursOffNow": "Labas ka ngayon sa oras ng negosyo: nakatago ang mga ad hanggang magbukas.",
-  "outsideHours": "Labas sa oras"
+  "outsideHours": "Labas sa oras",
+  "safeTitle": "Ligtas bang magbayad?",
+  "safeIntro": "Suriin ito bago kumpirmahin. Iniiwasan nito ang karamihan ng scam at frozen na bayad.",
+  "safe1": "Nagbabayad ako mula sa account na nakapangalan sa akin.",
+  "safe2": "Magpapadala ako ng eksaktong {amount} kay {holder}, ang pangalan sa order na ito.",
+  "safe3": "Reference lang ng order ang nasa payment note: walang salitang crypto, USDT o P2P.",
+  "safe4": "Walang nag-utos na magbayad ako sa labas ng parley o sa ibang account.",
+  "safeConfirm": "Oo, naipadala ko na ang bayad",
+  "dStepOpened": "Nabuksan ang dispute",
+  "dStepEvidence": "Naidagdag ang ebidensya ({n})",
+  "dStepReview": "Sinusuri ng arbiter",
+  "dStepEscalated": "Inakyat sa senior arbiter",
+  "dStepDecision": "Desisyon",
+  "trustScore": "Trust score",
+  "trust_excellent": "Napakahusay",
+  "trust_good": "Mabuti",
+  "trust_fair": "Katamtaman",
+  "trust_new": "Bagong trader",
+  "trustPart_history": "Natapos na trade",
+  "trustPart_completion": "Completion rate",
+  "trustPart_feedback": "Feedback",
+  "trustPart_age": "Edad ng account",
+  "trustPart_verification": "Beripikasyon",
+  "trustPart_disputes": "Kaunting dispute",
+  "trustPenalty": "−{n} dahil sa bank-freeze reports",
+  "saveSearch": "I-save ang search na ito",
+  "searchName": "Pangalanan",
+  "translate": "Isalin",
+  "rewardRule": "Makakakuha ka ng {amount} {asset} kapag natapos ng inimbitahan mo ang unang trade na ${min} pataas sa ibang tao.",
+  "rewardEarned": "Nakuha",
+  "rewardPending": "Hinihintay ibayad"
  }
 }

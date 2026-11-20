@@ -175,7 +175,9 @@
    "security_alert": "Security alert",
    "tier_changed": "Verification level changed",
    "price_alert": "Price alert reached",
-   "otc_update": "Large trade request update"
+   "otc_update": "Large trade request update",
+   "release_reminder": "Reminder: release the crypto",
+   "referral_reward": "Invite reward received"
   }
  },
  "common": {
@@ -620,6 +622,36 @@
   "opensAt": "Opens",
   "closesAt": "Closes",
   "hoursOffNow": "Outside your business hours now: your ads are hidden until you open.",
-  "outsideHours": "Outside trading hours"
+  "outsideHours": "Outside trading hours",
+  "safeTitle": "Safe to pay?",
+  "safeIntro": "Check these before you confirm. They prevent most P2P scams and frozen payments.",
+  "safe1": "I'm paying from an account in my own name.",
+  "safe2": "I'm sending exactly {amount} to {holder}, the name shown on this order.",
+  "safe3": "My payment note has only the order reference: no words like crypto, USDT or P2P.",
+  "safe4": "Nobody asked me to pay outside parley or to a different account.",
+  "safeConfirm": "Yes, I've sent the payment",
+  "dStepOpened": "Dispute opened",
+  "dStepEvidence": "Evidence added ({n})",
+  "dStepReview": "An arbiter is reviewing",
+  "dStepEscalated": "Escalated to a senior arbiter",
+  "dStepDecision": "Decision",
+  "trustScore": "Trust score",
+  "trust_excellent": "Excellent",
+  "trust_good": "Good",
+  "trust_fair": "Fair",
+  "trust_new": "New trader",
+  "trustPart_history": "Completed trades",
+  "trustPart_completion": "Completion rate",
+  "trustPart_feedback": "Feedback",
+  "trustPart_age": "Account age",
+  "trustPart_verification": "Verification",
+  "trustPart_disputes": "Few disputes",
+  "trustPenalty": "−{n} for bank-freeze reports",
+  "saveSearch": "Save this search",
+  "searchName": "Name it",
+  "translate": "Translate",
+  "rewardRule": "You get {amount} {asset} when a friend you invited completes their first trade of ${min} or more with someone other than you.",
+  "rewardEarned": "Earned",
+  "rewardPending": "Waiting to be paid"
  }
 }

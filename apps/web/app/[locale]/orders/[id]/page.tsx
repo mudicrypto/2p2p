@@ -11,6 +11,7 @@ import { Chat, uploadAttachment } from '../../../../components/chat';
 import { ErrorText } from '../../../../components/errors';
 import { cdp, orderState } from '../../../../components/order-state';
 import { useL } from '../../../../components/nav';
+import { DisputeProgress, SafePayDialog } from '../../../../components/parity';
 
 function useNow() {
   const [now, setNow] = useState(Date.now());
@@ -31,6 +32,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const [busy, setBusy] = useState('');
   const [fb, setFb] = useState(false);
   const [disputing, setDisputing] = useState(false);
+  const [safe, setSafe] = useState(false);
   const statusRef = useRef('');
   statusRef.current = o?.status ?? '';
   const load = useCallback(() => api(`/orders/${id}`).then((x) => { setO(x); if (x.status === 'DISPUTED') api(`/orders/${id}/dispute`).then(setDispute).catch(() => {}); }).catch(setErr), [id]);
@@ -87,8 +89,9 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         <EscrowPill>{t('ui.inEscrow', { amount: crypto })}</EscrowPill>
         <div className="mx-auto mt-6 h-1.5 w-full max-w-lg overflow-hidden rounded-full bg-muted"><div className={cn('h-full rounded-full', left < 120 ? 'bg-sell' : 'bg-primary')} style={{ width: `${(left / total) * 100}%` }} /></div>
         {left < 120 && <p className="mt-3 text-sm font-medium text-sell">{t('ui.underTwoMin')}</p>}
-        <Button size="lg" className="mt-6 w-full max-w-md" loading={busy === 'paid'} onClick={() => act('paid')} data-testid="mark-paid">{t('ui.iveSent', { amount: fiatAmt })}</Button>
+        <Button size="lg" className="mt-6 w-full max-w-md" loading={busy === 'paid'} onClick={() => setSafe(true)} data-testid="mark-paid">{t('ui.iveSent', { amount: fiatAmt })}</Button>
         <p className="mx-auto mt-3 max-w-md text-xs text-muted-foreground">{t('order.confirmPaid', { amount: fiatAmt })}</p>
+        {safe && <SafePayDialog amount={fiatAmt} holder={o.payee?.holderName} busy={busy === 'paid'} onClose={() => setSafe(false)} onConfirm={async () => { await act('paid'); setSafe(false); }} />}
       </HeroCard>
     );
   } else if (buyer) { // PAID, waiting for release
@@ -266,8 +269,7 @@ function DisputePanel({ o, dispute, onDone, onCancel }: { o: any; dispute: any; 
     <Card className="space-y-3 p-6" data-testid="dispute-card">
       <div className="flex items-center justify-between"><span className="text-[20px] font-semibold">{t('ui.disputeOpen')}</span>{dispute && <Badge variant="danger">{dispute.status}</Badge>}</div>
       {dispute && <p className="text-[15px]"><span className="text-muted-foreground">{t('ui.reason')}: </span>{reasonLabel(dispute.reason)}</p>}
-      {dispute?.slaDueAt && <p className="text-sm text-muted-foreground">{t('ui.arbiterBy', { time: date(dispute.slaDueAt) })}</p>}
-      {dispute && <p className="text-sm text-muted-foreground">{t('ui.evidence')}: {dispute.evidence?.length ?? 0}</p>}
+      {dispute && <DisputeProgress dispute={dispute} />}
       {dispute?.decisionNote && <p className="rounded-2xl bg-muted p-3 text-sm">{dispute.decisionNote}</p>}
       {dispute && !dispute.resolvedAt && <>
         <input ref={ref} type="file" hidden accept="image/png,image/jpeg,image/webp,application/pdf" onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; const key = await uploadAttachment(o.id, f); await api(`/disputes/${dispute.id}/evidence`, { body: { fileKey: key } }).catch(() => {}); onDone(); }} />
