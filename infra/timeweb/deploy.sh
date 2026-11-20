@@ -70,7 +70,7 @@ if ! grep -q '^ADMIN_INITIAL_PASSWORD=' "$ENV"; then
   printf 'admin email: %s\ninitial password: %s\n' "$(grep '^ADMIN_EMAIL=' ./site.env | cut -d= -f2)" "$pw" > /opt/parley/www/admin-initial.txt
   chmod 644 /opt/parley/www/admin-initial.txt
 fi
-grep -v -e '^SITE_HOST=' -e '^ADMIN_EMAIL=' -e '^WEB_ORIGINS=' -e '^WEBAUTHN_RP_IDS=' "$ENV" > "$ENV.tmp" && { echo "SITE_HOST=$SITE_HOST"; echo "WEB_ORIGINS=$ORIGINS"; echo "WEBAUTHN_RP_IDS=$RPIDS"; grep '^ADMIN_EMAIL=' ./site.env; } >> "$ENV.tmp" && mv "$ENV.tmp" "$ENV" && chmod 600 "$ENV"
+grep -v -e '^SITE_HOST=' -e '^ADMIN_EMAIL=' -e '^ADMIN_KEY_RESET=' -e '^WEB_ORIGINS=' -e '^WEBAUTHN_RP_IDS=' "$ENV" > "$ENV.tmp" && { echo "SITE_HOST=$SITE_HOST"; echo "WEB_ORIGINS=$ORIGINS"; echo "WEBAUTHN_RP_IDS=$RPIDS"; grep -e '^ADMIN_EMAIL=' -e '^ADMIN_KEY_RESET=' ./site.env; } >> "$ENV.tmp" && mv "$ENV.tmp" "$ENV" && chmod 600 "$ENV"
 # Keep the host Caddy routes in step with the release (adds /admin); the ops token stays as provisioned.
 OPS_TOKEN="$(grep -o '/_ops/[0-9a-f]*' /etc/caddy/Caddyfile | head -1 | cut -d/ -f3)"
 if [ -n "$OPS_TOKEN" ]; then

@@ -52,3 +52,20 @@ describe('M6 admin auth & RBAC', () => {
     expect(actions).toEqual(expect.arrayContaining(['admin.view_user', 'user.status_changed', 'report.sar_created', 'country_rules.changed']));
   });
 });
+
+describe('server-side passkey reset', () => {
+  it('removes the admin passkeys once per value and ends their sessions', async () => {
+    const { resetAdminKeysOnce } = await import('../src');
+    const { webauthnCredentials, adminUsers, eq } = await import('@p2p/db');
+    const email = `reset-${Date.now()}@admin.io`;
+    const a = await createAdmin(ctx, null, { email, password: 'admin-password-123', roles: ['superadmin'] });
+    await ctx.db.insert(webauthnCredentials).values({ id: `cred-${Date.now()}`, adminId: a.id, publicKey: 'x', counter: 0 });
+    const nonce = `n-${Date.now()}`;
+    expect(await resetAdminKeysOnce(ctx, email.toUpperCase(), nonce)).toEqual({ reset: true, removed: 1 });
+    expect(await ctx.db.select().from(webauthnCredentials).where(eq(webauthnCredentials.adminId, a.id))).toHaveLength(0);
+    expect(await resetAdminKeysOnce(ctx, email, nonce)).toMatchObject({ reset: false, reason: 'already applied' });
+    const l = await adminLogin(ctx, email, 'admin-password-123', '127.0.0.1');
+    expect(l.needsRegistration).toBe(true);
+    void adminUsers;
+  });
+});

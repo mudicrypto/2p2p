@@ -54,9 +54,10 @@ services:
       <<: *app-env
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
+      ADMIN_KEY_RESET: ${ADMIN_KEY_RESET:-}   # from site.env: a new value removes that admin's passkeys once
     working_dir: /repo/apps/api
-    # Creates the first superadmin once (no-op when it already exists).
-    command: ["node", "--input-type=module", "-e", "import { createDb } from '@p2p/db'; import { createAdmin } from '@p2p/core'; const email = (process.env.ADMIN_EMAIL || '').toLowerCase(); const h = createDb(process.env.DATABASE_URL); try { if (!email) console.log('no ADMIN_EMAIL'); else { await createAdmin({ db: h.db, now: () => new Date() }, null, { email, password: process.env.ADMIN_INITIAL_PASSWORD, roles: ['superadmin'] }); console.log('admin created'); } } catch (e) { const c = e?.code ?? e?.cause?.code; if (c === '23505') console.log('admin exists'); else throw e; } finally { await h.close(); }"]
+    # Creates the first superadmin once (no-op when it already exists); applies a requested passkey reset once.
+    command: ["node", "--input-type=module", "-e", "import { createDb } from '@p2p/db'; import { createAdmin, resetAdminKeysOnce } from '@p2p/core'; const email = (process.env.ADMIN_EMAIL || '').toLowerCase(); const h = createDb(process.env.DATABASE_URL); try { if (!email) console.log('no ADMIN_EMAIL'); else { await createAdmin({ db: h.db, now: () => new Date() }, null, { email, password: process.env.ADMIN_INITIAL_PASSWORD, roles: ['superadmin'] }); console.log('admin created'); } } catch (e) { const c = e?.code ?? e?.cause?.code; if (c === '23505') console.log('admin exists'); else throw e; } try { if (email && process.env.ADMIN_KEY_RESET) console.log('passkey reset', JSON.stringify(await resetAdminKeysOnce({ db: h.db, now: () => new Date() }, email, process.env.ADMIN_KEY_RESET))); } finally { await h.close(); }"]
     depends_on: { migrate: { condition: service_completed_successfully } }
   api:
     image: parley-api

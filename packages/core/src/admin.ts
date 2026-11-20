@@ -5,7 +5,7 @@
 import argon2 from 'argon2';
 import {
   adminUsers, adminSessions, users, kycApplications, countryRules, paymentMethodTypes, fiatCurrencies, auditLog, riskFlags, reports,
-  orders, deposits, withdrawals, devices, limitsConfig, and, eq, or, sql, desc, gt, isNull, inArray, gte, lte, ilike,
+  orders, deposits, withdrawals, devices, limitsConfig, systemConfig, webauthnCredentials, and, eq, or, sql, desc, gt, isNull, inArray, gte, lte, ilike,
 } from '@p2p/db';
 import { DomainError } from '@p2p/shared';
 import type { Ctx } from './context';
@@ -308,4 +308,24 @@ export async function recordAuditorSignoff(ctx: Ctx, admin: Admin, input: { audi
   const after = await setConfig(ctx.db, 'withdrawals', { auditGate: !input.liftWithdrawalGate });
   await audit(ctx.db, { actorType: 'admin', actorId: admin.id, action: 'launch.auditor_signoff', subjectType: 'config', subjectId: 'withdrawals', before: { auditGate: before.auditGate }, after: { auditGate: after.auditGate, auditor: input.auditor, reportRef: input.reportRef } });
   return { auditGate: after.auditGate };
+}
+
+/**
+ * Server-side passkey reset for one admin, applied once per `nonce` (set in the server's site settings and run by
+ * the deploy). For an operator locked out of their only passkey: the password is still required afterwards,
+ * and the next sign-in asks to create a new passkey.
+ */
+export async function resetAdminKeysOnce(ctx: Pick<Ctx, 'db' | 'now'>, email: string, nonce: string) {
+  if (!email || !nonce) return { reset: false, reason: 'not requested' };
+  const key = 'admin.keyReset';
+  const [row] = await ctx.db.select().from(systemConfig).where(eq(systemConfig.key, key));
+  if ((row?.value as { nonce?: string } | undefined)?.nonce === nonce) return { reset: false, reason: 'already applied' };
+  const [a] = await ctx.db.select().from(adminUsers).where(eq(adminUsers.email, email.toLowerCase()));
+  if (!a) return { reset: false, reason: 'no such admin' };
+  const removed = await ctx.db.delete(webauthnCredentials).where(eq(webauthnCredentials.adminId, a.id)).returning({ id: webauthnCredentials.id });
+  await ctx.db.update(adminSessions).set({ expiresAt: ctx.now() }).where(eq(adminSessions.adminId, a.id));
+  const value = { nonce, at: ctx.now().toISOString() };
+  await ctx.db.insert(systemConfig).values({ key, value }).onConflictDoUpdate({ target: systemConfig.key, set: { value, updatedAt: new Date() } });
+  await audit(ctx.db, { actorType: 'system', action: 'admin.keys_reset', subjectType: 'admin', subjectId: a.id, after: { removed: removed.length, nonce } });
+  return { reset: true, removed: removed.length };
 }
