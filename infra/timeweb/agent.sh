@@ -23,6 +23,12 @@ if [ -n "$latest" ] && [ "$latest" != "$current" ]; then
     && git -C "$REPO" archive "origin/$BRANCH" | tar -x -C "$dir" \
     && bash "$dir/infra/timeweb/deploy.sh" && echo "$latest" > "$ROOT/current" && echo "DEPLOY OK $latest"; } > "$log" 2>&1 || echo "DEPLOY FAILED $latest" >> "$log"
   ls -1dt "$ROOT"/releases/*/ 2>/dev/null | tail -n +4 | xargs -r rm -rf   # keep the last 3 releases
+elif [ -f "$ROOT/PENDING_HOST" ] && [ -n "$current" ] && [ -f "$ROOT/releases/$current/infra/timeweb/deploy.sh" ]; then
+  # A new main domain is waiting for its DNS: re-run the deploy once it points here.
+  want="$(cat "$ROOT/PENDING_HOST")"; me="$(getent ahostsv4 "$(cat "$ROOT/ORIG_HOST" 2>/dev/null)" | awk '{print $1}' | head -1)"
+  if [ -n "$me" ] && getent ahostsv4 "$want" | awk '{print $1}' | grep -qx "$me"; then
+    bash "$ROOT/releases/$current/infra/timeweb/deploy.sh" >> "$WWW/deploy-$current.log" 2>&1 && echo "DOMAIN SWITCH OK $want" >> "$WWW/deploy-$current.log"
+  fi
 fi
 {
   date -u; echo "site: $(cat "$ROOT/SITE_HOST")  branch: $BRANCH  deployed: ${current:-none}  latest: ${latest:-?}"

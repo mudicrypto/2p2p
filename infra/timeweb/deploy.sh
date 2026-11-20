@@ -43,9 +43,17 @@ fi
 # stays as LEGACY_HOST and keeps serving the API, admin and ops pages so older app builds and passkeys keep working.
 ORIG_HOST="$(cat /opt/parley/ORIG_HOST 2>/dev/null || cat /opt/parley/SITE_HOST)"; echo "$ORIG_HOST" > /opt/parley/ORIG_HOST
 WANT="$(grep '^SITE_HOST=' ./site.env | cut -d= -f2 | tr -d ' ')"
-[ -n "$WANT" ] && echo "$WANT" > /opt/parley/SITE_HOST
+# Only move to a new domain once it really points at this server: switching earlier would break HTTPS for everyone.
+# Until then the agent re-checks every minute (PENDING_HOST) and re-runs this script when the DNS is live.
+ips() { getent ahostsv4 "$1" 2>/dev/null | awk '{print $1}' | sort -u; }
+if [ -n "$WANT" ] && [ "$WANT" != "$(cat /opt/parley/SITE_HOST)" ]; then
+  MYIP="$(ips "$ORIG_HOST" | head -1)"
+  if [ -n "$MYIP" ] && ips "$WANT" | grep -qx "$MYIP"; then echo "$WANT" > /opt/parley/SITE_HOST; rm -f /opt/parley/PENDING_HOST; echo "switching main domain to $WANT"
+  else echo "$WANT" > /opt/parley/PENDING_HOST; echo "waiting for DNS: $WANT does not point to $MYIP yet; keeping $(cat /opt/parley/SITE_HOST)"; fi
+elif [ -n "$WANT" ]; then rm -f /opt/parley/PENDING_HOST; fi
 SITE_HOST="$(cat /opt/parley/SITE_HOST)"
 REDIRECT_HOSTS="$(grep '^REDIRECT_HOSTS=' ./site.env | cut -d= -f2- | tr -d '"')"
+[ -f /opt/parley/PENDING_HOST ] && REDIRECT_HOSTS=""   # forward the extra names only once the main domain is live
 LEGACY_HOST=""; [ "$ORIG_HOST" != "$SITE_HOST" ] && LEGACY_HOST="$ORIG_HOST"
 ORIGINS="https://$SITE_HOST${LEGACY_HOST:+,https://$LEGACY_HOST}"; RPIDS="$SITE_HOST${LEGACY_HOST:+,$LEGACY_HOST}"
 # First superadmin: email from site.env, password generated here once. It is published for 2 hours
