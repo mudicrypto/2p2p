@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: p2p-staging
+resources:
+- ../../base
+images:
+- name: ghcr.io/example/p2p
+  newTag: IMAGE_TAG
+patches:
+- target:
+    kind: ExternalSecret
+    name: p2p-secrets
+  patch: "- op: replace\n  path: /spec/dataFrom/0/extract/key\n  value: p2p/staging/app\n"
+- target:
+    kind: ConfigMap
+    name: p2p-config
+  patch: "- op: add\n  path: /data/PROVIDER_MODE\n  value: mock\n- op: add\n  path:\
+    \ /data/ALLOW_MOCK_PROVIDERS\n  value: '1'\n- op: add\n  path: /data/WEB_ORIGIN\n\
+    \  value: https://staging.example.com\n"
+- target:
+    kind: HorizontalPodAutoscaler
+  patch: "- op: replace\n  path: /spec/minReplicas\n  value: 1\n"

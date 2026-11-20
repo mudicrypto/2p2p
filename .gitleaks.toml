@@ -1,0 +1,7 @@
+title = "p2p gitleaks config"
+[extend]
+useDefault = true
+[allowlist]
+description = "Reviewed false positives: local dev DB URLs, test-only passwords, env var names, testnet addresses (see .secrets.baseline)"
+paths = ['''(^|/)test/''', '''(^|/)e2e/''', '''\.env\.example$''', '''docker-compose\.yml$''', '''\.secrets\.baseline$''']
+regexes = ['''postgres://postgres:postgres@''']

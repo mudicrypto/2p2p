@@ -1,0 +1,112 @@
+name: CI
+on: [push, pull_request]
+permissions: { contents: read }
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres, POSTGRES_DB: p2p_test }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    env:
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/p2p_test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/p2p_test
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm i18n:check
+      - run: pnpm test
+      - name: Create E2E database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -c 'CREATE DATABASE p2p_e2e'
+      - name: Install Playwright browser
+        run: pnpm --filter @p2p/web exec playwright install --with-deps chromium
+      - name: Playwright E2E (web)
+        run: pnpm --filter @p2p/web e2e --trace off
+      - name: Playwright E2E (Telegram Mini App)
+        run: pnpm --filter @p2p/tg e2e --trace off
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Dependency audit
+        run: pnpm audit --prod --audit-level high
+      - name: Semgrep
+        run: pipx run semgrep scan --config p/typescript --config p/nodejs --config p/secrets --config .semgrep.yml --error
+      - name: Secret scan (full git history)
+        # The gitleaks action scans "<first commit>^..head", which breaks on a root commit; scan all history instead.
+        run: docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.21.2 git /repo --config /repo/.gitleaks.toml --redact --verbose
+  load:
+    runs-on: ubuntu-latest
+    needs: test
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres, POSTGRES_DB: p2p_load }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+      redis: { image: redis:7, ports: ["6379:6379"] }
+    env: { DATABASE_URL: postgres://postgres:postgres@localhost:5432/p2p_load, REDIS_URL: redis://localhost:6379 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile && pnpm build && node packages/db/dist/migrate.js
+      - run: node loadtest/setup.mjs
+      - run: PROVIDER_MODE=mock RATE_LIMIT_DISABLED=1 API_WORKERS=3 nohup node apps/api/dist/main.js & sleep 10
+      - uses: grafana/setup-k6-action@v1
+      - run: k6 run -e API=http://localhost:4000 -e RATE=60 loadtest/orders.k6.js
+      - run: node loadtest/verify.mjs
+  infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: for d in infra/terraform/envs/*; do terraform -chdir=$d init -backend=false && terraform -chdir=$d validate; done
+      - run: terraform fmt -check -recursive infra/terraform
+      - run: for o in infra/k8s/overlays/*; do kubectl kustomize $o > /dev/null; done
+  restore-test:
+    runs-on: ubuntu-latest
+    needs: test
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres, POSTGRES_DB: p2p }
+        ports: ["5432:5432"]
+        options: --health-cmd pg_isready --health-interval 5s --health-retries 10
+    env: { DATABASE_URL: postgres://postgres:postgres@localhost:5432/p2p }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - run: pnpm install --frozen-lockfile && pnpm build && node packages/db/dist/migrate.js && node loadtest/setup.mjs
+        env: { BUYERS: "500", SELLERS: "20" }
+      - name: Postgres 16 client tools (must match the server major version)
+        # The runner image ships a newer pg_dump and no v16 package; run the tools from the same image as the server.
+        run: |
+          docker pull -q postgres:16
+          mkdir -p "$RUNNER_TEMP/pgbin"
+          for t in pg_dump pg_restore; do
+            printf '#!/usr/bin/env bash\nexec docker run --rm -i --network host --user "$(id -u):$(id -g)" -v "%s:%s" postgres:16 %s "$@"\n' "$RUNNER_TEMP" "$RUNNER_TEMP" "$t" > "$RUNNER_TEMP/pgbin/$t"
+            chmod +x "$RUNNER_TEMP/pgbin/$t"
+          done
+          echo "$RUNNER_TEMP/pgbin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/pgbin/pg_dump" --version
+      - run: DUMP=$(BACKUP_DIR=$RUNNER_TEMP infra/backup/backup.sh) && DUMP=$DUMP RESTORE_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres SOURCE_URL=$DATABASE_URL infra/backup/restore-test.sh

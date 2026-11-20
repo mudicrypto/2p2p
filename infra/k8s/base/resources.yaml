@@ -1,0 +1,731 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: p2p
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: p2p-config
+data:
+  PROVIDER_MODE: real
+  API_PORT: '4000'
+  API_WORKERS: '1'
+  TRUST_PROXY: '1'
+  WEB_ORIGIN: https://app.example.com
+  ADMIN_ORIGIN: https://admin.example.com
+  WEBAUTHN_RP_ID: example.com
+  WEBAUTHN_ORIGIN: https://app.example.com
+  API_URL: http://p2p-api
+  NEXT_PUBLIC_WS_URL: https://api.example.com
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: p2p-secrets
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: aws-secrets-manager
+    kind: ClusterSecretStore
+  target:
+    name: p2p-secrets
+  dataFrom:
+  - extract:
+      key: p2p/ENV/app
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p2p-api
+  labels:
+    app: p2p-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: p2p-api
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: p2p-api
+    spec:
+      serviceAccountName: p2p
+      automountServiceAccountToken: false
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: p2p-api
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      containers:
+      - name: p2p-api
+        image: ghcr.io/example/p2p:IMAGE_TAG
+        env:
+        - name: APP
+          value: api
+        - name: NODE_ENV
+          value: production
+        envFrom:
+        - configMapRef:
+            name: p2p-config
+        - secretRef:
+            name: p2p-secrets
+        resources:
+          requests:
+            cpu: '1'
+            memory: 1Gi
+          limits:
+            memory: 1Gi
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - containerPort: 4000
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 4000
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 4000
+          periodSeconds: 15
+          failureThreshold: 4
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p2p-api
+spec:
+  selector:
+    app: p2p-api
+  ports:
+  - port: 80
+    targetPort: 4000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: p2p-api
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: p2p-api
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: p2p-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: p2p-api
+  minReplicas: 3
+  maxReplicas: 30
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 65
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p2p-worker
+  labels:
+    app: p2p-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: p2p-worker
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: p2p-worker
+    spec:
+      serviceAccountName: p2p
+      automountServiceAccountToken: false
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: p2p-worker
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      containers:
+      - name: p2p-worker
+        image: ghcr.io/example/p2p:IMAGE_TAG
+        env:
+        - name: APP
+          value: worker
+        - name: NODE_ENV
+          value: production
+        envFrom:
+        - configMapRef:
+            name: p2p-config
+        - secretRef:
+            name: p2p-secrets
+        resources:
+          requests:
+            cpu: 500m
+            memory: 768Mi
+          limits:
+            memory: 768Mi
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p2p-web
+  labels:
+    app: p2p-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: p2p-web
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: p2p-web
+    spec:
+      serviceAccountName: p2p
+      automountServiceAccountToken: false
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: p2p-web
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      containers:
+      - name: p2p-web
+        image: ghcr.io/example/p2p:IMAGE_TAG
+        env:
+        - name: APP
+          value: web
+        - name: NODE_ENV
+          value: production
+        envFrom:
+        - configMapRef:
+            name: p2p-config
+        - secretRef:
+            name: p2p-secrets
+        resources:
+          requests:
+            cpu: 500m
+            memory: 768Mi
+          limits:
+            memory: 768Mi
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 15
+          failureThreshold: 4
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p2p-web
+spec:
+  selector:
+    app: p2p-web
+  ports:
+  - port: 80
+    targetPort: 3000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: p2p-web
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: p2p-web
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: p2p-web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: p2p-web
+  minReplicas: 2
+  maxReplicas: 30
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 65
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p2p-tg
+  labels:
+    app: p2p-tg
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: p2p-tg
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: p2p-tg
+    spec:
+      serviceAccountName: p2p
+      automountServiceAccountToken: false
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: p2p-tg
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      containers:
+      - name: p2p-tg
+        image: ghcr.io/example/p2p:IMAGE_TAG
+        env:
+        - name: APP
+          value: tg
+        - name: NODE_ENV
+          value: production
+        envFrom:
+        - configMapRef:
+            name: p2p-config
+        - secretRef:
+            name: p2p-secrets
+        resources:
+          requests:
+            cpu: 500m
+            memory: 768Mi
+          limits:
+            memory: 768Mi
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 15
+          failureThreshold: 4
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p2p-tg
+spec:
+  selector:
+    app: p2p-tg
+  ports:
+  - port: 80
+    targetPort: 3000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: p2p-tg
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: p2p-tg
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: p2p-tg
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: p2p-tg
+  minReplicas: 2
+  maxReplicas: 30
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 65
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: p2p-admin
+  labels:
+    app: p2p-admin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: p2p-admin
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: p2p-admin
+    spec:
+      serviceAccountName: p2p
+      automountServiceAccountToken: false
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: topology.kubernetes.io/zone
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: p2p-admin
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      containers:
+      - name: p2p-admin
+        image: ghcr.io/example/p2p:IMAGE_TAG
+        env:
+        - name: APP
+          value: admin
+        - name: NODE_ENV
+          value: production
+        - name: ADMIN_IP_ALLOWLIST
+          valueFrom:
+            configMapKeyRef:
+              name: p2p-admin-allowlist
+              key: cidrs
+        envFrom:
+        - configMapRef:
+            name: p2p-config
+        - secretRef:
+            name: p2p-secrets
+        resources:
+          requests:
+            cpu: 500m
+            memory: 768Mi
+          limits:
+            memory: 768Mi
+        securityContext:
+          runAsNonRoot: true
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          periodSeconds: 15
+          failureThreshold: 4
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: p2p-admin
+spec:
+  selector:
+    app: p2p-admin
+  ports:
+  - port: 80
+    targetPort: 3000
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: p2p-admin
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: p2p-admin
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: p2p-admin
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: p2p-admin
+  minReplicas: 2
+  maxReplicas: 30
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 65
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: p2p-admin-allowlist
+data:
+  cidrs: 203.0.113.0/24
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: p2p-public
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/wafv2-acl-arn: WAF_ARN
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+spec:
+  ingressClassName: alb
+  rules:
+  - host: app.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: p2p-web
+            port:
+              number: 80
+  - host: api.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: p2p-api
+            port:
+              number: 80
+  - host: tg.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: p2p-tg
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: p2p-admin
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/inbound-cidrs: 203.0.113.0/24
+    alb.ingress.kubernetes.io/group.name: admin
+spec:
+  ingressClassName: alb
+  rules:
+  - host: admin.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: p2p-admin
+            port:
+              number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-http
+spec:
+  podSelector:
+    matchExpressions:
+    - key: app
+      operator: In
+      values:
+      - p2p-api
+      - p2p-web
+      - p2p-tg
+      - p2p-admin
+  ingress:
+  - {}
+  policyTypes:
+  - Ingress
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: p2p-backup
+spec:
+  schedule: 17 2 * * *
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: p2p-backup
+          restartPolicy: Never
+          containers:
+          - name: p2p-backup
+            image: ghcr.io/example/p2p-ops:IMAGE_TAG
+            command:
+            - bash
+            - -c
+            - BACKUP_DIR=/tmp infra/backup/backup.sh
+            envFrom:
+            - secretRef:
+                name: p2p-backup
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: p2p-restore-test
+spec:
+  schedule: 43 4 * * 0
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: p2p-backup
+          restartPolicy: Never
+          containers:
+          - name: p2p-restore-test
+            image: ghcr.io/example/p2p-ops:IMAGE_TAG
+            command:
+            - bash
+            - -c
+            - DUMP=$(BACKUP_DIR=/tmp infra/backup/backup.sh) && DUMP=$DUMP infra/backup/restore-test.sh
+            envFrom:
+            - secretRef:
+                name: p2p-backup
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: p2p-migrate
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migrate
+        image: ghcr.io/example/p2p:IMAGE_TAG
+        command:
+        - node
+        - packages/db/dist/migrate.js
+        envFrom:
+        - secretRef:
+            name: p2p-secrets

@@ -1,0 +1,15 @@
+{
+  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "build": {
+    "base": { "node": "22.16.0", "pnpm": "10.28.0" },
+    "development": { "extends": "base", "developmentClient": false, "distribution": "internal", "android": { "buildType": "apk" }, "ios": { "simulator": true }, "env": { "EXPO_PUBLIC_API_URL": "http://localhost:4000" } },
+    "preview": { "extends": "base", "distribution": "internal", "android": { "buildType": "apk" }, "channel": "preview", "env": { "EXPO_PUBLIC_API_URL": "https://api.staging.example.com" } },
+    "production": { "extends": "base", "autoIncrement": true, "channel": "production", "env": { "EXPO_PUBLIC_API_URL": "https://api.example.com" } }
+  },
+  "submit": {
+    "production": {
+      "ios": { "ascAppId": "TODO(provider): App Store Connect app id", "appleTeamId": "TODO(provider): Apple team id" },
+      "android": { "serviceAccountKeyPath": "./google-play-service-account.json", "track": "internal" }
+    }
+  }
+}

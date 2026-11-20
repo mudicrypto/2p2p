@@ -1,0 +1,15 @@
+{
+  "title": "P2P Exchange — Overview", "uid": "p2p-overview", "schemaVersion": 39, "refresh": "30s", "time": { "from": "now-6h", "to": "now" },
+  "templating": { "list": [{ "name": "region", "type": "query", "query": "label_values(http_request_duration_seconds_count, region)", "includeAll": true, "multi": true }] },
+  "panels": [
+    { "type": "stat", "title": "Ledger invariant", "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }, "targets": [{ "expr": "min(ledger_invariant_ok)" }], "options": { "colorMode": "background" }, "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "FAILED", "color": "red" }, "1": { "text": "OK", "color": "green" } } }] } } },
+    { "type": "stat", "title": "Withdrawals", "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }, "targets": [{ "expr": "max(withdrawals_paused)" }], "fieldConfig": { "defaults": { "mappings": [{ "type": "value", "options": { "0": { "text": "OPEN", "color": "green" }, "1": { "text": "PAUSED", "color": "red" } } }] } } },
+    { "type": "timeseries", "title": "Order creation p50/p95/p99 (s)", "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 }, "targets": [
+      { "expr": "histogram_quantile(0.5, sum by (le) (rate(http_request_duration_seconds_bucket{route=\"/v1/orders\",method=\"POST\",region=~\"$region\"}[5m])))", "legendFormat": "p50" },
+      { "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{route=\"/v1/orders\",method=\"POST\",region=~\"$region\"}[5m])))", "legendFormat": "p95" },
+      { "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{route=\"/v1/orders\",method=\"POST\",region=~\"$region\"}[5m])))", "legendFormat": "p99" } ] },
+    { "type": "timeseries", "title": "Order events / s", "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 }, "targets": [{ "expr": "sum by (type) (rate(domain_events_total{type=~\"order.*\"}[5m]))", "legendFormat": "{{type}}" }] },
+    { "type": "timeseries", "title": "HTTP status rate", "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 }, "targets": [{ "expr": "sum by (status) (rate(http_request_duration_seconds_count{region=~\"$region\"}[5m]))", "legendFormat": "{{status}}" }] },
+    { "type": "timeseries", "title": "Order-book cache hit ratio", "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 }, "targets": [{ "expr": "sum(rate(order_book_cache_total{result=\"hit\"}[5m])) / sum(rate(order_book_cache_total[5m]))" }] }
+  ]
+}

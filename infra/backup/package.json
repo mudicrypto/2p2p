@@ -1,0 +1,1 @@
+{ "name": "@p2p/backup", "private": true, "version": "0.0.0", "type": "module", "dependencies": { "@p2p/core": "workspace:*", "@p2p/db": "workspace:*" } }

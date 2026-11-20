@@ -1,0 +1,88 @@
+# Single-server test-mode deployment (see README.md). Caddy on the host serves everything on one HTTPS
+# origin, so the session cookie reaches the API and the live-update socket. Containers bind to localhost only.
+x-app-env: &app-env
+  NODE_ENV: staging            # not "production": keeps test-mode helpers (test funds) and the test banner on
+  PROVIDER_MODE: mock          # no real custody, KYC or payment providers: no real money can move
+  ALLOW_MOCK_PROVIDERS: "1"
+  DATABASE_URL: postgres://parley:${POSTGRES_PASSWORD}@postgres:5432/parley
+  REDIS_URL: redis://redis:6379
+  WEB_ORIGIN: ${WEB_ORIGINS:-https://${SITE_HOST}}
+  TRUST_PROXY: "1"
+  DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY}
+  MOCK_WEBHOOK_SECRET: ${MOCK_WEBHOOK_SECRET}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}   # random: disables the public dev token until a real bot exists
+  TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}   # e.g. parley_alerts_bot, together with a real TELEGRAM_BOT_TOKEN
+  PUSH_MODE: ${PUSH_MODE:-expo}                        # phone push via Expo (Android also needs FCM credentials in the Expo project)
+  EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}            # optional: chat translation + automatic receipt reading
+  TRANSLATE_API_URL: ${TRANSLATE_API_URL:-}            # optional: LibreTranslate server for chat translation
+  RESEND_API_KEY: ${RESEND_API_KEY:-}                  # optional: email via Resend (or paste the key in the admin panel)
+  EMAIL_FROM: ${EMAIL_FROM:-}                          # optional: sender, default parley <no-reply@parley.markets>
+  METRICS_TOKEN: ${METRICS_TOKEN}
+  TOTP_REPLAY_PROTECTION: "on"
+  WEBAUTHN_RP_ID: ${WEBAUTHN_RP_IDS:-${SITE_HOST}}
+  WEBAUTHN_ORIGIN: ${WEB_ORIGINS:-https://${SITE_HOST}}
+  ADMIN_IP_ALLOWLIST: "*"     # test server: any IP, still password + passkey; restrict to your IP later
+
+x-build: &build
+  context: ../..
+  args: { NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin }
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment: { POSTGRES_USER: parley, POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}", POSTGRES_DB: parley }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "parley"], interval: 5s, retries: 20 }
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: [redisdata:/data]
+  migrate:
+    build: { <<: *build, args: { APP: api, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
+    image: parley-api
+    environment: *app-env
+    working_dir: /repo/apps/api
+    # Apply migrations, then load reference data (fiats, payment method types, limits). Both are idempotent.
+    command: ["sh", "-c", "node /repo/packages/db/dist/migrate.js && node --input-type=module -e \"import { createDb } from '@p2p/db'; import { seed } from '@p2p/core'; const h = createDb(process.env.DATABASE_URL); await seed(h.db); await h.close(); console.log('seeded');\""]
+    depends_on: { postgres: { condition: service_healthy } }
+  admin-bootstrap:
+    image: parley-api
+    environment:
+      <<: *app-env
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD}
+      ADMIN_KEY_RESET: ${ADMIN_KEY_RESET:-}   # from site.env: a new value removes that admin's passkeys once
+    working_dir: /repo/apps/api
+    # Creates the first superadmin once (no-op when it already exists); applies a requested passkey reset once.
+    command: ["node", "--input-type=module", "-e", "import { createDb } from '@p2p/db'; import { createAdmin, resetAdminKeysOnce } from '@p2p/core'; const email = (process.env.ADMIN_EMAIL || '').toLowerCase(); const h = createDb(process.env.DATABASE_URL); try { if (!email) console.log('no ADMIN_EMAIL'); else { await createAdmin({ db: h.db, now: () => new Date() }, null, { email, password: process.env.ADMIN_INITIAL_PASSWORD, roles: ['superadmin'] }); console.log('admin created'); } } catch (e) { const c = e?.code ?? e?.cause?.code; if (c === '23505') console.log('admin exists'); else throw e; } try { if (email && process.env.ADMIN_KEY_RESET) console.log('passkey reset', JSON.stringify(await resetAdminKeysOnce({ db: h.db, now: () => new Date() }, email, process.env.ADMIN_KEY_RESET))); } finally { await h.close(); }"]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+  api:
+    image: parley-api
+    restart: unless-stopped
+    environment: *app-env
+    ports: ["127.0.0.1:4000:4000"]
+    depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
+  worker:
+    build: { <<: *build, args: { APP: worker, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
+    image: parley-worker
+    restart: unless-stopped
+    environment: *app-env
+    depends_on: { migrate: { condition: service_completed_successfully }, redis: { condition: service_started } }
+  web:
+    build: { <<: *build, args: { APP: web, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
+    image: parley-web
+    restart: unless-stopped
+    environment: { API_URL: "http://api:4000", PORT: "3000" }
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on: [api]
+  admin:
+    build: { <<: *build, args: { APP: admin, NEXT_PUBLIC_WS_URL: "https://${SITE_HOST}", ADMIN_BASE_PATH: /admin } }
+    image: parley-admin
+    restart: unless-stopped
+    environment: { API_URL: "http://api:4000", PORT: "3001", ADMIN_IP_ALLOWLIST: "*", ADMIN_BASE_PATH: /admin }   # read again at start-up
+    ports: ["127.0.0.1:3001:3001"]
+    depends_on: [api]
+volumes: { pgdata: {}, redisdata: {} }

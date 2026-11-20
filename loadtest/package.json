@@ -1,0 +1,2 @@
+{ "name": "@p2p/loadtest", "private": true, "version": "0.0.0", "type": "module",
+  "dependencies": { "@p2p/core": "workspace:*", "@p2p/db": "workspace:*", "@p2p/providers": "workspace:*", "@p2p/shared": "workspace:*" } }

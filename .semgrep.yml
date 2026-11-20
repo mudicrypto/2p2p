@@ -1,0 +1,25 @@
+rules:
+  - id: no-float-money
+    languages: [typescript]
+    severity: ERROR
+    message: Money must be bigint minor units; do not parse amounts as floats (spec 0.1).
+    paths: { include: [packages/core/src, packages/shared/src, apps/api/src] }
+    pattern-either:
+      - pattern: parseFloat(...)
+      - pattern: Number($X.amount)
+      - pattern: Number($X.price)
+  - id: no-direct-ledger-mutation
+    languages: [typescript]
+    severity: ERROR
+    message: Ledger entries are append-only; write through postTx().
+    pattern-either:
+      - pattern: $DB.update(ledgerEntries)
+      - pattern: $DB.delete(ledgerEntries)
+      - pattern: $DB.update(auditLog)
+      - pattern: $DB.delete(auditLog)
+  - id: no-console-pii
+    languages: [typescript]
+    severity: WARNING
+    message: Log via redactPii() — never log raw request bodies or user PII.
+    paths: { include: [apps/api/src, apps/worker/src] }
+    pattern: console.$F(..., $REQ.body, ...)

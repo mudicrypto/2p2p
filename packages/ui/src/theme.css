@@ -1,0 +1,64 @@
+/* Shared design tokens. Dark is the default; [data-theme="light"] switches. */
+@theme {
+  /* parley — warm neutral, sand accent. Dark is the default. */
+  --color-background: #111214;
+  --color-foreground: #f4f2ee;
+  --color-card: #1c1d20;
+  --color-card-foreground: #f4f2ee;
+  --color-surface: #26272b;
+  --color-muted: #2a2b2f;
+  --color-muted-foreground: #a3a19c;
+  --color-border: #2e2f33;
+  --color-primary: #e2c38a;
+  --color-primary-2: #ecd4a6;
+  --color-primary-foreground: #1a1714;
+  --color-ink: #f3f1ec;
+  --color-ink-foreground: #161513;
+  --color-info: #a9bdf5;
+  --color-ring: #e2c38a;
+  --color-buy: #9fd49a;
+  --color-sell: #ec8670;
+  --color-warn: #e2c38a;
+  --color-glow: rgb(150 98 42 / 0.55);
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Thai', 'Noto Sans Bengali', 'Noto Sans Devanagari', sans-serif;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pulse-soft: pulse-soft 2s ease-in-out infinite;
+  @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+}
+:root[data-theme='light'] {
+  --color-background: #ebe9e4;
+  --color-foreground: #161513;
+  --color-card: #ffffff;
+  --color-card-foreground: #161513;
+  --color-surface: #ffffff;
+  --color-muted: #ecebe8;
+  --color-muted-foreground: #6f6c66;
+  --color-border: #e6e3dd;
+  --color-primary: #e2c38a;
+  --color-primary-2: #ecd4a6;
+  --color-primary-foreground: #1a1714;
+  --color-ink: #1a1815;
+  --color-ink-foreground: #ffffff;
+  --color-info: #a9bdf5;
+  --color-buy: #1f6b33;
+  --color-sell: #e0705a;
+  --color-warn: #b38634;
+  --color-glow: rgb(250 214 186 / 0.85);
+}
+html { color-scheme: dark; }
+html[data-theme='light'] { color-scheme: light; }
+body { background: var(--color-background); color: var(--color-foreground); font-family: var(--font-sans); font-feature-settings: 'cv11', 'ss01'; -webkit-font-smoothing: antialiased; }
+.num { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.bg-brand { background: var(--color-primary); color: var(--color-primary-foreground); }
+.glass { background: color-mix(in srgb, var(--color-card) 78%, transparent); backdrop-filter: blur(14px); }
+.hero-glow { background: radial-gradient(55% 60% at 50% 35%, var(--color-glow), transparent 72%); }
+::selection { background: rgb(226 195 138 / 0.4); }
+* { scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+.num-xl { font-variant-numeric: tabular-nums; letter-spacing: -0.045em; font-weight: 800; line-height: 0.95; }
+.text-gradient { color: var(--color-primary); }

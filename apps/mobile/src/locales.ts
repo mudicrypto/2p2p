@@ -1,0 +1,32 @@
+/** Static locale map (Metro cannot bundle template-literal dynamic imports). Source of truth: packages/i18n/locales. */
+import en from '../../../packages/i18n/locales/en.json';
+import es from '../../../packages/i18n/locales/es.json';
+import pt from '../../../packages/i18n/locales/pt.json';
+import ru from '../../../packages/i18n/locales/ru.json';
+import uk from '../../../packages/i18n/locales/uk.json';
+import tr from '../../../packages/i18n/locales/tr.json';
+import ar from '../../../packages/i18n/locales/ar.json';
+import fa from '../../../packages/i18n/locales/fa.json';
+import ur from '../../../packages/i18n/locales/ur.json';
+import hi from '../../../packages/i18n/locales/hi.json';
+import bn from '../../../packages/i18n/locales/bn.json';
+import id from '../../../packages/i18n/locales/id.json';
+import ms from '../../../packages/i18n/locales/ms.json';
+import vi from '../../../packages/i18n/locales/vi.json';
+import th from '../../../packages/i18n/locales/th.json';
+import fil from '../../../packages/i18n/locales/fil.json';
+import zh_Hant from '../../../packages/i18n/locales/zh-Hant.json';
+import ko from '../../../packages/i18n/locales/ko.json';
+import ja from '../../../packages/i18n/locales/ja.json';
+import fr from '../../../packages/i18n/locales/fr.json';
+import de from '../../../packages/i18n/locales/de.json';
+import it from '../../../packages/i18n/locales/it.json';
+import pl from '../../../packages/i18n/locales/pl.json';
+import sw from '../../../packages/i18n/locales/sw.json';
+import ha from '../../../packages/i18n/locales/ha.json';
+import yo from '../../../packages/i18n/locales/yo.json';
+
+export const MESSAGES = { en, es, pt, ru, uk, tr, ar, fa, ur, hi, bn, id, ms, vi, th, fil, 'zh-Hant': zh_Hant, ko, ja, fr, de, it, pl, sw, ha, yo } as unknown as Record<string, typeof en>;
+export const LOCALES = ['en', 'es', 'pt', 'ru', 'uk', 'tr', 'ar', 'fa', 'ur', 'hi', 'bn', 'id', 'ms', 'vi', 'th', 'fil', 'zh-Hant', 'ko', 'ja', 'fr', 'de', 'it', 'pl', 'sw', 'ha', 'yo'] as const;
+export const NATIVE_NAMES: Record<string, string> = { en: 'English', es: 'Español', pt: 'Português', ru: 'Русский', uk: 'Українська', tr: 'Türkçe', ar: 'العربية', fa: 'فارسی', ur: 'اردو', hi: 'हिन्दी', bn: 'বাংলা', id: 'Bahasa Indonesia', ms: 'Bahasa Melayu', vi: 'Tiếng Việt', th: 'ไทย', fil: 'Filipino', 'zh-Hant': '繁體中文', ko: '한국어', ja: '日本語', fr: 'Français', de: 'Deutsch', it: 'Italiano', pl: 'Polski', sw: 'Kiswahili', ha: 'Hausa', yo: 'Yorùbá' };
+export const RTL = new Set(['ar', 'fa', 'ur']);

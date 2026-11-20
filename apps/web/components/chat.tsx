@@ -1,0 +1,97 @@
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import { Paperclip, SendHorizontal, ShieldAlert, FileText, Languages } from 'lucide-react';
+import { Avatar, Button, Card, Input, cn } from '@p2p/ui';
+import { useI18n } from '../lib/i18n';
+import { useSession } from '../lib/session';
+import { api, ApiError } from '../lib/api';
+import { socket } from '../lib/socket';
+
+export async function uploadAttachment(orderId: string, file: File): Promise<string> {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  let bin = ''; for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+  const r = await api(`/orders/${orderId}/attachments`, { body: { contentType: file.type, dataBase64: btoa(bin) } });
+  return r.key as string;
+}
+
+export function Chat({ orderId, counterparty, className }: { orderId: string; counterparty?: { id: string; displayName?: string }; className?: string }) {
+  const { t, date, locale } = useI18n();
+  const { me } = useSession();
+  const [msgs, setMsgs] = useState<any[]>([]);
+  const [canTranslate, setCanTranslate] = useState(false);
+  const [tr, setTr] = useState<Record<string, string>>({});
+  useEffect(() => { api<{ chatTranslation?: boolean }>('/features').then((f) => setCanTranslate(!!f.chatTranslation)).catch(() => {}); }, []);
+  const translate = async (id: string) => { try { const r = await api(`/orders/${orderId}/messages/${id}/translate`, { body: { target: locale } }); setTr((x) => ({ ...x, [id]: r.text })); } catch { /* show original */ } };
+  const [text, setText] = useState('');
+  const [warn, setWarn] = useState('');
+  const [typing, setTyping] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const logRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    // Merge by id: history and live messages can overlap, and nothing may be dropped.
+    const merge = (incoming: any[]) => setMsgs((m) => {
+      const seen = new Set(m.map((x) => x.id));
+      const add = incoming.filter((x) => !seen.has(x.id));
+      return add.length ? [...m, ...add].sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt))) : m;
+    });
+    const fetchAll = () => api<any[]>(`/orders/${orderId}/messages`).then(merge).catch(() => {});
+    const s = socket();
+    // Join the order room, then load the history: anything sent before the join finished is in the history,
+    // anything after arrives live. Same again after a reconnect.
+    const joinAndFetch = () => { s.emit('join', `order:${orderId}`, () => void fetchAll()); };
+    void fetchAll(); joinAndFetch();
+    const onOrder = (p: any) => { if (p.type === 'chat.message') merge([p]); };
+    const onTyping = (p: any) => { if (p.userId !== me?.id) { setTyping(true); setTimeout(() => setTyping(false), 2000); } };
+    s.on('order', onOrder); s.on('typing', onTyping); s.on('connect', joinAndFetch);
+    return () => { s.off('order', onOrder); s.off('typing', onTyping); s.off('connect', joinAndFetch); };
+  }, [orderId, me?.id]);
+  useEffect(() => { logRef.current?.scrollTo({ top: logRef.current.scrollHeight, behavior: 'smooth' }); }, [msgs.length]);
+  const send = async (body: string, attachmentKey?: string) => {
+    setWarn('');
+    // Clear the box right away so anything typed while this message is sending isn't wiped when it returns.
+    if (body) setText('');
+    try {
+      const m = await api(`/orders/${orderId}/messages`, { body: { body, attachmentKey } });
+      setMsgs((x) => (x.some((y) => y.id === m.id) ? x : [...x, m]));
+    } catch (e) {
+      if (body) setText((cur) => cur || body); // put an unsent message back unless the user already typed something new
+      if (e instanceof ApiError && e.code === 'FORBIDDEN') setWarn(t('chat.blocked'));
+    }
+  };
+  const name = counterparty?.displayName ?? counterparty?.id?.slice(0, 8) ?? '';
+  return (
+    <Card className={cn('flex h-[520px] flex-col overflow-hidden lg:h-[calc(100vh-24rem)] lg:min-h-[420px] lg:max-h-[640px]', className)}>
+      <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+        <Avatar name={name || '?'} seed={counterparty?.id} size={36} online />
+        <div className="min-w-0 flex-1"><div className="truncate font-semibold">{name}</div><div className="text-xs text-muted-foreground">{typing ? <span className="text-primary">{t('chat.typing')}</span> : t('chat.title')}</div></div>
+      </div>
+      <div className="flex items-start gap-2 px-5 pt-3 text-[12px] leading-snug text-muted-foreground"><ShieldAlert size={14} className="mt-px shrink-0" />{t('ui.chatSafety')}</div>
+      <div ref={logRef} className="flex-1 space-y-2 overflow-y-auto px-4 py-4" data-testid="chat-log">
+        {msgs.map((m) => {
+          const mine = m.senderId === me?.id;
+          const system = !m.senderId;
+          if (system) return <div key={m.id} className="mx-auto max-w-[90%] rounded-full bg-muted px-3 py-1 text-center text-[11px] text-muted-foreground">{m.body}</div>;
+          return (
+            <div key={m.id} className={cn('flex', mine ? 'justify-end' : 'justify-start')}>
+              <div className={cn('max-w-[80%] rounded-[20px] px-4 py-2.5 text-[15px]', mine ? 'rounded-ee-md bg-ink text-ink-foreground' : 'rounded-es-md bg-muted')}>
+                {!mine && m.warning && <div className="mb-1 flex items-start gap-1.5 rounded-lg bg-sell/15 px-2 py-1 text-[12px] font-medium text-sell" data-testid="chat-scam-warning"><ShieldAlert size={13} className="mt-0.5 shrink-0" />{t(`ui.scam_${m.warning}`)}</div>}
+                {m.body && <div className="whitespace-pre-wrap break-words">{m.body}</div>}
+                {tr[m.id] && <div className="mt-1 whitespace-pre-wrap break-words border-t border-border/60 pt-1 text-[14px] italic" data-testid="chat-translation">{tr[m.id]}</div>}
+                {!mine && canTranslate && m.body && !tr[m.id] && <button type="button" className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground" onClick={() => translate(m.id)} data-testid="chat-translate"><Languages size={12} />{t('ui.translate')}</button>}
+                {m.attachmentKey && <a className="mt-1 flex items-center gap-1.5 underline-offset-2 hover:underline" target="_blank" rel="noreferrer" href={`/v1/orders/${orderId}/attachments?key=${encodeURIComponent(m.attachmentKey)}`}><FileText size={14} />{t('chat.attach')}</a>}
+                <div className={cn('mt-0.5 text-end text-[10px]', mine ? 'opacity-60' : 'text-muted-foreground')}>{date(m.createdAt)}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {warn && <div className="mx-4 mb-2 rounded-lg bg-sell/10 px-3 py-2 text-xs text-sell" role="alert" data-testid="chat-warning">{warn}</div>}
+      <form className="flex items-center gap-2 border-t border-border p-3" onSubmit={(e) => { e.preventDefault(); if (text.trim()) void send(text); }}>
+        <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden data-testid="chat-file" onChange={async (e) => { const f = e.target.files?.[0]; if (f) await send('', await uploadAttachment(orderId, f)); e.target.value = ''; }} />
+        <Button type="button" variant="ghost" size="icon" onClick={() => fileRef.current?.click()} aria-label={t('chat.attach')}><Paperclip size={18} /></Button>
+        <Input data-testid="chat-input" className="flex-1 rounded-full" value={text} placeholder={t('chat.placeholder')} onChange={(e) => { setText(e.target.value); socket().emit('typing', orderId); }} />
+        <Button type="submit" size="icon" variant="ink" data-testid="chat-send" aria-label={t('chat.send')} disabled={!text.trim()}><SendHorizontal size={18} className="rtl:-scale-x-100" /></Button>
+      </form>
+    </Card>
+  );
+}

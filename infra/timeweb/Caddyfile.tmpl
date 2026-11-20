@@ -1,0 +1,17 @@
+{SITE} {
+	encode gzip zstd
+	handle_path /_ops/{OPS_TOKEN}/* {
+		root * /opt/parley/www
+		file_server
+	}
+	@api path /v1/* /socket.io/* /healthz
+	handle @api {
+		reverse_proxy 127.0.0.1:4000
+	}
+	handle /admin* {
+		reverse_proxy 127.0.0.1:3001
+	}
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}

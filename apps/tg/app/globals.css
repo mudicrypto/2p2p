@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/inter';
+@import '../../../packages/ui/src/theme.css';
+@source '../../../packages/ui/src';
+@source '../../web/app';
+@source '../../web/components';
