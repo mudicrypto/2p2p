@@ -85,3 +85,24 @@ describe('M6 admin API', () => {
     void f2;
   });
 });
+
+describe('admin passkeys', () => {
+  it('a second passkey needs a session already confirmed with the first one', async () => {
+    const email = `${uniq()}@admin.io`;
+    await createAdmin(t.ctx, null, { email, password: 'admin-password-123', roles: ['support'] });
+    const key = new SoftAuthenticator(); const phone = new SoftAuthenticator();
+    let l = await t.http.post('/v1/admin/auth/login').send({ email, password: 'admin-password-123' }).expect(200);
+    const reg = await t.http.post('/v1/admin/auth/register-key/options').set('x-admin-token', l.body.token).expect(200);
+    await t.http.post('/v1/admin/auth/register-key').set('x-admin-token', l.body.token).send({ response: key.register(reg.body) }).expect(200);
+    // Password alone can't add another key.
+    l = await t.http.post('/v1/admin/auth/login').send({ email, password: 'admin-password-123' }).expect(200);
+    expect(l.body.needsRegistration).toBe(false);
+    await t.http.post('/v1/admin/auth/register-key/options').set('x-admin-token', l.body.token).expect(409);
+    // After confirming with the first key, a second one can be added and then used.
+    await t.http.post('/v1/admin/auth/webauthn').set('x-admin-token', l.body.token).send({ response: key.assert(l.body.webauthnOptions) }).expect(200);
+    const reg2 = await t.http.post('/v1/admin/auth/register-key/options').set('x-admin-token', l.body.token).expect(200);
+    await t.http.post('/v1/admin/auth/register-key').set('x-admin-token', l.body.token).send({ response: phone.register(reg2.body) }).expect(200);
+    const l2 = await t.http.post('/v1/admin/auth/login').send({ email, password: 'admin-password-123' }).expect(200);
+    await t.http.post('/v1/admin/auth/webauthn').set('x-admin-token', l2.body.token).send({ response: phone.assert(l2.body.webauthnOptions) }).expect(200);
+  });
+});

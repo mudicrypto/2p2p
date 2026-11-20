@@ -115,17 +115,19 @@ export async function adminWebauthn(ctx: Ctx, token: string, response: unknown, 
   await audit(ctx.db, { actorType: 'admin', actorId: s.admin.id, action: 'admin.login_webauthn', ip });
   return { ok: true, roles: s.admin.roles };
 }
-/** First-time key enrolment for an admin (requires a password-authenticated session from an allowed IP). */
+/** Key enrolment: the first key needs a password-authenticated session; extra keys (another device or address)
+ *  need a session that is already confirmed with an existing key. */
 export async function adminKeyRegistrationOptions(ctx: Ctx, token: string, origin?: string) {
   const s = await adminSessionRaw(ctx, token);
   if (!s) throw new DomainError('UNAUTHORIZED', 'session expired');
-  if (await hasAdminKey(ctx, s.admin.id)) throw new DomainError('CONFLICT', 'key already enrolled; ask a superadmin to reset');
+  if (!s.session.webauthnAt && (await hasAdminKey(ctx, s.admin.id))) throw new DomainError('CONFLICT', 'key already enrolled; sign in with it to add another');
   return passkeyRegistrationOptions(ctx, { kind: 'admin', id: s.admin.id, name: s.admin.email }, origin);
 }
 export async function adminKeyRegister(ctx: Ctx, token: string, response: unknown) {
   const s = await adminSessionRaw(ctx, token);
   if (!s) throw new DomainError('UNAUTHORIZED', 'session expired');
-  if (await hasAdminKey(ctx, s.admin.id)) throw new DomainError('CONFLICT', 'key already enrolled');
+  if (!s.session.webauthnAt && (await hasAdminKey(ctx, s.admin.id))) throw new DomainError('CONFLICT', 'key already enrolled');
+  if (s.session.webauthnAt) await audit(ctx.db, { actorType: 'admin', actorId: s.admin.id, action: 'admin.key_added' });
   return passkeyRegister(ctx, { kind: 'admin', id: s.admin.id }, response);
 }
 async function adminSessionRaw(ctx: Ctx, token: string): Promise<AdminSession | null> {
