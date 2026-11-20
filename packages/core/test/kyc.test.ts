@@ -47,7 +47,11 @@ describe('M4 KYC and limits', () => {
     expect(l1.daily).toBe(1_000_000n);
     expect(await getKycName(ctx.db, u.id)).toBe('Ana Maria Silva');
     const [app] = await ctx.db.select().from(kycApplications).where(eq(kycApplications.providerRef, s.providerRef));
-    expect(app.verifiedFullNameEnc).not.toContain('Ana');
+    // Stored as an encrypted envelope, never as the name itself (or its plain base64). A short substring check
+    // would be flaky: random ciphertext can contain any three letters by chance.
+    expect(app.verifiedFullNameEnc).toMatch(/^v1\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/);
+    expect(app.verifiedFullNameEnc).not.toContain('Ana Maria Silva');
+    expect(app.verifiedFullNameEnc).not.toContain(Buffer.from('Ana Maria Silva').toString('base64url'));
     const [a] = await ctx.db.select().from(auditLog).where(and(eq(auditLog.action, 'user.tier_changed'), eq(auditLog.subjectId, u.id)));
     expect(a.before).toEqual({ tier: 0 });
     expect((a.after as any).tier).toBe(1);
