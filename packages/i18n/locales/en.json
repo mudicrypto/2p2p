@@ -721,6 +721,18 @@
   "tgUnavailable": "Not set up on this server yet.",
   "tgConnect": "Connect Telegram",
   "tgDisconnect": "Disconnect",
-  "agreeMerchantRules": "By posting you agree to the"
+  "agreeMerchantRules": "By posting you agree to the",
+  "forgotPw": "Forgot password?",
+  "forgotTitle": "Reset your password",
+  "forgotDesc": "Enter the email of your account. We'll send you a link to choose a new password.",
+  "forgotSend": "Send reset link",
+  "forgotSent": "If an account uses this email, a reset link is on its way. Check your inbox and spam folder. The link works for 1 hour.",
+  "repeatPassword": "Repeat new password",
+  "passwordsDiffer": "The two passwords don't match.",
+  "setPassword": "Save new password",
+  "resetDone": "Your password was changed and you were signed out on all devices. Log in with your new password.",
+  "emailUnverified": "Your email isn't confirmed yet. Open the link we sent you, or get a new one.",
+  "resendEmail": "Resend email",
+  "emailSent": "Sent. Check your inbox and spam folder."
  }
 }

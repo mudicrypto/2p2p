@@ -721,6 +721,18 @@
   "tgUnavailable": "Belum diatur di server ini.",
   "tgConnect": "Hubungkan Telegram",
   "tgDisconnect": "Putuskan",
-  "agreeMerchantRules": "Dengan memasang iklan Anda menyetujui"
+  "agreeMerchantRules": "Dengan memasang iklan Anda menyetujui",
+  "forgotPw": "Lupa kata sandi?",
+  "forgotTitle": "Atur ulang kata sandi",
+  "forgotDesc": "Masukkan email akun Anda. Kami akan mengirim tautan untuk memilih kata sandi baru.",
+  "forgotSend": "Kirim tautan",
+  "forgotSent": "Jika ada akun dengan email ini, tautan sedang dikirim. Periksa kotak masuk dan folder spam. Tautan berlaku 1 jam.",
+  "repeatPassword": "Ulangi kata sandi baru",
+  "passwordsDiffer": "Kedua kata sandi tidak cocok.",
+  "setPassword": "Simpan kata sandi baru",
+  "resetDone": "Kata sandi diubah dan Anda keluar dari semua perangkat. Masuk dengan kata sandi baru.",
+  "emailUnverified": "Email Anda belum dikonfirmasi. Buka tautan yang kami kirim atau minta yang baru.",
+  "resendEmail": "Kirim ulang",
+  "emailSent": "Terkirim. Periksa kotak masuk dan spam."
  }
 }

@@ -67,6 +67,7 @@ export default function Account() {
         </div>
       </Card>
       <ErrorText error={err} />
+      {me.email && !me.emailVerified && <EmailUnverified />}
 
       {/* Verification */}
       <section className="space-y-3">
@@ -190,5 +191,27 @@ function Row({ icon, title, desc, children }: { icon: React.ReactNode; title: Re
       </div>
       <div className="flex shrink-0 justify-start sm:justify-end">{children}</div>
     </div>
+  );
+}
+
+/** Shown until the email is confirmed; sends a fresh link (test mode without email also shows it on screen). */
+function EmailUnverified() {
+  const { t } = useI18n();
+  const L = useL();
+  const [state, setState] = useState<'idle' | 'busy' | 'sent'>('idle');
+  const [dev, setDev] = useState('');
+  const [err, setErr] = useState<unknown>(null);
+  const resend = async () => {
+    setErr(null); setState('busy');
+    try { const r = await api('/auth/verify-email/resend', { body: {} }); setDev(r.devEmailToken ?? ''); setState('sent'); } catch (e) { setErr(e); setState('idle'); }
+  };
+  return (
+    <Card className="flex flex-wrap items-center gap-3 border-warn/50 bg-warn/10 p-4" data-testid="email-unverified">
+      <Mail size={18} className="shrink-0 text-warn" />
+      <p className="min-w-0 flex-1 text-sm">{state === 'sent' ? t('ui.emailSent') : t('ui.emailUnverified')}</p>
+      {dev && <Link data-testid="dev-verify-link" className="text-sm font-medium text-primary hover:underline" href={L(`/verify-email?token=${encodeURIComponent(dev)}`)}>{t('auth.verifyEmail')} (dev)</Link>}
+      {state !== 'sent' && <Button size="sm" variant="outline" loading={state === 'busy'} onClick={resend} data-testid="resend-email">{t('ui.resendEmail')}</Button>}
+      <ErrorText error={err} />
+    </Card>
   );
 }

@@ -721,6 +721,18 @@
   "tgUnavailable": "Non ancora configurato su questo server.",
   "tgConnect": "Collega Telegram",
   "tgDisconnect": "Scollega",
-  "agreeMerchantRules": "Pubblicando accetti le"
+  "agreeMerchantRules": "Pubblicando accetti le",
+  "forgotPw": "Password dimenticata?",
+  "forgotTitle": "Reimposta la password",
+  "forgotDesc": "Inserisci l'email del tuo account. Ti invieremo un link per scegliere una nuova password.",
+  "forgotSend": "Invia link",
+  "forgotSent": "Se un account usa questa email, il link è in arrivo. Controlla la posta in arrivo e lo spam. Il link vale 1 ora.",
+  "repeatPassword": "Ripeti la nuova password",
+  "passwordsDiffer": "Le due password non coincidono.",
+  "setPassword": "Salva la nuova password",
+  "resetDone": "La password è stata cambiata e sei uscito da tutti i dispositivi. Accedi con la nuova password.",
+  "emailUnverified": "La tua email non è ancora confermata. Apri il link che ti abbiamo inviato o richiedine uno nuovo.",
+  "resendEmail": "Invia di nuovo",
+  "emailSent": "Inviato. Controlla la posta in arrivo e lo spam."
  }
 }

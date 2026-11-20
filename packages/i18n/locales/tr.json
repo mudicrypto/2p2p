@@ -721,6 +721,18 @@
   "tgUnavailable": "Bu sunucuda henüz kurulmadı.",
   "tgConnect": "Telegram'ı bağla",
   "tgDisconnect": "Bağlantıyı kes",
-  "agreeMerchantRules": "Yayınlayarak şunları kabul edersiniz:"
+  "agreeMerchantRules": "Yayınlayarak şunları kabul edersiniz:",
+  "forgotPw": "Şifreni mi unuttun?",
+  "forgotTitle": "Şifreni sıfırla",
+  "forgotDesc": "Hesabının e-postasını gir. Yeni şifre belirlemen için bir bağlantı göndereceğiz.",
+  "forgotSend": "Bağlantıyı gönder",
+  "forgotSent": "Bu e-postayla bir hesap varsa bağlantı yolda. Gelen kutunu ve spam klasörünü kontrol et. Bağlantı 1 saat geçerli.",
+  "repeatPassword": "Yeni şifreyi tekrarla",
+  "passwordsDiffer": "İki şifre eşleşmiyor.",
+  "setPassword": "Yeni şifreyi kaydet",
+  "resetDone": "Şifren değişti ve tüm cihazlarda oturumun kapatıldı. Yeni şifrenle giriş yap.",
+  "emailUnverified": "E-postan henüz onaylanmadı. Gönderdiğimiz bağlantıyı aç veya yenisini iste.",
+  "resendEmail": "Tekrar gönder",
+  "emailSent": "Gönderildi. Gelen kutunu ve spam klasörünü kontrol et."
  }
 }

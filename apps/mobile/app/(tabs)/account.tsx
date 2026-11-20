@@ -51,6 +51,7 @@ export default function Account() {
         <Avatar name={name} seed={me.id} size={60} />
         <View style={{ flex: 1, gap: 4 }}><Text size="h3" numberOfLines={1}>{name}</Text><Row><Badge label={t('profile.tier', { tier })} tone="info" />{me.totpEnabled && <Badge label="2FA" tone="success" />}</Row></View>
       </Row>
+      {me.email && me.emailVerified === false && <EmailUnverified />}
       <Card style={{ gap: space(3) }}>
         <Row style={{ justifyContent: 'space-between' }}><Text weight="700">{t('ui.verification')}</Text><Text size="small" tone="sub">{t('ui.level', { n: tier })}</Text></Row>
         <Row style={{ gap: 6 }}>{[1, 2, 3].map((l) => <View key={l} style={{ flex: 1, height: 6, borderRadius: 3, backgroundColor: l <= tier ? c.primary : c.muted }} />)}</Row>
@@ -89,5 +90,28 @@ export default function Account() {
       <Button variant="soft" icon="log-out-outline" title={t('nav.logout')} onPress={signOut} />
       <Press onPress={() => void Linking.openURL(`${WEB_URL}/${locale}/legal/delete-account`)} testID="delete-account"><Text size="small" tone="sell" style={{ textAlign: 'center', paddingVertical: space(2) }}>{t('ui.deleteAccount')}</Text></Press>
     </ScrollView>
+  );
+}
+
+/** Until the email is confirmed: send a fresh link (test mode without email confirms right away). */
+function EmailUnverified() {
+  const { t } = useI18n();
+  const { refresh } = useApp();
+  const [state, setState] = useState<'idle' | 'busy' | 'sent'>('idle');
+  const [err, setErr] = useState<string | null>(null);
+  const resend = async () => {
+    setErr(null); setState('busy');
+    try {
+      const r = await api.resendVerification();
+      if (r.devEmailToken) { await api.verifyEmail(r.devEmailToken); await refresh(); return; }
+      setState('sent');
+    } catch (e) { setErr(errText(t, e)); setState('idle'); }
+  };
+  return (
+    <Card style={{ gap: space(2) }} testID="email-unverified">
+      <Notice tone="warn" text={state === 'sent' ? t('ui.emailSent') : t('ui.emailUnverified')} />
+      {err && <Notice tone="error" text={err} />}
+      {state !== 'sent' && <Button title={t('ui.resendEmail')} variant="outline" icon="mail" loading={state === 'busy'} onPress={resend} />}
+    </Card>
   );
 }

@@ -721,6 +721,18 @@
   "tgUnavailable": "Pas encore configuré sur ce serveur.",
   "tgConnect": "Connecter Telegram",
   "tgDisconnect": "Déconnecter",
-  "agreeMerchantRules": "En publiant, vous acceptez les"
+  "agreeMerchantRules": "En publiant, vous acceptez les",
+  "forgotPw": "Mot de passe oublié ?",
+  "forgotTitle": "Réinitialiser le mot de passe",
+  "forgotDesc": "Saisissez l'e-mail de votre compte. Nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+  "forgotSend": "Envoyer le lien",
+  "forgotSent": "Si un compte utilise cet e-mail, le lien est en route. Vérifiez votre boîte de réception et vos spams. Le lien est valable 1 heure.",
+  "repeatPassword": "Répétez le nouveau mot de passe",
+  "passwordsDiffer": "Les deux mots de passe ne correspondent pas.",
+  "setPassword": "Enregistrer le nouveau mot de passe",
+  "resetDone": "Votre mot de passe a été modifié et vous avez été déconnecté de tous les appareils. Connectez-vous avec le nouveau mot de passe.",
+  "emailUnverified": "Votre e-mail n'est pas encore confirmé. Ouvrez le lien envoyé ou demandez-en un nouveau.",
+  "resendEmail": "Renvoyer l'e-mail",
+  "emailSent": "Envoyé. Vérifiez votre boîte de réception et vos spams."
  }
 }

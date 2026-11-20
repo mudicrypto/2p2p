@@ -2,7 +2,7 @@ import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import { createDb } from '@p2p/db';
 import { createProviders } from '@p2p/providers';
-import { redactPii, type Ctx, type DomainEvent } from '@p2p/core';
+import { redactPii, wireEmail, type Ctx, type DomainEvent } from '@p2p/core';
 import { JOBS, SCHEDULES } from './jobs';
 
 export const QUEUE = 'p2p';
@@ -16,6 +16,7 @@ async function main() {
     // Worker-originated events are relayed to API instances (which own the sockets) via Redis pub/sub.
     events: { publish: (e: DomainEvent) => void pub.publish('p2p:events', JSON.stringify(e, (_k, v) => (typeof v === 'bigint' ? v.toString() : v))) },
   };
+  wireEmail(ctx);
   const queue = new Queue(QUEUE, { connection });
   for (const s of SCHEDULES) await queue.upsertJobScheduler(s.name, { every: s.everyMs }, { name: s.name });
   const worker = new Worker(QUEUE, async (job) => {

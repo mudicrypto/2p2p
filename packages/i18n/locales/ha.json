@@ -721,6 +721,18 @@
   "tgUnavailable": "Ba a saita shi a wannan sabar ba tukuna.",
   "tgConnect": "Haɗa Telegram",
   "tgDisconnect": "Cire haɗi",
-  "agreeMerchantRules": "Ta hanyar wallafawa ka yarda da"
+  "agreeMerchantRules": "Ta hanyar wallafawa ka yarda da",
+  "forgotPw": "Ka manta kalmar sirri?",
+  "forgotTitle": "Sake saita kalmar sirrinka",
+  "forgotDesc": "Shigar da imel ɗin asusunka. Za mu aiko maka hanyar haɗi don zaɓar sabuwar kalmar sirri.",
+  "forgotSend": "Aika hanyar haɗi",
+  "forgotSent": "Idan akwai asusu da wannan imel, an aiko hanyar haɗi. Duba akwatin saƙo da babban fayil na spam. Hanyar haɗin tana aiki na awa 1.",
+  "repeatPassword": "Maimaita sabuwar kalmar sirri",
+  "passwordsDiffer": "Kalmomin sirri biyu ba su yi daidai ba.",
+  "setPassword": "Ajiye sabuwar kalmar sirri",
+  "resetDone": "An canza kalmar sirrinka kuma an fitar da kai daga dukkan na'urori. Shiga da sabuwar kalmar sirri.",
+  "emailUnverified": "Ba a tabbatar da imel ɗinka ba tukuna. Buɗe hanyar haɗin da muka aiko ko nemi sabo.",
+  "resendEmail": "Sake aikawa",
+  "emailSent": "An aika. Duba akwatin saƙo da spam."
  }
 }

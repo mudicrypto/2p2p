@@ -9,7 +9,7 @@ import Redis from 'ioredis';
 import { Queue } from 'bullmq';
 import { createDb } from '@p2p/db';
 import { createProviders, type Providers } from '@p2p/providers';
-import type { Ctx, DomainEvent, EventSink } from '@p2p/core';
+import { wireEmail, type Ctx, type DomainEvent, type EventSink } from '@p2p/core';
 import { AppModule } from './app.module';
 import { RealtimeGateway } from './modules/realtime.gateway';
 import { httpMetricsMiddleware, metricsSink } from './common/metrics';
@@ -40,6 +40,7 @@ export async function createApp(opts: AppOptions = {}) {
   const redis = redisUrl ? new Redis(redisUrl, { maxRetriesPerRequest: 2 }) : null;
   const sink = new CompositeSink();
   const ctx: Ctx = { db: dbh.db, read: dbh.read, providers: opts.providers ?? createProviders(), events: sink, now: () => new Date() };
+  wireEmail(ctx); // email goes through Resend once a key is set (server env or admin panel)
   // Timers/notifications go to BullMQ (apps/worker). Without Redis, the worker sweeper is the fallback.
   const queue = redis ? new Queue('p2p', { connection: redis.duplicate({ maxRetriesPerRequest: null }) }) : null;
   if (queue) ctx.jobs = { enqueue: async (name, data, o) => { await queue.add(name, data, { delay: o?.delayMs, jobId: o?.jobId, removeOnComplete: 1000, removeOnFail: 5000 }); } };

@@ -33,7 +33,7 @@ export default function Login() {
     <AuthShell title={t('ui.welcome')} step={2} footer={<>{t('auth.noAccount')} <Link className="font-semibold underline underline-offset-4" href={L('/signup')}>{t('nav.signup')}</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         <div><Label htmlFor="email">{t('auth.email')}</Label><Input id="email" type="email" className="h-12" autoComplete="username" value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} required /></div>
-        <div><Label htmlFor="password">{t('auth.password')}</Label><Input id="password" type="password" className="h-12" autoComplete="current-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} required /></div>
+        <div><div className="flex items-baseline justify-between"><Label htmlFor="password">{t('auth.password')}</Label><Link href={L('/forgot-password')} className="text-xs font-medium text-muted-foreground hover:text-foreground hover:underline" data-testid="forgot-link">{t('ui.forgotPw')}</Link></div><Input id="password" type="password" className="h-12" autoComplete="current-password" value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} required /></div>
         {need2fa && <div><Label htmlFor="totp">{t('auth.totp')}</Label><Input id="totp" inputMode="numeric" maxLength={6} className="h-12 text-center font-mono text-lg tracking-[0.4em]" autoComplete="one-time-code" value={f.totp} onChange={(e) => setF({ ...f, totp: e.target.value })} autoFocus /></div>}
         <ErrorText error={err} />
         <Button type="submit" size="lg" className="w-full" loading={busy} data-testid="login-submit">{t('auth.login')}</Button>

@@ -1,6 +1,6 @@
 import type { Notifier, NotifyMessage } from '../interfaces';
 import { httpJson, requireEnv } from './http';
-import { renderTemplate } from '../templates';
+import { renderEmail, renderTemplate } from '../templates';
 
 /** Telegram Bot API notifier. `to` = chat id (tg_id). */
 export class TelegramNotifier implements Notifier {
@@ -23,6 +23,30 @@ export class PostmarkNotifier implements Notifier {
     });
     return { id: r.MessageID };
   }
+}
+/** Resend transactional email. The key and sender can come from the environment or be looked up at send time
+ *  (admins can paste the key in the admin panel). Without a key the message goes to `fallback`. */
+export class ResendNotifier implements Notifier {
+  constructor(private settings: () => Promise<{ key?: string; from?: string } | null> = async () => ({ key: process.env.RESEND_API_KEY, from: process.env.EMAIL_FROM }), private fallback?: Notifier) {}
+  async send(msg: NotifyMessage) {
+    const s = await this.settings();
+    if (!s?.key) { if (this.fallback) return this.fallback.send(msg); throw new Error('email is not configured'); }
+    return sendResend(s.key, s.from || process.env.EMAIL_FROM || 'parley <no-reply@parley.markets>', msg);
+  }
+}
+export async function sendResend(key: string, from: string, msg: NotifyMessage): Promise<{ id: string }> {
+  const e = renderEmail(msg);
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 10_000);
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST', signal: ctrl.signal,
+      headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ from, to: [msg.to], subject: e.subject, text: e.text, html: e.html }),
+    });
+    const body = (await res.json().catch(() => ({}))) as { id?: string; message?: string; name?: string };
+    if (!res.ok) throw new Error(`Resend ${res.status}: ${body.message ?? body.name ?? 'error'}`);
+    return { id: body.id ?? '' };
+  } finally { clearTimeout(t); }
 }
 /** Twilio SMS. */
 export class TwilioNotifier implements Notifier {

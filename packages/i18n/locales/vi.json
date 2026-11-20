@@ -721,6 +721,18 @@
   "tgUnavailable": "Chưa được thiết lập trên máy chủ này.",
   "tgConnect": "Kết nối Telegram",
   "tgDisconnect": "Ngắt kết nối",
-  "agreeMerchantRules": "Khi đăng, bạn đồng ý với"
+  "agreeMerchantRules": "Khi đăng, bạn đồng ý với",
+  "forgotPw": "Quên mật khẩu?",
+  "forgotTitle": "Đặt lại mật khẩu",
+  "forgotDesc": "Nhập email tài khoản của bạn. Chúng tôi sẽ gửi liên kết để bạn chọn mật khẩu mới.",
+  "forgotSend": "Gửi liên kết",
+  "forgotSent": "Nếu có tài khoản dùng email này, liên kết đang được gửi. Hãy kiểm tra hộp thư đến và thư rác. Liên kết có hiệu lực trong 1 giờ.",
+  "repeatPassword": "Nhập lại mật khẩu mới",
+  "passwordsDiffer": "Hai mật khẩu không khớp.",
+  "setPassword": "Lưu mật khẩu mới",
+  "resetDone": "Mật khẩu đã được đổi và bạn đã đăng xuất trên mọi thiết bị. Hãy đăng nhập bằng mật khẩu mới.",
+  "emailUnverified": "Email của bạn chưa được xác nhận. Hãy mở liên kết chúng tôi đã gửi hoặc nhận liên kết mới.",
+  "resendEmail": "Gửi lại",
+  "emailSent": "Đã gửi. Hãy kiểm tra hộp thư đến và thư rác."
  }
 }

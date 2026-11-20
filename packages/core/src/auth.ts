@@ -57,7 +57,9 @@ export async function signupEmail(ctx: Ctx, input: { email: string; password: st
   const u = await screenAndCreate(ctx, { email, passwordHash: await hashPassword(input.password), country: input.country.toUpperCase(), locale: input.locale ?? 'en' }, meta, 'user.signup_email');
   await applyReferral(ctx.db, u.id, input.ref);
   const token = await issueToken(ctx, u.id, 'email_verify', email, 24 * 3600_000, randomToken(24));
-  await ctx.providers.notifier.send({ channel: 'email', to: email, template: 'email_verify', params: { link: `${(process.env.WEB_ORIGIN ?? '').split(',')[0]}/verify-email?token=${token}` } });
+  // A delivery problem must not fail the signup: the user can ask for a new link from their account.
+  await ctx.providers.notifier.send({ channel: 'email', to: email, template: 'email_verify', params: { link: `${(process.env.WEB_ORIGIN ?? '').split(',')[0]}/verify-email?token=${token}` } })
+    .catch((e: Error) => console.error(`[email] email_verify not sent: ${e.message}`));
   return { user: u, emailToken: token };
 }
 

@@ -721,6 +721,18 @@
   "tgUnavailable": "Jeszcze nie skonfigurowano na tym serwerze.",
   "tgConnect": "Połącz Telegram",
   "tgDisconnect": "Rozłącz",
-  "agreeMerchantRules": "Publikując akceptujesz"
+  "agreeMerchantRules": "Publikując akceptujesz",
+  "forgotPw": "Nie pamiętasz hasła?",
+  "forgotTitle": "Zresetuj hasło",
+  "forgotDesc": "Podaj e-mail swojego konta. Wyślemy link do ustawienia nowego hasła.",
+  "forgotSend": "Wyślij link",
+  "forgotSent": "Jeśli konto używa tego e-maila, link jest już w drodze. Sprawdź skrzynkę odbiorczą i spam. Link działa przez 1 godzinę.",
+  "repeatPassword": "Powtórz nowe hasło",
+  "passwordsDiffer": "Hasła nie są takie same.",
+  "setPassword": "Zapisz nowe hasło",
+  "resetDone": "Hasło zostało zmienione, wylogowano Cię na wszystkich urządzeniach. Zaloguj się nowym hasłem.",
+  "emailUnverified": "Twój e-mail nie jest jeszcze potwierdzony. Otwórz wysłany link lub poproś o nowy.",
+  "resendEmail": "Wyślij ponownie",
+  "emailSent": "Wysłano. Sprawdź skrzynkę i spam."
  }
 }

@@ -32,6 +32,12 @@ export const SECTIONS: Section[] = [
   { key: 'rewards', title: 'Invite rewards fund (USDT)', roles: ['finance'], list: '/rewards/USDT', actions: [
     { label: 'Fund from fees', method: 'POST', path: () => '/rewards/USDT/fund', body: () => ({ amount: ask('Amount of USDT to move from collected fees into the rewards fund') }) },
   ] },
+  { key: 'email', title: 'Email sending (Resend)', roles: ['superadmin'], list: '/email', actions: [
+    { label: 'Set API key', method: 'PUT', path: () => '/email', body: () => ({ apiKey: ask('Paste the Resend API key (starts with re_). It is stored encrypted and never shown again.') }) },
+    { label: 'Set sender', method: 'PUT', path: () => '/email', body: () => ({ from: ask('Sender, e.g.  parley <no-reply@parley.markets>  (the domain must be verified in Resend)') }) },
+    { label: 'Send test email', method: 'POST', path: () => '/email/test', body: () => ({ to: ask('Send a test email to which address?') }) },
+    { label: 'Remove key', method: 'POST', path: () => '/email/remove', danger: true },
+  ] },
   { key: 'otc', title: 'Large trade requests', roles: ['support', 'finance', 'compliance'], list: '/otc-requests?status=open,contacted', actions: [
     { label: 'Mark contacted', method: 'POST', path: (r) => `/otc-requests/${r.id}/status`, body: () => ({ status: 'contacted' }) },
     { label: 'Close', method: 'POST', path: (r) => `/otc-requests/${r.id}/status`, body: () => ({ status: 'closed' }) },

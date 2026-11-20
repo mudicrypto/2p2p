@@ -35,6 +35,8 @@ export function createApi(baseUrl: string, getToken: () => string | null | Promi
     logout: () => call('/auth/logout', { body: {} }),
     signup: (email: string, password: string, country: string, locale: string, ref?: string) => call<{ user: any; devEmailToken?: string }>('/auth/signup', { body: { email, password, country, locale, deviceFingerprint: fingerprint, ...(ref ? { ref } : {}) } }),
     verifyEmail: (token: string) => call('/auth/verify-email', { body: { token } }),
+    resendVerification: () => call<{ sent: boolean; alreadyVerified: boolean; devEmailToken?: string }>('/auth/verify-email/resend', { body: {} }),
+    forgotPassword: (email: string) => call<{ ok: true }>('/auth/password/forgot', { body: { email } }),
     status: () => call<{ overall: string; testMode?: boolean }>('/status'),
     fiats: () => call<Array<{ code: string }>>('/fiats'),
     paymentMethodTypes: (fiat?: string) => call<Array<{ code: string; name: string; fieldsSchema?: Array<{ name: string }> }>>(`/payment-method-types${fiat ? `?fiat=${fiat}` : ''}`),

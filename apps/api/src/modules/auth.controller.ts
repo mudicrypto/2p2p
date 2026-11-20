@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import {
   signupEmail, verifyEmail, login, logout, startPhoneVerification, verifyPhone, totpSetup, totpConfirm, telegramLogin,
   publicUser, passkeyRegistrationOptions, passkeyRegister, passkeyAuthOptions, passkeyLogin, changePassword, randomToken, type User,
+  emailConfigured, resendVerificationEmail, requestPasswordReset, resetPassword,
 } from '@p2p/core';
 import { SignupEmailSchema, LoginSchema, VerifyEmailSchema, PhoneStartSchema, PhoneVerifySchema, TelegramAuthSchema, TotpConfirmSchema } from '@p2p/shared';
 import { z } from 'zod';
@@ -27,7 +28,26 @@ export class AuthController {
   @Public() @Post('signup') @RateLimit(10)
   async signup(@Body(new Zod(SignupEmailSchema, 'SignupEmail')) b: z.infer<typeof SignupEmailSchema>, @Meta() meta: any) {
     const { user, emailToken } = await signupEmail(this.ctx, b, meta);
-    return { user: publicUser(user), devEmailToken: this.ctx.providers.mode === 'mock' ? emailToken : undefined };
+    return { user: publicUser(user), devEmailToken: await this.devToken(emailToken) };
+  }
+  /** Test mode only, and only while no real email is set up: the link is shown on screen instead. */
+  private async devToken(token: string | undefined) {
+    return token && this.ctx.providers.mode === 'mock' && !(await emailConfigured(this.ctx)) ? token : undefined;
+  }
+
+  @Post('verify-email/resend') @HttpCode(200) @RateLimit(5)
+  async resendVerify(@CurrentUser() u: User) {
+    const r = await resendVerificationEmail(this.ctx, u);
+    return { sent: !r.alreadyVerified, alreadyVerified: r.alreadyVerified, devEmailToken: await this.devToken(r.token) };
+  }
+
+  @Public() @NoIdempotency() @Post('password/forgot') @HttpCode(200) @RateLimit(5)
+  forgot(@Body(new Zod(z.object({ email: z.string().email().max(254) }), 'ForgotPassword')) b: { email: string }, @Meta() meta: any) {
+    return requestPasswordReset(this.ctx, b.email, meta);
+  }
+  @Public() @NoIdempotency() @Post('password/reset') @HttpCode(200) @RateLimit(10)
+  reset(@Body(new Zod(z.object({ token: z.string().min(16).max(128), password: z.string().min(10).max(256) }), 'ResetPassword')) b: { token: string; password: string }, @Meta() meta: any) {
+    return resetPassword(this.ctx, b.token, b.password, meta);
   }
 
   @Public() @Post('verify-email') @HttpCode(200)

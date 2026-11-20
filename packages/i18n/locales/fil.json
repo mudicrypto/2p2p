@@ -721,6 +721,18 @@
   "tgUnavailable": "Hindi pa naka-set up sa server na ito.",
   "tgConnect": "I-connect ang Telegram",
   "tgDisconnect": "I-disconnect",
-  "agreeMerchantRules": "Sa pag-post, sumasang-ayon ka sa"
+  "agreeMerchantRules": "Sa pag-post, sumasang-ayon ka sa",
+  "forgotPw": "Nakalimutan ang password?",
+  "forgotTitle": "I-reset ang iyong password",
+  "forgotDesc": "Ilagay ang email ng iyong account. Magpapadala kami ng link para pumili ng bagong password.",
+  "forgotSend": "Ipadala ang link",
+  "forgotSent": "Kung may account na gumagamit ng email na ito, papunta na ang link. Tingnan ang inbox at spam folder. Gumagana ang link nang 1 oras.",
+  "repeatPassword": "Ulitin ang bagong password",
+  "passwordsDiffer": "Hindi magkatugma ang dalawang password.",
+  "setPassword": "I-save ang bagong password",
+  "resetDone": "Napalitan ang password at na-sign out ka sa lahat ng device. Mag-log in gamit ang bagong password.",
+  "emailUnverified": "Hindi pa kumpirmado ang iyong email. Buksan ang link na ipinadala namin o humingi ng bago.",
+  "resendEmail": "Ipadala muli",
+  "emailSent": "Naipadala. Tingnan ang inbox at spam."
  }
 }

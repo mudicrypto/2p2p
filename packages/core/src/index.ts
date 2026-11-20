@@ -37,3 +37,4 @@ export * from './parity';
 export * from './safety';
 export * from './growth';
 export * from './tg-alerts';
+export * from './email';

@@ -56,6 +56,7 @@ function Shell() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="orders/[id]" options={{ headerShown: true, title: '' }} />
         <Stack.Screen name="trade" options={{ ...modal, title: '' }} />
+        <Stack.Screen name="forgot-password" options={{ ...modal, title: t('ui.forgotTitle') }} />
         <Stack.Screen name="deposit" options={{ ...modal, title: t('ui.deposit') }} />
         <Stack.Screen name="withdraw" options={{ ...modal, title: t('ui.withdraw') }} />
         <Stack.Screen name="login" options={{ ...modal, title: '' }} />

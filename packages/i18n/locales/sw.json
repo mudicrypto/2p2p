@@ -721,6 +721,18 @@
   "tgUnavailable": "Bado haijawekwa kwenye seva hii.",
   "tgConnect": "Unganisha Telegram",
   "tgDisconnect": "Tenganisha",
-  "agreeMerchantRules": "Kwa kuchapisha unakubali"
+  "agreeMerchantRules": "Kwa kuchapisha unakubali",
+  "forgotPw": "Umesahau nenosiri?",
+  "forgotTitle": "Weka upya nenosiri lako",
+  "forgotDesc": "Weka barua pepe ya akaunti yako. Tutakutumia kiungo cha kuchagua nenosiri jipya.",
+  "forgotSend": "Tuma kiungo",
+  "forgotSent": "Ikiwa kuna akaunti inayotumia barua pepe hii, kiungo kiko njiani. Angalia kikasha na folda ya spam. Kiungo kinafanya kazi kwa saa 1.",
+  "repeatPassword": "Rudia nenosiri jipya",
+  "passwordsDiffer": "Manenosiri mawili hayalingani.",
+  "setPassword": "Hifadhi nenosiri jipya",
+  "resetDone": "Nenosiri limebadilishwa na umetolewa kwenye vifaa vyote. Ingia kwa nenosiri jipya.",
+  "emailUnverified": "Barua pepe yako bado haijathibitishwa. Fungua kiungo tulichotuma au pata kipya.",
+  "resendEmail": "Tuma tena",
+  "emailSent": "Imetumwa. Angalia kikasha na spam."
  }
 }

@@ -721,6 +721,18 @@
   "tgUnavailable": "Kò tíì ṣètò rẹ̀ lórí sáfà yìí.",
   "tgConnect": "So Telegram pọ̀",
   "tgDisconnect": "Já a",
-  "agreeMerchantRules": "Nípa fífi síta, o gbà"
+  "agreeMerchantRules": "Nípa fífi síta, o gbà",
+  "forgotPw": "Ṣé o gbàgbé ọ̀rọ̀ aṣínà?",
+  "forgotTitle": "Tún ọ̀rọ̀ aṣínà rẹ ṣe",
+  "forgotDesc": "Tẹ ímeèlì àkọọ́lẹ̀ rẹ. A ó fi ìjápọ̀ ránṣẹ́ láti yan ọ̀rọ̀ aṣínà tuntun.",
+  "forgotSend": "Fi ìjápọ̀ ránṣẹ́",
+  "forgotSent": "Tí àkọọ́lẹ̀ kan bá ń lo ímeèlì yìí, ìjápọ̀ ti ń bọ̀. Ṣàyẹ̀wò àpótí ìwé rẹ àti fódà spam. Ìjápọ̀ náà ń ṣiṣẹ́ fún wákàtí 1.",
+  "repeatPassword": "Tún ọ̀rọ̀ aṣínà tuntun tẹ̀",
+  "passwordsDiffer": "Ọ̀rọ̀ aṣínà méjèèjì kò bá ara wọn mu.",
+  "setPassword": "Fi ọ̀rọ̀ aṣínà tuntun pamọ́",
+  "resetDone": "A ti yí ọ̀rọ̀ aṣínà rẹ padà, a sì ti mú ọ jáde lórí gbogbo ẹ̀rọ. Wọlé pẹ̀lú ọ̀rọ̀ aṣínà tuntun.",
+  "emailUnverified": "A kò tíì jẹ́rìí ímeèlì rẹ. Ṣí ìjápọ̀ tí a fi ránṣẹ́ tàbí gba tuntun.",
+  "resendEmail": "Tún fi ránṣẹ́",
+  "emailSent": "A ti fi ránṣẹ́. Ṣàyẹ̀wò àpótí ìwé àti spam."
  }
 }

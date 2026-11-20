@@ -31,6 +31,7 @@ export default function Login() {
         <Text size="h1">{t('ui.welcome')}</Text>
         <Input label={t('auth.email')} autoCapitalize="none" autoComplete="email" keyboardType="email-address" value={f.email} onChangeText={(email) => setF({ ...f, email })} />
         <Input label={t('auth.password')} secureTextEntry autoComplete="current-password" value={f.password} onChangeText={(password) => setF({ ...f, password })} />
+        <Press onPress={() => router.push('/forgot-password')} style={{ alignSelf: 'flex-end' }} testID="forgot-link"><Text size="small" tone="sub" style={{ textDecorationLine: 'underline' }}>{t('ui.forgotPw')}</Text></Press>
         {need2fa && <Input label={t('auth.totp')} keyboardType="number-pad" maxLength={6} autoFocus value={f.totp} onChangeText={(totp) => setF({ ...f, totp })} style={{ letterSpacing: 8, fontSize: 22, textAlign: 'center' }} />}
         {err && <Notice tone="error" text={err} />}
         <Button size="lg" title={t('auth.login')} loading={busy} disabled={!f.email || !f.password} onPress={submit} />

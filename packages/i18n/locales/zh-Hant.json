@@ -721,6 +721,18 @@
   "tgUnavailable": "此伺服器尚未設定。",
   "tgConnect": "連接 Telegram",
   "tgDisconnect": "中斷連接",
-  "agreeMerchantRules": "發布即表示你同意"
+  "agreeMerchantRules": "發布即表示你同意",
+  "forgotPw": "忘記密碼？",
+  "forgotTitle": "重設密碼",
+  "forgotDesc": "輸入你的帳戶電子郵件，我們會寄送設定新密碼的連結。",
+  "forgotSend": "寄送連結",
+  "forgotSent": "如果有帳戶使用此電子郵件，連結已寄出。請查看收件匣與垃圾郵件。連結 1 小時內有效。",
+  "repeatPassword": "再次輸入新密碼",
+  "passwordsDiffer": "兩次輸入的密碼不一致。",
+  "setPassword": "儲存新密碼",
+  "resetDone": "密碼已變更，所有裝置都已登出。請用新密碼登入。",
+  "emailUnverified": "你的電子郵件尚未確認。請開啟我們寄出的連結，或重新取得連結。",
+  "resendEmail": "重新寄送",
+  "emailSent": "已寄出，請查看收件匣與垃圾郵件。"
  }
 }

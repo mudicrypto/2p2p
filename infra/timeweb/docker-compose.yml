@@ -16,6 +16,8 @@ x-app-env: &app-env
   EXPO_ACCESS_TOKEN: ${EXPO_ACCESS_TOKEN:-}
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}            # optional: chat translation + automatic receipt reading
   TRANSLATE_API_URL: ${TRANSLATE_API_URL:-}            # optional: LibreTranslate server for chat translation
+  RESEND_API_KEY: ${RESEND_API_KEY:-}                  # optional: email via Resend (or paste the key in the admin panel)
+  EMAIL_FROM: ${EMAIL_FROM:-}                          # optional: sender, default parley <no-reply@parley.markets>
   METRICS_TOKEN: ${METRICS_TOKEN}
   TOTP_REPLAY_PROTECTION: "on"
   WEBAUTHN_RP_ID: ${WEBAUTHN_RP_IDS:-${SITE_HOST}}

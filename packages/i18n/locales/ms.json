@@ -721,6 +721,18 @@
   "tgUnavailable": "Belum disediakan di pelayan ini.",
   "tgConnect": "Sambung Telegram",
   "tgDisconnect": "Putuskan",
-  "agreeMerchantRules": "Dengan menyiarkan anda bersetuju dengan"
+  "agreeMerchantRules": "Dengan menyiarkan anda bersetuju dengan",
+  "forgotPw": "Lupa kata laluan?",
+  "forgotTitle": "Tetapkan semula kata laluan",
+  "forgotDesc": "Masukkan e-mel akaun anda. Kami akan menghantar pautan untuk memilih kata laluan baharu.",
+  "forgotSend": "Hantar pautan",
+  "forgotSent": "Jika ada akaun dengan e-mel ini, pautan sedang dihantar. Semak peti masuk dan folder spam. Pautan sah selama 1 jam.",
+  "repeatPassword": "Ulang kata laluan baharu",
+  "passwordsDiffer": "Kedua-dua kata laluan tidak sepadan.",
+  "setPassword": "Simpan kata laluan baharu",
+  "resetDone": "Kata laluan ditukar dan anda dilog keluar daripada semua peranti. Log masuk dengan kata laluan baharu.",
+  "emailUnverified": "E-mel anda belum disahkan. Buka pautan yang kami hantar atau minta yang baharu.",
+  "resendEmail": "Hantar semula",
+  "emailSent": "Dihantar. Semak peti masuk dan spam."
  }
 }

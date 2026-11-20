@@ -61,4 +61,4 @@ export class AdminAuditInterceptor implements NestInterceptor {
     );
   }
 }
-const redactBody = (b: any) => (b && typeof b === 'object' ? Object.fromEntries(Object.entries(b).map(([k, v]) => [k, /password|secret|token|response/i.test(k) ? '[redacted]' : v])) : b);
+const redactBody = (b: any) => (b && typeof b === 'object' ? Object.fromEntries(Object.entries(b).map(([k, v]) => [k, /password|secret|token|response|apikey|api_key/i.test(k) ? '[redacted]' : v])) : b);

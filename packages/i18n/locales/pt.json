@@ -721,6 +721,18 @@
   "tgUnavailable": "Ainda não configurado neste servidor.",
   "tgConnect": "Conectar Telegram",
   "tgDisconnect": "Desconectar",
-  "agreeMerchantRules": "Ao publicar você concorda com as"
+  "agreeMerchantRules": "Ao publicar você concorda com as",
+  "forgotPw": "Esqueceu a senha?",
+  "forgotTitle": "Redefina sua senha",
+  "forgotDesc": "Digite o e-mail da sua conta. Enviaremos um link para você escolher uma nova senha.",
+  "forgotSend": "Enviar link",
+  "forgotSent": "Se existir uma conta com este e-mail, o link está a caminho. Verifique a caixa de entrada e o spam. O link vale por 1 hora.",
+  "repeatPassword": "Repita a nova senha",
+  "passwordsDiffer": "As duas senhas não coincidem.",
+  "setPassword": "Salvar nova senha",
+  "resetDone": "Sua senha foi alterada e você saiu de todos os dispositivos. Entre com a nova senha.",
+  "emailUnverified": "Seu e-mail ainda não foi confirmado. Abra o link que enviamos ou peça outro.",
+  "resendEmail": "Reenviar e-mail",
+  "emailSent": "Enviado. Verifique a caixa de entrada e o spam."
  }
 }

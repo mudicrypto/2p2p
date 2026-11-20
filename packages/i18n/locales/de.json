@@ -721,6 +721,18 @@
   "tgUnavailable": "Auf diesem Server noch nicht eingerichtet.",
   "tgConnect": "Telegram verbinden",
   "tgDisconnect": "Trennen",
-  "agreeMerchantRules": "Mit dem Veröffentlichen akzeptierst du die"
+  "agreeMerchantRules": "Mit dem Veröffentlichen akzeptierst du die",
+  "forgotPw": "Passwort vergessen?",
+  "forgotTitle": "Passwort zurücksetzen",
+  "forgotDesc": "Gib die E-Mail-Adresse deines Kontos ein. Wir senden dir einen Link, um ein neues Passwort festzulegen.",
+  "forgotSend": "Link senden",
+  "forgotSent": "Wenn ein Konto diese E-Mail nutzt, ist der Link unterwegs. Prüfe Posteingang und Spam-Ordner. Der Link gilt 1 Stunde.",
+  "repeatPassword": "Neues Passwort wiederholen",
+  "passwordsDiffer": "Die beiden Passwörter stimmen nicht überein.",
+  "setPassword": "Neues Passwort speichern",
+  "resetDone": "Dein Passwort wurde geändert und du wurdest auf allen Geräten abgemeldet. Melde dich mit dem neuen Passwort an.",
+  "emailUnverified": "Deine E-Mail ist noch nicht bestätigt. Öffne den gesendeten Link oder fordere einen neuen an.",
+  "resendEmail": "Erneut senden",
+  "emailSent": "Gesendet. Prüfe Posteingang und Spam."
  }
 }

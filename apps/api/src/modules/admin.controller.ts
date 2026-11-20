@@ -159,6 +159,18 @@ export class AdminController {
     return core.fundRewards(this.ctx, a.id, asset as Asset, toMinor(b.amount, assetDecimals(asset as Asset)), String(req.headers['idempotency-key']));
   }
 
+  // ---------------------------------------------------------- email delivery (superadmin)
+  @Perm('admins.manage') @Get('email')
+  emailStatus() { return core.adminEmailStatus(this.ctx); }
+  @Perm('admins.manage') @Put('email') @HttpCode(200)
+  emailSet(@CurrentAdmin() a: Admin, @Body(new Zod(z.object({ apiKey: z.string().max(256).optional(), from: z.string().max(200).optional() }))) b: { apiKey?: string; from?: string }) {
+    return core.adminSetEmail(this.ctx, a.id, b);
+  }
+  @Perm('admins.manage') @Post('email/remove') @HttpCode(200)
+  emailRemove(@CurrentAdmin() a: Admin) { return core.adminClearEmail(this.ctx, a.id); }
+  @Perm('admins.manage') @Post('email/test') @HttpCode(200) @RateLimit(10)
+  emailTest(@Body(new Zod(z.object({ to: z.string().max(254) }))) b: { to: string }) { return core.adminTestEmail(this.ctx, b.to); }
+
   // ---------------------------------------------------------- merchants
   @Perm('otc.read') @Get('otc-requests')
   otcList(@Query('status') status?: string) { return core.listOtcRequests(this.ctx, { status: status ? String(status).split(',') : undefined }); }
