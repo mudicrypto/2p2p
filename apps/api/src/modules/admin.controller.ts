@@ -27,7 +27,7 @@ export class AdminController {
   // ---------------------------------------------------------- auth
   @AdminPublic() @NoIdempotency() @Post('auth/login') @HttpCode(200) @RateLimit(10)
   async login(@Body(new Zod(z.object({ email: z.string().email(), password: z.string().min(1) }))) b: { email: string; password: string }, @Req() req: any, @Res({ passthrough: true }) res: Response) {
-    const r = await core.adminLogin(this.ctx, b.email, b.password, req.ip);
+    const r = await core.adminLogin(this.ctx, b.email, b.password, req.ip, req.headers.origin);
     res.cookie(ADMIN_COOKIE, r.token, { httpOnly: true, secure: secure(), sameSite: 'strict', path: '/', maxAge: 8 * 3600_000 });
     const csrf = core.randomToken(16);
     res.cookie(ADMIN_CSRF, csrf, { httpOnly: false, secure: secure(), sameSite: 'strict', path: '/' });
@@ -36,7 +36,7 @@ export class AdminController {
   @AdminPublic() @NoIdempotency() @Post('auth/webauthn') @HttpCode(200)
   webauthn(@Body() b: { response: unknown }, @Req() req: any) { return core.adminWebauthn(this.ctx, adminToken(req).token ?? '', b.response, req.ip); }
   @AdminPublic() @NoIdempotency() @Post('auth/register-key/options') @HttpCode(200)
-  regOptions(@Req() req: any): Promise<unknown> { return core.adminKeyRegistrationOptions(this.ctx, adminToken(req).token ?? ''); }
+  regOptions(@Req() req: any): Promise<unknown> { return core.adminKeyRegistrationOptions(this.ctx, adminToken(req).token ?? '', req.headers.origin); }
   @AdminPublic() @NoIdempotency() @Post('auth/register-key') @HttpCode(200)
   register(@Body() b: { response: unknown }, @Req() req: any) { return core.adminKeyRegister(this.ctx, adminToken(req).token ?? '', b.response); }
   @Perm('config.read') @Get('me')

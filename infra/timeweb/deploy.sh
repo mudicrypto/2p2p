@@ -39,7 +39,15 @@ if [ ! -f "$ENV" ]; then
     echo "METRICS_TOKEN=$(openssl rand -hex 24)"
   } > "$ENV"
 fi
+# Main domain: site.env (SITE_HOST=...) wins over the address the server was created with; the original address
+# stays as LEGACY_HOST and keeps serving the API, admin and ops pages so older app builds and passkeys keep working.
+ORIG_HOST="$(cat /opt/parley/ORIG_HOST 2>/dev/null || cat /opt/parley/SITE_HOST)"; echo "$ORIG_HOST" > /opt/parley/ORIG_HOST
+WANT="$(grep '^SITE_HOST=' ./site.env | cut -d= -f2 | tr -d ' ')"
+[ -n "$WANT" ] && echo "$WANT" > /opt/parley/SITE_HOST
 SITE_HOST="$(cat /opt/parley/SITE_HOST)"
+REDIRECT_HOSTS="$(grep '^REDIRECT_HOSTS=' ./site.env | cut -d= -f2- | tr -d '"')"
+LEGACY_HOST=""; [ "$ORIG_HOST" != "$SITE_HOST" ] && LEGACY_HOST="$ORIG_HOST"
+ORIGINS="https://$SITE_HOST${LEGACY_HOST:+,https://$LEGACY_HOST}"; RPIDS="$SITE_HOST${LEGACY_HOST:+,$LEGACY_HOST}"
 # First superadmin: email from site.env, password generated here once. It is published for 2 hours
 # under the secret ops path so it can be handed over, then the agent deletes it.
 if ! grep -q '^ADMIN_INITIAL_PASSWORD=' "$ENV"; then
@@ -48,12 +56,19 @@ if ! grep -q '^ADMIN_INITIAL_PASSWORD=' "$ENV"; then
   printf 'admin email: %s\ninitial password: %s\n' "$(grep '^ADMIN_EMAIL=' ./site.env | cut -d= -f2)" "$pw" > /opt/parley/www/admin-initial.txt
   chmod 644 /opt/parley/www/admin-initial.txt
 fi
-grep -v -e '^SITE_HOST=' -e '^ADMIN_EMAIL=' "$ENV" > "$ENV.tmp" && { echo "SITE_HOST=$SITE_HOST"; grep '^ADMIN_EMAIL=' ./site.env; } >> "$ENV.tmp" && mv "$ENV.tmp" "$ENV" && chmod 600 "$ENV"
+grep -v -e '^SITE_HOST=' -e '^ADMIN_EMAIL=' -e '^WEB_ORIGINS=' -e '^WEBAUTHN_RP_IDS=' "$ENV" > "$ENV.tmp" && { echo "SITE_HOST=$SITE_HOST"; echo "WEB_ORIGINS=$ORIGINS"; echo "WEBAUTHN_RP_IDS=$RPIDS"; grep '^ADMIN_EMAIL=' ./site.env; } >> "$ENV.tmp" && mv "$ENV.tmp" "$ENV" && chmod 600 "$ENV"
 # Keep the host Caddy routes in step with the release (adds /admin); the ops token stays as provisioned.
 OPS_TOKEN="$(grep -o '/_ops/[0-9a-f]*' /etc/caddy/Caddyfile | head -1 | cut -d/ -f3)"
 if [ -n "$OPS_TOKEN" ]; then
-  sed -e "s/{SITE}/$SITE_HOST/" -e "s/{OPS_TOKEN}/$OPS_TOKEN/" ./Caddyfile.tmpl > /etc/caddy/Caddyfile.new
-  if ! cmp -s /etc/caddy/Caddyfile.new /etc/caddy/Caddyfile; then mv /etc/caddy/Caddyfile.new /etc/caddy/Caddyfile && systemctl reload caddy; else rm -f /etc/caddy/Caddyfile.new; fi
+  {
+    sed -e "s/{SITE}/$SITE_HOST/" -e "s/{OPS_TOKEN}/$OPS_TOKEN/" ./Caddyfile.tmpl
+    # Old address: API, admin and ops keep working; web pages move to the main domain.
+    [ -n "$LEGACY_HOST" ] && sed -e "s/{LEGACY}/$LEGACY_HOST/" -e "s/{SITE}/$SITE_HOST/" -e "s/{OPS_TOKEN}/$OPS_TOKEN/" ./Caddyfile.legacy.tmpl
+    # Extra names (www, other domains) forward to the main domain.
+    [ -n "$REDIRECT_HOSTS" ] && printf '\n%s {\n\tredir https://%s{uri} permanent\n}\n' "$(echo $REDIRECT_HOSTS | sed 's/ /, /g')" "$SITE_HOST"
+  } > /etc/caddy/Caddyfile.new
+  caddy validate --config /etc/caddy/Caddyfile.new --adapter caddyfile >/dev/null 2>&1 || { echo "caddy config invalid, keeping the old one"; rm -f /etc/caddy/Caddyfile.new; }
+  [ -f /etc/caddy/Caddyfile.new ] && if ! cmp -s /etc/caddy/Caddyfile.new /etc/caddy/Caddyfile; then mv /etc/caddy/Caddyfile.new /etc/caddy/Caddyfile && systemctl reload caddy; else rm -f /etc/caddy/Caddyfile.new; fi
 fi
 export DOCKER_BUILDKIT=1
 docker compose -p parley --env-file "$ENV" build

@@ -57,7 +57,7 @@ export async function signupEmail(ctx: Ctx, input: { email: string; password: st
   const u = await screenAndCreate(ctx, { email, passwordHash: await hashPassword(input.password), country: input.country.toUpperCase(), locale: input.locale ?? 'en' }, meta, 'user.signup_email');
   await applyReferral(ctx.db, u.id, input.ref);
   const token = await issueToken(ctx, u.id, 'email_verify', email, 24 * 3600_000, randomToken(24));
-  await ctx.providers.notifier.send({ channel: 'email', to: email, template: 'email_verify', params: { link: `${process.env.WEB_ORIGIN ?? ''}/verify-email?token=${token}` } });
+  await ctx.providers.notifier.send({ channel: 'email', to: email, template: 'email_verify', params: { link: `${(process.env.WEB_ORIGIN ?? '').split(',')[0]}/verify-email?token=${token}` } });
   return { user: u, emailToken: token };
 }
 
@@ -257,7 +257,13 @@ export async function changePassword(ctx: Ctx, user: User, oldPw: string, newPw:
 }
 
 // ---------------------------------------------------------------- passkeys (WebAuthn)
-const rp = () => ({ rpID: process.env.WEBAUTHN_RP_ID ?? 'localhost', origin: process.env.WEBAUTHN_ORIGIN ?? 'http://localhost:3000' });
+// The site can answer on several addresses (e.g. a new domain plus the old one): WEBAUTHN_RP_ID / WEBAUTHN_ORIGIN are
+// comma-separated lists in the same order. Options use the entry matching the browser's origin; verification accepts any.
+const list = (v: string | undefined, d: string) => (v ?? d).split(',').map((x) => x.trim()).filter(Boolean);
+const rpIDs = () => list(process.env.WEBAUTHN_RP_ID, 'localhost');
+const rpOrigins = () => list(process.env.WEBAUTHN_ORIGIN, 'http://localhost:3000');
+const rpFor = (origin?: string) => { const i = origin ? rpOrigins().indexOf(origin) : -1; return rpIDs()[i >= 0 ? i : 0] ?? rpIDs()[0]; };
+const rp = () => ({ rpID: rpIDs(), origin: rpOrigins() });
 
 async function saveChallenge(ctx: Ctx, subject: string, challenge: string) {
   await ctx.db.delete(webauthnChallenges).where(eq(webauthnChallenges.subject, subject));
@@ -269,11 +275,11 @@ async function takeChallenge(ctx: Ctx, subject: string) {
   return c.challenge;
 }
 
-export async function passkeyRegistrationOptions(ctx: Ctx, subject: { kind: 'user' | 'admin'; id: string; name: string }) {
+export async function passkeyRegistrationOptions(ctx: Ctx, subject: { kind: 'user' | 'admin'; id: string; name: string }, origin?: string) {
   const col = subject.kind === 'user' ? webauthnCredentials.userId : webauthnCredentials.adminId;
   const existing = await ctx.db.select().from(webauthnCredentials).where(eq(col, subject.id));
   const opts = await generateRegistrationOptions({
-    rpName: 'P2P Exchange', rpID: rp().rpID, userName: subject.name, userID: new TextEncoder().encode(subject.id),
+    rpName: 'parley', rpID: rpFor(origin), userName: subject.name, userID: new TextEncoder().encode(subject.id),
     excludeCredentials: existing.map((c) => ({ id: c.id })), authenticatorSelection: { residentKey: 'preferred', userVerification: 'required' },
   });
   await saveChallenge(ctx, `${subject.kind}:${subject.id}:reg`, opts.challenge);
@@ -294,8 +300,8 @@ export async function passkeyRegister(ctx: Ctx, subject: { kind: 'user' | 'admin
   });
   return { verified: true };
 }
-export async function passkeyAuthOptions(ctx: Ctx, subjectKey: string) {
-  const opts = await generateAuthenticationOptions({ rpID: rp().rpID, userVerification: 'required' });
+export async function passkeyAuthOptions(ctx: Ctx, subjectKey: string, origin?: string) {
+  const opts = await generateAuthenticationOptions({ rpID: rpFor(origin), userVerification: 'required' });
   await saveChallenge(ctx, `auth:${subjectKey}`, opts.challenge);
   return opts;
 }

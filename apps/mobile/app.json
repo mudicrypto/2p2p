@@ -76,8 +76,8 @@
       "./plugins/with-release-signing"
     ],
     "extra": {
-      "apiUrl": "https://72-56-69-5.sslip.io",
-      "webUrl": "https://72-56-69-5.sslip.io"
+      "apiUrl": "https://parley.markets",
+      "webUrl": "https://parley.markets"
     },
     "web": {
       "bundler": "metro",

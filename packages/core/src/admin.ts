@@ -85,7 +85,7 @@ export async function setAdminRoles(ctx: Ctx, actorId: string, adminId: string, 
 }
 
 /** Step 1: password (+ IP allowlist). Returns a session that is NOT usable until WebAuthn completes. */
-export async function adminLogin(ctx: Ctx, email: string, password: string, ip?: string) {
+export async function adminLogin(ctx: Ctx, email: string, password: string, ip?: string, origin?: string) {
   if (!ipAllowed(ip)) {
     await audit(ctx.db, { actorType: 'system', action: 'admin.login_ip_blocked', after: { email }, ip });
     throw new DomainError('FORBIDDEN', 'IP not allowed');
@@ -97,7 +97,7 @@ export async function adminLogin(ctx: Ctx, email: string, password: string, ip?:
   }
   const token = randomToken(32);
   await ctx.db.insert(adminSessions).values({ adminId: a.id, tokenHash: sha256(token), ip, expiresAt: new Date(ctx.now().getTime() + 8 * 3600_000) });
-  const options = await passkeyAuthOptions(ctx, `admin:${sha256(token)}`);
+  const options = await passkeyAuthOptions(ctx, `admin:${sha256(token)}`, origin);
   await audit(ctx.db, { actorType: 'admin', actorId: a.id, action: 'admin.login_password', ip });
   return { token, webauthnOptions: options, needsRegistration: !(await hasAdminKey(ctx, a.id)) };
 }
@@ -116,11 +116,11 @@ export async function adminWebauthn(ctx: Ctx, token: string, response: unknown, 
   return { ok: true, roles: s.admin.roles };
 }
 /** First-time key enrolment for an admin (requires a password-authenticated session from an allowed IP). */
-export async function adminKeyRegistrationOptions(ctx: Ctx, token: string) {
+export async function adminKeyRegistrationOptions(ctx: Ctx, token: string, origin?: string) {
   const s = await adminSessionRaw(ctx, token);
   if (!s) throw new DomainError('UNAUTHORIZED', 'session expired');
   if (await hasAdminKey(ctx, s.admin.id)) throw new DomainError('CONFLICT', 'key already enrolled; ask a superadmin to reset');
-  return passkeyRegistrationOptions(ctx, { kind: 'admin', id: s.admin.id, name: s.admin.email });
+  return passkeyRegistrationOptions(ctx, { kind: 'admin', id: s.admin.id, name: s.admin.email }, origin);
 }
 export async function adminKeyRegister(ctx: Ctx, token: string, response: unknown) {
   const s = await adminSessionRaw(ctx, token);

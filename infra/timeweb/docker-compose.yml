@@ -6,7 +6,7 @@ x-app-env: &app-env
   ALLOW_MOCK_PROVIDERS: "1"
   DATABASE_URL: postgres://parley:${POSTGRES_PASSWORD}@postgres:5432/parley
   REDIS_URL: redis://redis:6379
-  WEB_ORIGIN: https://${SITE_HOST}
+  WEB_ORIGIN: ${WEB_ORIGINS:-https://${SITE_HOST}}
   TRUST_PROXY: "1"
   DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY}
   MOCK_WEBHOOK_SECRET: ${MOCK_WEBHOOK_SECRET}
@@ -18,8 +18,8 @@ x-app-env: &app-env
   TRANSLATE_API_URL: ${TRANSLATE_API_URL:-}            # optional: LibreTranslate server for chat translation
   METRICS_TOKEN: ${METRICS_TOKEN}
   TOTP_REPLAY_PROTECTION: "on"
-  WEBAUTHN_RP_ID: ${SITE_HOST}
-  WEBAUTHN_ORIGIN: https://${SITE_HOST}
+  WEBAUTHN_RP_ID: ${WEBAUTHN_RP_IDS:-${SITE_HOST}}
+  WEBAUTHN_ORIGIN: ${WEB_ORIGINS:-https://${SITE_HOST}}
   ADMIN_IP_ALLOWLIST: "*"     # test server: any IP, still password + passkey; restrict to your IP later
 
 x-build: &build

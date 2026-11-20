@@ -80,12 +80,12 @@ export class AuthController {
   }
 
   @Post('passkeys/register/options')
-  passkeyRegOptions(@CurrentUser() u: User): Promise<unknown> { return passkeyRegistrationOptions(this.ctx, { kind: 'user', id: u.id, name: u.email ?? u.id }); }
+  passkeyRegOptions(@CurrentUser() u: User, @Req() req: any): Promise<unknown> { return passkeyRegistrationOptions(this.ctx, { kind: 'user', id: u.id, name: u.email ?? u.id }, req.headers.origin); }
   @Post('passkeys/register') @HttpCode(200)
   passkeyRegister(@CurrentUser() u: User, @Body() b: any) { return passkeyRegister(this.ctx, { kind: 'user', id: u.id }, b); }
 
   @Public() @NoIdempotency() @Post('passkeys/login/options') @HttpCode(200)
-  passkeyLoginOptions(@Body(new Zod(z.object({ sessionKey: z.string().min(8).max(64) }))) b: { sessionKey: string }): Promise<unknown> { return passkeyAuthOptions(this.ctx, b.sessionKey); }
+  passkeyLoginOptions(@Body(new Zod(z.object({ sessionKey: z.string().min(8).max(64) }))) b: { sessionKey: string }, @Req() req: any): Promise<unknown> { return passkeyAuthOptions(this.ctx, b.sessionKey, req.headers.origin); }
   @Public() @NoIdempotency() @Post('passkeys/login') @HttpCode(200)
   async passkeyLogin(@Body() b: { sessionKey: string; response: any }, @Meta() meta: any, @Res({ passthrough: true }) res: Response) {
     const s = await passkeyLogin(this.ctx, b.sessionKey, b.response, meta);
