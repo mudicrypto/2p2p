@@ -25,3 +25,19 @@ deploy, in `/opt/parley/.env` (mode 600), and never leave it.
 Until a domain is connected the site is `https://<ip-with-dashes>.sslip.io`. To use a domain, point its
 A record at the server IP, write the domain to `/opt/parley/SITE_HOST`, update `/etc/caddy/Caddyfile`
 and restart Caddy, then deploy a new release (the web build embeds the address).
+
+
+## Health monitoring and alerts
+
+`monitor.sh` runs every minute (systemd `parley-monitor.timer`, installed by `deploy.sh`). It checks the API, web app,
+admin app, the public HTTPS site, the worker, disk and memory. After two failed checks in a row it restarts the
+failing container; it alerts when something goes down, when it is still down after 10 minutes, and when it recovers.
+Status page: `https://<site>/_ops/<ops-token>/health.txt` (incident history at the bottom).
+
+Where alerts go (add to `/opt/parley/.env`, no restart needed):
+- `ALERT_TELEGRAM_CHAT_ID=<your chat id>` (needs a real `TELEGRAM_BOT_TOKEN`; get your chat id by messaging the bot and
+  opening `https://api.telegram.org/bot<token>/getUpdates`)
+- `ALERT_WEBHOOK_URL=<Slack/Discord/ntfy webhook>`
+
+Also recommended: a free external check (e.g. UptimeRobot, Better Stack) on `https://<site>/healthz` every minute,
+so you are told even if the whole server is down.
